@@ -37,6 +37,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   alle ihre Unterpunkte erledigt sind
 - Jeder angelegte und abgehakte Schritt landet in der Historie; der Vorgang
   schließt sich selbst, sobald nichts mehr offen ist
+- **Nachricht schreiben** (Konzept, Abschnitt 10): Ablauf mit Inhalt vor
+  Empfänger und Empfängertyp vor Adresse; Schemaversion 4
+- Floskel-Rahmen wird automatisch ergänzt – immer derselbe höflich-neutrale
+  Standard, bei allen Empfängern gleich, und nie doppelt
+- Zustand „übergeben" für Nachrichten, die an die System-App gingen: die App
+  kann nicht wissen, ob gesendet wurde. Auf „Nein" bleibt der Vorgang als
+  offene Aufgabe liegen, ohne Druck
 
 ### Fixed
 

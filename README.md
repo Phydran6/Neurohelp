@@ -161,7 +161,7 @@ Nach Abschnitt 19 des Konzepts:
 4. 🟡 Onboarding + Konto + Sicherheit (Logik fertig, Plattform-Anbindung offen)
 5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
 6. 🟡 Feature „Aufgabe sortieren" (Logik fertig, Oberfläche offen)
-7. ⬜ Feature „Nachricht schreiben"
+7. 🟡 Feature „Nachricht schreiben" (Logik fertig, Oberfläche offen)
 8. ⬜ Feature „Anruf erledigen" + Anrufbegleitung
 9. ⬜ Feature „Termin klären"
 10. ⬜ Info- & Hilfe-Bereich

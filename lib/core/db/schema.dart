@@ -7,15 +7,16 @@
 /// bekommt einen neuen Eintrag in [migrations].
 abstract final class DbSchema {
   /// Aktuelle Schemaversion. Muss der Anzahl der Migrationen entsprechen.
-  static const int version = 3;
+  static const int version = 4;
 
   static const String tableEntries = 'history_entries';
   static const String tableEvents = 'history_events';
   static const String tableSettings = 'settings';
   static const String tableTaskNodes = 'task_nodes';
+  static const String tableMessages = 'messages';
 
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
-  static const List<List<String>> migrations = [_v1, _v2, _v3];
+  static const List<List<String>> migrations = [_v1, _v2, _v3, _v4];
 
   static const List<String> _v1 = [
     '''
@@ -84,5 +85,31 @@ abstract final class DbSchema {
     'CREATE INDEX idx_task_nodes_entry ON $tableTaskNodes (entry_id)',
     'CREATE INDEX idx_task_nodes_parent '
         'ON $tableTaskNodes (parent_id, position)',
+  ];
+
+  /// Version 4: verfasste Nachrichten (Konzept, Abschnitt 10).
+  ///
+  /// Gespeichert wird der verfasste Text, der Empfänger, das Datum und der
+  /// Status. Ob eine Mail tatsächlich rausging, kann die App nicht wissen –
+  /// daher der Zwischenstand „übergeben".
+  static const List<String> _v4 = [
+    '''
+    CREATE TABLE $tableMessages (
+      id             TEXT    PRIMARY KEY,
+      entry_id       TEXT    NOT NULL,
+      subject        TEXT    NOT NULL,
+      channel        TEXT    NOT NULL,
+      recipient_type TEXT,
+      recipient      TEXT,
+      body           TEXT    NOT NULL DEFAULT '',
+      compose_mode   TEXT    NOT NULL,
+      state          TEXT    NOT NULL,
+      created_at     INTEGER NOT NULL,
+      handed_over_at INTEGER,
+      FOREIGN KEY (entry_id) REFERENCES $tableEntries (id) ON DELETE CASCADE
+    )
+    ''',
+    'CREATE INDEX idx_messages_entry ON $tableMessages (entry_id)',
+    'CREATE INDEX idx_messages_state ON $tableMessages (state)',
   ];
 }

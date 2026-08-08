@@ -44,6 +44,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Zustand „übergeben" für Nachrichten, die an die System-App gingen: die App
   kann nicht wissen, ob gesendet wurde. Auf „Nein" bleibt der Vorgang als
   offene Aufgabe liegen, ohne Druck
+- **Anruf erledigen** (Konzept, Abschnitt 8): Kategorie, Historie-Check über
+  frühere Anrufe, Ziel, Ansprechpartner und Stichpunkte als flexibler
+  Leitfaden; Schemaversion 5
+- Minimale Nachbereitung – eine Frage, zwei Antworten. Auf „Nein" bleibt der
+  Vorgang offen, damit die App Weiterhilfe anbieten kann
+- Schnittstelle für die **Anrufbegleitung** (Konzept, Abschnitt 8a): Android
+  Overlay oder Split-Screen, iOS Live Activity. `supportsLiveNotes` bildet
+  ab, dass Notizen auf iOS erst nach dem Anruf entstehen können
+- Die Wahl der Begleitung wird einmalig gemerkt
 
 ### Fixed
 

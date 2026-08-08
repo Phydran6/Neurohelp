@@ -162,7 +162,8 @@ Nach Abschnitt 19 des Konzepts:
 5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
 6. 🟡 Feature „Aufgabe sortieren" (Logik fertig, Oberfläche offen)
 7. 🟡 Feature „Nachricht schreiben" (Logik fertig, Oberfläche offen)
-8. ⬜ Feature „Anruf erledigen" + Anrufbegleitung
+8. 🟡 Feature „Anruf erledigen" + Anrufbegleitung (Logik fertig, Oberfläche
+   und native Begleitung offen)
 9. ⬜ Feature „Termin klären"
 10. ⬜ Info- & Hilfe-Bereich
 11. ⬜ Apple Developer Account

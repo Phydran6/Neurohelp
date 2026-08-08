@@ -1,4 +1,5 @@
 import '../ai/ai_client.dart';
+import '../companion/companion_style.dart';
 
 /// Wie die App beim Start entsperrt wird (Konzept, Abschnitt 13).
 ///
@@ -24,6 +25,7 @@ class AppSettings {
     this.aiEnabled = false,
     this.tone = AiTone.locker,
     this.lockMethod = LockMethod.none,
+    this.companionStyle = CompanionStyle.none,
   });
 
   /// Ob das Onboarding vollständig durchlaufen wurde.
@@ -39,6 +41,10 @@ class AppSettings {
 
   final LockMethod lockMethod;
 
+  /// Einmalige Wahl der Anrufbegleitung. Wird gemerkt, damit die Frage nicht
+  /// bei jedem Anruf neu kommt (Konzept, Abschnitt 8a).
+  final CompanionStyle companionStyle;
+
   /// Ob die App beim Start gesperrt ist.
   bool get isLocked => lockMethod != LockMethod.none;
 
@@ -47,12 +53,14 @@ class AppSettings {
     bool? aiEnabled,
     AiTone? tone,
     LockMethod? lockMethod,
+    CompanionStyle? companionStyle,
   }) {
     return AppSettings(
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
       aiEnabled: aiEnabled ?? this.aiEnabled,
       tone: tone ?? this.tone,
       lockMethod: lockMethod ?? this.lockMethod,
+      companionStyle: companionStyle ?? this.companionStyle,
     );
   }
 
@@ -62,9 +70,15 @@ class AppSettings {
       other.onboardingCompleted == onboardingCompleted &&
       other.aiEnabled == aiEnabled &&
       other.tone == tone &&
-      other.lockMethod == lockMethod;
+      other.lockMethod == lockMethod &&
+      other.companionStyle == companionStyle;
 
   @override
-  int get hashCode =>
-      Object.hash(onboardingCompleted, aiEnabled, tone, lockMethod);
+  int get hashCode => Object.hash(
+    onboardingCompleted,
+    aiEnabled,
+    tone,
+    lockMethod,
+    companionStyle,
+  );
 }

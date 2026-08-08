@@ -1,4 +1,5 @@
 import '../ai/ai_client.dart';
+import '../companion/companion_style.dart';
 import 'app_settings.dart';
 
 /// Zugriff auf die lokal gespeicherten Einstellungen.
@@ -15,4 +16,7 @@ abstract interface class SettingsRepository {
   Future<AppSettings> setTone(AiTone tone);
 
   Future<AppSettings> setLockMethod(LockMethod method);
+
+  /// Merkt sich die einmalige Wahl der Anrufbegleitung.
+  Future<AppSettings> setCompanionStyle(CompanionStyle style);
 }

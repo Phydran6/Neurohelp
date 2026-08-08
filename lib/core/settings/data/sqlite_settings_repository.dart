@@ -1,6 +1,7 @@
 import 'package:sqflite/sqflite.dart';
 
 import '../../ai/ai_client.dart';
+import '../../companion/companion_style.dart';
 import '../../db/schema.dart';
 import '../app_settings.dart';
 import '../settings_repository.dart';
@@ -17,6 +18,7 @@ class SqliteSettingsRepository implements SettingsRepository {
   static const _keyAiEnabled = 'ai_enabled';
   static const _keyTone = 'tone';
   static const _keyLockMethod = 'lock_method';
+  static const _keyCompanionStyle = 'companion_style';
 
   @override
   Future<AppSettings> load() async {
@@ -36,6 +38,9 @@ class SqliteSettingsRepository implements SettingsRepository {
       lockMethod:
           _readEnum(LockMethod.values, values[_keyLockMethod]) ??
           defaults.lockMethod,
+      companionStyle:
+          _readEnum(CompanionStyle.values, values[_keyCompanionStyle]) ??
+          defaults.companionStyle,
     );
   }
 
@@ -53,6 +58,10 @@ class SqliteSettingsRepository implements SettingsRepository {
   @override
   Future<AppSettings> setLockMethod(LockMethod method) =>
       _write(_keyLockMethod, method.name);
+
+  @override
+  Future<AppSettings> setCompanionStyle(CompanionStyle style) =>
+      _write(_keyCompanionStyle, style.name);
 
   Future<AppSettings> _write(String key, String value) async {
     await _db.insert(DbSchema.tableSettings, {

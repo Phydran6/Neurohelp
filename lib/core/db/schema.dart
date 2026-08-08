@@ -7,16 +7,17 @@
 /// bekommt einen neuen Eintrag in [migrations].
 abstract final class DbSchema {
   /// Aktuelle Schemaversion. Muss der Anzahl der Migrationen entsprechen.
-  static const int version = 4;
+  static const int version = 5;
 
   static const String tableEntries = 'history_entries';
   static const String tableEvents = 'history_events';
   static const String tableSettings = 'settings';
   static const String tableTaskNodes = 'task_nodes';
   static const String tableMessages = 'messages';
+  static const String tableCalls = 'calls';
 
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
-  static const List<List<String>> migrations = [_v1, _v2, _v3, _v4];
+  static const List<List<String>> migrations = [_v1, _v2, _v3, _v4, _v5];
 
   static const List<String> _v1 = [
     '''
@@ -111,5 +112,31 @@ abstract final class DbSchema {
     ''',
     'CREATE INDEX idx_messages_entry ON $tableMessages (entry_id)',
     'CREATE INDEX idx_messages_state ON $tableMessages (state)',
+  ];
+
+  /// Version 5: vorbereitete Anrufe (Konzept, Abschnitt 8).
+  ///
+  /// Die Stichpunkte stehen als eine Zeile pro Punkt in `talking_points` –
+  /// einfacher als JSON und beim Hineinschauen lesbar.
+  static const List<String> _v5 = [
+    '''
+    CREATE TABLE $tableCalls (
+      id             TEXT    PRIMARY KEY,
+      entry_id       TEXT    NOT NULL,
+      category       TEXT    NOT NULL,
+      situation      TEXT    NOT NULL DEFAULT '',
+      goal           TEXT,
+      contact_name   TEXT,
+      contact_number TEXT,
+      talking_points TEXT    NOT NULL DEFAULT '',
+      note           TEXT,
+      outcome        TEXT    NOT NULL,
+      created_at     INTEGER NOT NULL,
+      called_at      INTEGER,
+      FOREIGN KEY (entry_id) REFERENCES $tableEntries (id) ON DELETE CASCADE
+    )
+    ''',
+    'CREATE INDEX idx_calls_entry ON $tableCalls (entry_id)',
+    'CREATE INDEX idx_calls_category ON $tableCalls (category)',
   ];
 }

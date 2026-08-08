@@ -53,6 +53,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Overlay oder Split-Screen, iOS Live Activity. `supportsLiveNotes` bildet
   ab, dass Notizen auf iOS erst nach dem Anruf entstehen können
 - Die Wahl der Begleitung wird einmalig gemerkt
+- **Termin klären** (Konzept, Abschnitt 9): Buchungsweg mit Übergabe an das
+  Anruf- bzw. Nachricht-Feature, V1 nur Neuorganisation; Schemaversion 6
+- Nachverfolgung in vier Phasen mit höchstens einer Benachrichtigung pro
+  Phase. Eine verpasste Erinnerung wird nicht nachgeholt – keine
+  Schuldmechanik
+- Kalender-Schnittstelle mit Kollisionsprüfung und ICS-Export; ohne
+  Kalenderzugriff blockiert nichts, es entfällt nur die Prüfung
 
 ### Fixed
 

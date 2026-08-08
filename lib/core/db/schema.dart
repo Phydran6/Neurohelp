@@ -7,7 +7,7 @@
 /// bekommt einen neuen Eintrag in [migrations].
 abstract final class DbSchema {
   /// Aktuelle Schemaversion. Muss der Anzahl der Migrationen entsprechen.
-  static const int version = 5;
+  static const int version = 6;
 
   static const String tableEntries = 'history_entries';
   static const String tableEvents = 'history_events';
@@ -15,9 +15,10 @@ abstract final class DbSchema {
   static const String tableTaskNodes = 'task_nodes';
   static const String tableMessages = 'messages';
   static const String tableCalls = 'calls';
+  static const String tableAppointments = 'appointments';
 
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
-  static const List<List<String>> migrations = [_v1, _v2, _v3, _v4, _v5];
+  static const List<List<String>> migrations = [_v1, _v2, _v3, _v4, _v5, _v6];
 
   static const List<String> _v1 = [
     '''
@@ -138,5 +139,32 @@ abstract final class DbSchema {
     ''',
     'CREATE INDEX idx_calls_entry ON $tableCalls (entry_id)',
     'CREATE INDEX idx_calls_category ON $tableCalls (category)',
+  ];
+
+  /// Version 6: Termine (Konzept, Abschnitt 9).
+  ///
+  /// `notified_phases` hält fest, welche der vier Nachverfolgungs-Phasen
+  /// schon gemeldet wurden – Grundlage für „höchstens eine Benachrichtigung
+  /// pro Phase".
+  static const List<String> _v6 = [
+    '''
+    CREATE TABLE $tableAppointments (
+      id              TEXT    PRIMARY KEY,
+      entry_id        TEXT    NOT NULL,
+      title           TEXT    NOT NULL,
+      route           TEXT    NOT NULL,
+      route_by_ai     INTEGER NOT NULL DEFAULT 0,
+      starts_at       INTEGER,
+      ends_at         INTEGER,
+      location        TEXT,
+      checklist       TEXT    NOT NULL DEFAULT '',
+      notified_phases TEXT    NOT NULL DEFAULT '',
+      created_at      INTEGER NOT NULL,
+      booked_at       INTEGER,
+      FOREIGN KEY (entry_id) REFERENCES $tableEntries (id) ON DELETE CASCADE
+    )
+    ''',
+    'CREATE INDEX idx_appointments_entry ON $tableAppointments (entry_id)',
+    'CREATE INDEX idx_appointments_start ON $tableAppointments (starts_at)',
   ];
 }

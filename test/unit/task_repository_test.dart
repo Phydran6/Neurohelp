@@ -4,7 +4,6 @@ import 'package:neurohelp/core/history/data/sqlite_history_repository.dart';
 import 'package:neurohelp/core/history/domain/history_entry.dart';
 import 'package:neurohelp/core/history/domain/history_event.dart';
 import 'package:neurohelp/features/tasks/data/sqlite_task_repository.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

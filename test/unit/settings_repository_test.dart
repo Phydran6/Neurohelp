@@ -3,7 +3,6 @@ import 'package:neurohelp/core/ai/ai_client.dart';
 import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/settings/app_settings.dart';
 import 'package:neurohelp/core/settings/data/sqlite_settings_repository.dart';
-import 'package:sqflite/sqflite.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 void main() {

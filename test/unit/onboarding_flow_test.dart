@@ -36,7 +36,7 @@ void main() {
 
   group('Überspringen', () {
     test('freiwilliger Schritt lässt sich überspringen', () {
-      final flow = const OnboardingFlow(step: OnboardingStep.extraSecurity);
+      const flow = OnboardingFlow(step: OnboardingStep.extraSecurity);
 
       expect(flow.step.isOptional, isTrue);
       expect(flow.skip().step, OnboardingStep.tone);

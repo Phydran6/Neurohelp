@@ -7,13 +7,14 @@
 /// bekommt einen neuen Eintrag in [migrations].
 abstract final class DbSchema {
   /// Aktuelle Schemaversion. Muss der Anzahl der Migrationen entsprechen.
-  static const int version = 1;
+  static const int version = 2;
 
   static const String tableEntries = 'history_entries';
   static const String tableEvents = 'history_events';
+  static const String tableSettings = 'settings';
 
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
-  static const List<List<String>> migrations = [_v1];
+  static const List<List<String>> migrations = [_v1, _v2];
 
   static const List<String> _v1 = [
     '''
@@ -45,5 +46,19 @@ abstract final class DbSchema {
     'CREATE INDEX idx_entries_status ON $tableEntries (status)',
     'CREATE INDEX idx_entries_updated ON $tableEntries (updated_at DESC)',
     'CREATE INDEX idx_events_entry ON $tableEvents (entry_id, created_at)',
+  ];
+
+  /// Version 2: Einstellungen und Onboarding-Zustand.
+  ///
+  /// Bewusst ein schlichter Schlüssel/Wert-Speicher – Einstellungen sind
+  /// wenige Zeilen und ändern sich häufiger als ein Schema.
+  static const List<String> _v2 = [
+    '''
+    CREATE TABLE $tableSettings (
+      key        TEXT    PRIMARY KEY,
+      value      TEXT    NOT NULL,
+      updated_at INTEGER NOT NULL
+    )
+    ''',
   ];
 }

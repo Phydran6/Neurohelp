@@ -7,9 +7,13 @@ publish_to: "none"
 version: 0.1.0+1
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  # Ab 3.8 formatiert `dart format` im neuen ("tall") Stil. Die Untergrenze
+  # bestimmt den Stil – sie muss zwischen lokal und CI gleich sein, sonst
+  # scheitert die Formatprüfung obwohl der Code formatiert ist.
+  sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
+  crypto: ^3.0.0
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter

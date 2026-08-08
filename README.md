@@ -65,12 +65,15 @@ lib/
 ├─ main.dart                 Einstiegspunkt
 ├─ app/                      App-Wurzel, MaterialApp, globales Setup
 ├─ core/                     Querschnitt: Config, Theme, Routing, DB, Services
+│  ├─ account/               Konto (Supabase Auth dahinter)
 │  ├─ ai/                    KI-Schnittstelle (kennt keinen Anbieter)
 │  ├─ config/                Build-Flavors und --dart-define-Werte
 │  ├─ db/                    SQLite: Schema, Migrationen, Zugang
 │  ├─ history/               Historie – das Rückgrat der App
 │  ├─ logging/               Log-Schicht (`print` ist verboten)
 │  ├─ router/                Navigation
+│  ├─ security/              App-Sperre, PIN-Ablage
+│  ├─ settings/              Tonfall, KI-Toggle, Art der Sperre
 │  └─ theme/                 Farben, Typografie, Themes
 ├─ features/                 Ein Ordner pro Feature (Abschnitt 7 des Konzepts)
 │  └─ <feature>/
@@ -155,7 +158,7 @@ Nach Abschnitt 19 des Konzepts:
 1. ✅ Projekt-Setup Flutter + GitHub Actions
 2. 🟡 Supabase (Schema + Migrationen fertig, Projekt anlegen steht aus → [docs/SUPABASE.md](docs/SUPABASE.md))
 3. ✅ Lokale DB + Historie-Rückgrat
-4. ⬜ Onboarding + Konto + Sicherheit
+4. 🟡 Onboarding + Konto + Sicherheit (Logik fertig, Plattform-Anbindung offen)
 5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
 6. ⬜ Feature „Aufgabe sortieren"
 7. ⬜ Feature „Nachricht schreiben"

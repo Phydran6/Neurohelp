@@ -20,6 +20,21 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   OpenAI); Prompts liegen im Backend und sind ohne App-Update änderbar
 - `AiClient`-Schnittstelle in der App – kennt nur Aufgabentypen, keinen
   Anbieter; `DisabledAiClient` für den KI-losen Betrieb
+- **Onboarding** (Konzept, Abschnitt 16): Ablaufsteuerung über die fünf
+  Schritte. KI-Toggle und App-Sperre sind Pflichtentscheidungen und lassen
+  sich nicht stillschweigend überspringen
+- Lokal gespeicherte Einstellungen (Tonfall, KI-Toggle, Art der App-Sperre)
+  in der SQLite-Datenbank, Schemaversion 2
+- PIN-Ablage als gesalzener, vielfach gehashter Wert – die PIN selbst wird
+  nie gespeichert; Vergleich läuft ohne frühen Abbruch
+- Schnittstellen für App-Sperre (`AppLock`) und Konto (`AccountRepository`),
+  beide ohne Plattform- und Backend-Bezug
+
+### Fixed
+
+- Formatprüfung in der CI: Die SDK-Untergrenze in `pubspec.yaml` bestimmt den
+  Stil von `dart format`. Sie liegt jetzt bei 3.8, damit lokal und CI
+  denselben Stil verwenden
 
 ## [0.1.0] - 2026-08-08
 

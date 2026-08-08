@@ -79,7 +79,9 @@ class PinCredential {
   /// Wiederholtes Hashen (PBKDF2-artig, HMAC-SHA256).
   static String _derive(String pin, String salt, int iterations) {
     final hmac = Hmac(sha256, utf8.encode(salt));
-    var bytes = utf8.encode(pin);
+    // Bewusst List<int>: utf8.encode liefert Uint8List, Hmac.convert aber
+    // eine gewöhnliche List<int>.
+    List<int> bytes = utf8.encode(pin);
 
     for (var round = 0; round < iterations; round++) {
       bytes = hmac.convert(bytes).bytes;

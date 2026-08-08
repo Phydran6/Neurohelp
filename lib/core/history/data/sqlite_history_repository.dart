@@ -96,7 +96,7 @@ class SqliteHistoryRepository implements HistoryRepository {
   Future<List<HistoryEntry>> search(String query, {int limit = 20}) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) {
-      return Future.value(const []);
+      return Future<List<HistoryEntry>>.value(const []);
     }
 
     // LIKE-Sonderzeichen entschärfen, damit eine Nutzereingabe wie „100%"

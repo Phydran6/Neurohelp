@@ -7,8 +7,7 @@ analyzer:
     strict-raw-types: true
   errors:
     todo: ignore
-    missing_required_param: error
-    missing_return: error
+    missing_required_argument: error
     invalid_annotation_target: ignore
   exclude:
     - "**/*.g.dart"

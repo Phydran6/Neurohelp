@@ -1,0 +1,79 @@
+# Flutter / Dart
+.dart_tool/
+.packages
+.pub-cache/
+.pub/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.metadata.bak
+pubspec.lock.bak
+coverage/
+*.g.dart.bak
+
+# Generierter Code (bewusst eingecheckt lassen? -> hier ignoriert)
+*.freezed.dart
+*.g.dart
+*.gr.dart
+*.mocks.dart
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/settings.json
+!.vscode/extensions.json
+!.vscode/launch.json
+*.iml
+*.ipr
+*.iws
+.history/
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/upload-keystore.jks
+android/app/*.jks
+android/app/google-services.json
+android/captures/
+*.keystore
+!android/app/debug.keystore
+
+# iOS / macOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/flutter_export_environment.sh
+ios/Flutter/ephemeral/
+ios/Runner/GoogleService-Info.plist
+ios/ExportOptions.plist
+**/DerivedData/
+*.mobileprovision
+*.p8
+*.p12
+*.cer
+*.certSigningRequest
+.DS_Store
+
+# Fastlane
+**/fastlane/report.xml
+**/fastlane/Preview.html
+**/fastlane/screenshots/**/*.png
+**/fastlane/test_output
+**/fastlane/README.md
+
+# Secrets / Env
+.env
+.env.*
+!.env.example
+*.secrets
+secrets/
+
+# Build-Artefakte
+*.apk
+*.aab
+*.ipa
+*.app.zip
+*.dSYM.zip

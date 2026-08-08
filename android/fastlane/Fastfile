@@ -1,0 +1,41 @@
+default_platform(:android)
+
+AAB_PATH = "../build/app/outputs/bundle/release/app-release.aab"
+
+platform :android do
+  desc "AAB in den Play-Track 'internal' hochladen"
+  lane :internal do
+    upload_to_play_store(
+      track: "internal",
+      aab: AAB_PATH,
+      release_status: "draft",
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Von 'internal' nach 'beta' (closed testing) hochstufen"
+  lane :promote_beta do
+    upload_to_play_store(
+      track: "internal",
+      track_promote_to: "beta",
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+
+  desc "Von 'beta' in die Produktion hochstufen"
+  lane :promote_production do
+    upload_to_play_store(
+      track: "beta",
+      track_promote_to: "production",
+      skip_upload_aab: true,
+      skip_upload_metadata: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
+    )
+  end
+end

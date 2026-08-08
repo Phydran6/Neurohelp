@@ -1,0 +1,135 @@
+name: Deploy
+
+# Verteilung an die Tester-Kanäle:
+#   Android -> Google Play, Track "internal"
+#   iOS     -> TestFlight
+#
+# Läuft automatisch nach einem erfolgreichen Release oder manuell.
+# Ohne hinterlegte Store-Secrets werden die Schritte sauber übersprungen.
+
+on:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Zielplattform"
+        required: true
+        default: both
+        type: choice
+        options: [both, android, ios]
+
+env:
+  FLUTTER_CHANNEL: stable
+
+jobs:
+  android:
+    name: Google Play (internal)
+    runs-on: ubuntu-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.target == 'both' || inputs.target == 'android') ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Play-Secrets vorhanden?
+        id: gate
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_JSON" ]; then
+            echo "::warning::PLAY_SERVICE_ACCOUNT_JSON fehlt – Deploy übersprungen."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-java@v4
+        if: steps.gate.outputs.ok == 'true'
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: subosito/flutter-action@v2
+        if: steps.gate.outputs.ok == 'true'
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Plattform-Ordner sicherstellen
+        if: steps.gate.outputs.ok == 'true'
+        run: bash scripts/ensure_platforms.sh
+
+      - name: Signing-Dateien schreiben
+        if: steps.gate.outputs.ok == 'true'
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          STORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          echo "$KEYSTORE_BASE64" | base64 -d > android/app/upload-keystore.jks
+          cat > android/key.properties <<EOF
+          storeFile=upload-keystore.jks
+          storePassword=$STORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+          echo "$PLAY_JSON" > android/play-service-account.json
+
+      - name: Bauen & hochladen
+        if: steps.gate.outputs.ok == 'true'
+        run: |
+          flutter pub get
+          flutter build appbundle --release \
+            --build-number="${{ github.run_number }}" \
+            --dart-define=FLAVOR=prod
+          cd android
+          gem install fastlane --no-document
+          fastlane internal
+
+  ios:
+    name: TestFlight
+    runs-on: macos-latest
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.target == 'both' || inputs.target == 'ios') ||
+      github.event.workflow_run.conclusion == 'success'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Apple-Secrets vorhanden?
+        id: gate
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+        run: |
+          if [ -z "$KEY_ID" ]; then
+            echo "::warning::APPSTORE_API_KEY_ID fehlt – TestFlight-Deploy übersprungen."
+            echo "ok=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ok=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: subosito/flutter-action@v2
+        if: steps.gate.outputs.ok == 'true'
+        with:
+          channel: ${{ env.FLUTTER_CHANNEL }}
+          cache: true
+
+      - name: Bauen & an TestFlight schicken
+        if: steps.gate.outputs.ok == 'true'
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          flutter pub get
+          bash scripts/ensure_platforms.sh
+          cd ios
+          gem install fastlane --no-document
+          fastlane beta build_number:"${{ github.run_number }}"

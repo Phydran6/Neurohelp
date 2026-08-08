@@ -1,0 +1,59 @@
+default_platform(:ios)
+
+def app_store_api_key
+  app_store_connect_api_key(
+    key_id: ENV["APPSTORE_API_KEY_ID"],
+    issuer_id: ENV["APPSTORE_API_ISSUER_ID"],
+    key_content: ENV["APPSTORE_API_PRIVATE_KEY"],
+    is_key_content_base64: true,
+    in_house: false,
+  )
+end
+
+platform :ios do
+  desc "Signiertes Release-IPA bauen"
+  lane :build_release do |options|
+    api_key = app_store_api_key
+
+    match(
+      type: "appstore",
+      readonly: true,
+      api_key: api_key,
+      git_url: ENV["MATCH_GIT_URL"],
+    )
+
+    sh(
+      "cd .. && cd .. && flutter build ipa --release " \
+      "--build-name=#{options[:version]} " \
+      "--build-number=#{options[:build_number]} " \
+      "--dart-define=FLAVOR=prod " \
+      "--export-options-plist=ios/ExportOptions.plist",
+    )
+  end
+
+  desc "Build bauen und an TestFlight schicken"
+  lane :beta do |options|
+    api_key = app_store_api_key
+
+    match(
+      type: "appstore",
+      readonly: true,
+      api_key: api_key,
+      git_url: ENV["MATCH_GIT_URL"],
+    )
+
+    sh(
+      "cd .. && cd .. && flutter build ipa --release " \
+      "--build-number=#{options[:build_number]} " \
+      "--dart-define=FLAVOR=prod " \
+      "--export-options-plist=ios/ExportOptions.plist",
+    )
+
+    upload_to_testflight(
+      api_key: api_key,
+      ipa: "../build/ios/ipa/neurohelp.ipa",
+      skip_waiting_for_build_processing: true,
+      changelog: "Siehe CHANGELOG.md im Repository.",
+    )
+  end
+end

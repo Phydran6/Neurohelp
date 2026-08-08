@@ -1,0 +1,28 @@
+name: neurohelp
+description: "Neurohelp – native Android & iOS App auf Basis von Flutter."
+publish_to: "none"
+
+# version: <semver>+<buildnumber>
+# Der Build-Nummer-Teil wird in der CI automatisch durch die GitHub-Run-Nummer ersetzt.
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+    - assets/icons/

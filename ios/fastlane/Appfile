@@ -1,0 +1,4 @@
+app_identifier("de.phytech.neurohelp")
+apple_id(ENV["APPLE_ID"])
+itc_team_id(ENV["APPSTORE_TEAM_ID"])
+team_id(ENV["DEVELOPER_TEAM_ID"])

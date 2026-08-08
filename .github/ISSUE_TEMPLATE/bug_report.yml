@@ -1,0 +1,41 @@
+name: Bug melden
+description: Etwas funktioniert nicht wie erwartet.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: Was passiert?
+      description: Kurz beschreiben, was schiefgeht.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Schritte zum Nachstellen
+      placeholder: |
+        1. ...
+        2. ...
+        3. Fehler tritt auf
+    validations:
+      required: true
+
+  - type: input
+    id: expected
+    attributes:
+      label: Was hättest du erwartet?
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Plattform
+      options: [Android, iOS, beide]
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: App-Version
+      placeholder: "0.1.0+42"

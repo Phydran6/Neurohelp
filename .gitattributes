@@ -1,0 +1,22 @@
+# Zeilenenden normalisieren – sonst scheitern Shell-Skripte in der Linux-CI,
+# wenn sie unter Windows mit CRLF committet wurden.
+* text=auto eol=lf
+
+*.sh   text eol=lf
+*.dart text eol=lf
+*.yml  text eol=lf
+*.yaml text eol=lf
+*.md   text eol=lf
+
+*.ps1  text eol=crlf
+*.bat  text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jks binary
+*.keystore binary
+*.p8  binary
+*.p12 binary
+*.ipa binary
+*.apk binary
+*.aab binary

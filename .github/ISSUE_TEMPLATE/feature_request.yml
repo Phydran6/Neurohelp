@@ -1,0 +1,35 @@
+name: Idee / Feature
+description: Vorschlag für eine Funktion oder Verbesserung.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem löst das?
+      description: Aus Nutzersicht beschreiben, nicht als Lösung.
+    validations:
+      required: true
+
+  - type: textarea
+    id: idea
+    attributes:
+      label: Idee
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Passt in
+      options:
+        - V1 (Bau-Reihenfolge, Abschnitt 19)
+        - Nach V1
+        - Parkplatz / Zukunfts-Idee
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: principles
+    attributes:
+      label: Leitplanken-Check
+      options:
+        - label: Kein Zwang, keine Schuldmechanik, keine Gamification
+        - label: Minimalistisch und reizarm umsetzbar

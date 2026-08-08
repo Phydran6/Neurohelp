@@ -1,0 +1,17 @@
+{
+  "editor.formatOnSave": true,
+  "editor.rulers": [100],
+  "files.insertFinalNewline": true,
+  "files.trimTrailingWhitespace": true,
+  "dart.lineLength": 100,
+  "dart.previewFlutterUiGuides": true,
+  "[dart]": {
+    "editor.defaultFormatter": "Dart-Code.dart-code",
+    "editor.codeActionsOnSave": { "source.fixAll": "explicit" }
+  },
+  "files.exclude": {
+    "**/.dart_tool": true,
+    "**/build": true,
+    "**/.flutter-plugins*": true
+  }
+}

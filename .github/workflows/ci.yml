@@ -37,11 +37,12 @@ jobs:
           set +e
           flutter analyze --fatal-infos --fatal-warnings 2>&1 | tee analyze.log
           code=${PIPESTATUS[0]}
-          # Meldungen zusätzlich als Annotation ausgeben: so stehen sie
-          # direkt am Job und im Pull Request, ohne dass jemand das
-          # vollständige Log öffnen muss.
-          grep -E '^[[:space:]]+(error|warning|info) -' analyze.log \
-            | while IFS= read -r line; do echo "::error::${line}"; done
+          # Bei Fehlern die vollständige Ausgabe als Annotation anhängen:
+          # so steht sie direkt am Job und im Pull Request, ohne dass
+          # jemand das komplette Log öffnen muss.
+          if [ "$code" -ne 0 ]; then
+            echo "::error::$(sed -z 's/\n/%0A/g' analyze.log)"
+          fi
           exit "$code"
 
       - name: Tests

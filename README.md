@@ -160,7 +160,7 @@ Nach Abschnitt 19 des Konzepts:
 3. ✅ Lokale DB + Historie-Rückgrat
 4. 🟡 Onboarding + Konto + Sicherheit (Logik fertig, Plattform-Anbindung offen)
 5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
-6. ⬜ Feature „Aufgabe sortieren"
+6. 🟡 Feature „Aufgabe sortieren" (Logik fertig, Oberfläche offen)
 7. ⬜ Feature „Nachricht schreiben"
 8. ⬜ Feature „Anruf erledigen" + Anrufbegleitung
 9. ⬜ Feature „Termin klären"

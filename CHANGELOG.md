@@ -29,6 +29,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   nie gespeichert; Vergleich läuft ohne frühen Abbruch
 - Schnittstellen für App-Sperre (`AppLock`) und Konto (`AccountRepository`),
   beide ohne Plattform- und Backend-Bezug
+- **Aufgabe sortieren** (Konzept, Abschnitt 11): beliebig tiefe Baumstruktur,
+  jeder Punkt mit eigener Notiz; Schemaversion 3
+- Fokus-Modus als Grundfunktion – die App liefert immer nur den nächsten
+  offenen Schritt, der Berg bleibt unsichtbar
+- Abhaken ist endgültig; Punkte mit Unterpunkten gelten als erledigt, sobald
+  alle ihre Unterpunkte erledigt sind
+- Jeder angelegte und abgehakte Schritt landet in der Historie; der Vorgang
+  schließt sich selbst, sobald nichts mehr offen ist
 
 ### Fixed
 

@@ -1,0 +1,38 @@
+project_id = "neurohelp"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+
+[db]
+port = 54322
+major_version = 15
+
+[studio]
+enabled = true
+port = 54323
+
+[inbucket]
+# Lokaler Mail-Catcher – fängt Reset-Mails in der Entwicklung ab.
+enabled = true
+port = 54324
+
+[auth]
+enabled = true
+site_url = "de.phytech.neurohelp://login-callback"
+additional_redirect_urls = ["de.phytech.neurohelp://login-callback"]
+jwt_expiry = 3600
+enable_refresh_token_rotation = true
+enable_signup = true
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true
+double_confirm_changes = true
+
+[functions.ai-proxy]
+# Ohne gültiges Nutzer-Token kein KI-Aufruf.
+verify_jwt = true

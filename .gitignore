@@ -71,6 +71,12 @@ ios/ExportOptions.plist
 *.secrets
 secrets/
 
+# Supabase
+supabase/.branches/
+supabase/.temp/
+supabase/.env
+supabase/.env.*
+
 # Build-Artefakte
 *.apk
 *.aab

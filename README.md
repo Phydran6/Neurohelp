@@ -65,7 +65,11 @@ lib/
 ├─ main.dart                 Einstiegspunkt
 ├─ app/                      App-Wurzel, MaterialApp, globales Setup
 ├─ core/                     Querschnitt: Config, Theme, Routing, DB, Services
+│  ├─ ai/                    KI-Schnittstelle (kennt keinen Anbieter)
 │  ├─ config/                Build-Flavors und --dart-define-Werte
+│  ├─ db/                    SQLite: Schema, Migrationen, Zugang
+│  ├─ history/               Historie – das Rückgrat der App
+│  ├─ logging/               Log-Schicht (`print` ist verboten)
 │  ├─ router/                Navigation
 │  └─ theme/                 Farben, Typografie, Themes
 ├─ features/                 Ein Ordner pro Feature (Abschnitt 7 des Konzepts)
@@ -79,7 +83,8 @@ test/          Unit- und Widget-Tests
 integration_test/  End-to-End-Tests auf Gerät/Emulator
 android/       Native Android-Schale + fastlane
 ios/           Native iOS-Schale + fastlane
-docs/          Konzept, Architektur, Release-Prozess
+supabase/      Schema, Migrationen, Edge Functions (KI-Proxy)
+docs/          Konzept, Architektur, Supabase, Release-Prozess
 scripts/       Bootstrap und Hilfsskripte
 ```
 
@@ -148,10 +153,10 @@ git tag v0.1.0 && git push origin v0.1.0
 Nach Abschnitt 19 des Konzepts:
 
 1. ✅ Projekt-Setup Flutter + GitHub Actions
-2. ⬜ Supabase-Projekt (Auth + Mailversand)
-3. ⬜ Lokale DB + Historie-Rückgrat
+2. 🟡 Supabase (Schema + Migrationen fertig, Projekt anlegen steht aus → [docs/SUPABASE.md](docs/SUPABASE.md))
+3. ✅ Lokale DB + Historie-Rückgrat
 4. ⬜ Onboarding + Konto + Sicherheit
-5. ⬜ Backend-Schicht: KI-Proxy, anbieteragnostisch
+5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
 6. ⬜ Feature „Aufgabe sortieren"
 7. ⬜ Feature „Nachricht schreiben"
 8. ⬜ Feature „Anruf erledigen" + Anrufbegleitung

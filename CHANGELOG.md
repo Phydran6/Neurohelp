@@ -7,6 +7,20 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+
+- **Historie-Rückgrat** (Konzept, Abschnitt 12): lokale SQLite-Datenbank mit
+  versionierten Migrationen, Vorgängen und lückenlosem Ereignis-Protokoll
+- Nachfrage-Logik mit harter Obergrenze von 3 Nachfragen je Vorgang – danach
+  bleibt der Vorgang still liegen, keine Schuldmechanik
+- Log-Schicht als Ersatz für `print`
+- **Supabase-Backend**: Schema für Konten und Wiederherstellungs-Codes mit Row
+  Level Security; bewusst ohne Tabellen für Nutzerinhalte (lokal-first)
+- **KI-Proxy** als Supabase Edge Function, anbieteragnostisch (Claude und
+  OpenAI); Prompts liegen im Backend und sind ohne App-Update änderbar
+- `AiClient`-Schnittstelle in der App – kennt nur Aufgabentypen, keinen
+  Anbieter; `DisabledAiClient` für den KI-losen Betrieb
+
 ## [0.1.0] - 2026-08-08
 
 Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions

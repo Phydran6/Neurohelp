@@ -6,10 +6,7 @@ enum Flavor { dev, staging, prod }
 /// Beispiel:
 /// `flutter run --dart-define=FLAVOR=dev --dart-define=API_BASE_URL=https://...`
 class AppConfig {
-  const AppConfig({
-    required this.flavor,
-    required this.apiBaseUrl,
-  });
+  const AppConfig({required this.flavor, required this.apiBaseUrl});
 
   final Flavor flavor;
   final String apiBaseUrl;

@@ -13,9 +13,7 @@ abstract final class DbSchema {
   static const String tableEvents = 'history_events';
 
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
-  static const List<List<String>> migrations = [
-    _v1,
-  ];
+  static const List<List<String>> migrations = [_v1];
 
   static const List<String> _v1 = [
     '''

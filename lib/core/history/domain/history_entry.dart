@@ -109,9 +109,8 @@ class HistoryEntry {
     );
   }
 
-  static DateTime? _date(Object? value) => value == null
-      ? null
-      : DateTime.fromMillisecondsSinceEpoch(value as int);
+  static DateTime? _date(Object? value) =>
+      value == null ? null : DateTime.fromMillisecondsSinceEpoch(value as int);
 
   static T _enumByName<T extends Enum>(List<T> values, String name) {
     return values.firstWhere((value) => value.name == name);

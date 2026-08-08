@@ -27,14 +27,13 @@ abstract final class AppLogger {
     String? scope,
     Object? error,
     StackTrace? stackTrace,
-  }) =>
-      _log(
-        LogLevel.error,
-        message,
-        scope: scope,
-        error: error,
-        stackTrace: stackTrace,
-      );
+  }) => _log(
+    LogLevel.error,
+    message,
+    scope: scope,
+    error: error,
+    stackTrace: stackTrace,
+  );
 
   static void _log(
     LogLevel level,
@@ -57,9 +56,9 @@ abstract final class AppLogger {
   }
 
   static int _severity(LogLevel level) => switch (level) {
-        LogLevel.debug => 500,
-        LogLevel.info => 800,
-        LogLevel.warning => 900,
-        LogLevel.error => 1000,
-      };
+    LogLevel.debug => 500,
+    LogLevel.info => 800,
+    LogLevel.warning => 900,
+    LogLevel.error => 1000,
+  };
 }

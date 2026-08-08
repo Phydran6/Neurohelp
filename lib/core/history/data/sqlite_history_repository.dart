@@ -15,8 +15,8 @@ class SqliteHistoryRepository implements HistoryRepository {
     this._db, {
     DateTime Function()? clock,
     String Function()? idGenerator,
-  })  : _now = clock ?? DateTime.now,
-        _newId = idGenerator ?? const Uuid().v4;
+  }) : _now = clock ?? DateTime.now,
+       _newId = idGenerator ?? const Uuid().v4;
 
   final Database _db;
   final DateTime Function() _now;
@@ -209,7 +209,8 @@ class SqliteHistoryRepository implements HistoryRepository {
 
     final rows = await _db.query(
       DbSchema.tableEntries,
-      where: 'closed_at IS NULL '
+      where:
+          'closed_at IS NULL '
           'AND follow_up_count < ? '
           'AND (last_follow_up_at IS NULL OR last_follow_up_at <= ?)',
       whereArgs: [HistoryEntry.maxFollowUps, cutoff],

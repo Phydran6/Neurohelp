@@ -33,7 +33,16 @@ jobs:
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Statische Analyse
-        run: flutter analyze --fatal-infos --fatal-warnings
+        run: |
+          set +e
+          flutter analyze --fatal-infos --fatal-warnings 2>&1 | tee analyze.log
+          code=${PIPESTATUS[0]}
+          # Meldungen zusätzlich als Annotation ausgeben: so stehen sie
+          # direkt am Job und im Pull Request, ohne dass jemand das
+          # vollständige Log öffnen muss.
+          grep -E '^[[:space:]]+(error|warning|info) -' analyze.log \
+            | while IFS= read -r line; do echo "::error::${line}"; done
+          exit "$code"
 
       - name: Tests
         run: flutter test --coverage --reporter expanded

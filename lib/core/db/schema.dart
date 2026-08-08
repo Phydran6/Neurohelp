@@ -7,14 +7,15 @@
 /// bekommt einen neuen Eintrag in [migrations].
 abstract final class DbSchema {
   /// Aktuelle Schemaversion. Muss der Anzahl der Migrationen entsprechen.
-  static const int version = 2;
+  static const int version = 3;
 
   static const String tableEntries = 'history_entries';
   static const String tableEvents = 'history_events';
   static const String tableSettings = 'settings';
+  static const String tableTaskNodes = 'task_nodes';
 
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
-  static const List<List<String>> migrations = [_v1, _v2];
+  static const List<List<String>> migrations = [_v1, _v2, _v3];
 
   static const List<String> _v1 = [
     '''
@@ -60,5 +61,28 @@ abstract final class DbSchema {
       updated_at INTEGER NOT NULL
     )
     ''',
+  ];
+
+  /// Version 3: zerlegte Aufgaben als Baum (Konzept, Abschnitt 11).
+  ///
+  /// `parent_id` verweist auf dieselbe Tabelle – dadurch beliebig tief.
+  static const List<String> _v3 = [
+    '''
+    CREATE TABLE $tableTaskNodes (
+      id         TEXT    PRIMARY KEY,
+      entry_id   TEXT    NOT NULL,
+      parent_id  TEXT,
+      title      TEXT    NOT NULL,
+      note       TEXT,
+      position   INTEGER NOT NULL,
+      created_at INTEGER NOT NULL,
+      done_at    INTEGER,
+      FOREIGN KEY (entry_id) REFERENCES $tableEntries (id) ON DELETE CASCADE,
+      FOREIGN KEY (parent_id) REFERENCES $tableTaskNodes (id) ON DELETE CASCADE
+    )
+    ''',
+    'CREATE INDEX idx_task_nodes_entry ON $tableTaskNodes (entry_id)',
+    'CREATE INDEX idx_task_nodes_parent '
+        'ON $tableTaskNodes (parent_id, position)',
   ];
 }

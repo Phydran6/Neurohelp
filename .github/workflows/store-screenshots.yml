@@ -39,17 +39,13 @@ jobs:
           # Über die UDID statt über den Namen: Auf den Runnern liegen mehrere
           # Simulatoren mit gleichem Namen für verschiedene iOS-Versionen, und
           # `flutter drive` erwischt dann den falschen.
-          udid=$(xcrun simctl list devices available --json \
-            | python3 -c "
-import json, sys
-name = sys.argv[1]
-data = json.load(sys.stdin)['devices']
-for runtime in sorted(data, reverse=True):
-    for device in data[runtime]:
-        if device['name'] == name:
-            print(device['udid'])
-            sys.exit(0)
-" "$DEVICE")
+          #
+          # Die Zeilen sehen so aus:
+          #   iPhone 16 Pro Max (A1B2C3D4-...) (Shutdown)
+          # Das " (" hinter dem Namen ist wichtig, sonst passt "iPhone 16 Pro"
+          # auch auf "iPhone 16 Pro Max".
+          udid=$(xcrun simctl list devices available \
+            | awk -v want="$DEVICE (" -F'[()]' 'index($0, want) { print $2; exit }')
 
           if [ -z "$udid" ]; then
             echo "::error::Simulator \"$DEVICE\" gibt es auf diesem Runner nicht. Verfuegbar:"

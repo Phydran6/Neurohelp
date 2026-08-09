@@ -36,19 +36,13 @@ git clone https://github.com/Phydran6/Neurohelp.git
 cd Neurohelp
 ```
 
-Einmalig die Plattform-Ordner erzeugen und das Projekt aufsetzen:
-
 ```bash
-pwsh -File scripts/bootstrap.ps1
+flutter pub get
 ```
 
-Auf macOS/Linux stattdessen:
-
-```bash
-bash scripts/bootstrap.sh
-```
-
-> Voraussetzung: Flutter SDK (stable). Windows: `winget install --id Google.Flutter -e`
+> Voraussetzung: Flutter SDK (stable). `android/` und `ios/` liegen im
+> Repository – die Bootstrap-Skripte unter `scripts/` werden nur gebraucht,
+> wenn die Plattform-Ordner neu erzeugt werden müssen.
 
 App starten:
 

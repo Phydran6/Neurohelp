@@ -66,6 +66,19 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - „Über die App" mit Herkunft, Entwickler, Version, Lizenzen und einem
   sichtbaren Hinweis zur Datenhaltung
 - Neue KI-Aufgabe `help.ask` in App und Backend
+- **Startseite** (Konzept, Abschnitt 6): Logo, wechselnder Spruch, ein
+  einziger großer Knopf. Der Spruch wechselt täglich statt bei jedem Tippen;
+  ein Test hält fest, dass keine Leistungs- oder Drucksprache hineinrutscht
+- **Hauptmenü** (Konzept, Abschnitt 7): Auswahl vor Eingabe, freie Eingabe
+  zuletzt, ruhige Symbole statt Emojis
+- **Fokus-Modus für „Aufgabe sortieren"** (Konzept, Abschnitt 11): ein
+  Schritt pro Bildschirm, der Berg bleibt unsichtbar. Historie-Check beim
+  Einstieg, Ausweg „Später weitermachen" ohne Mahnung, am Ende eine
+  Feststellung statt Lob
+- Neue Aufgaben lassen sich selbst zerlegen: ein Feld, Eingabetaste,
+  nächster Punkt
+- `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
+  `pubspec.lock` eingecheckt
 
 ### Fixed
 

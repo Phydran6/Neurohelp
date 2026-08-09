@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../tasks/presentation/task_start_page.dart';
+
 /// Ein Eintrag im Hauptmenü.
 class MenuEntry {
   const MenuEntry({required this.id, required this.label, required this.icon});
@@ -83,7 +85,7 @@ class _MenuTile extends StatelessWidget {
       child: InkWell(
         key: Key('menu_${entry.id}'),
         borderRadius: BorderRadius.circular(16),
-        onTap: () => _showComingSoon(context),
+        onTap: () => _open(context),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
           child: Row(
@@ -100,7 +102,14 @@ class _MenuTile extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context) {
+  void _open(BuildContext context) {
+    if (entry.id == 'task') {
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => const TaskStartPage()));
+      return;
+    }
+
     // Ehrlich statt so tun als ob: Die Abläufe dahinter sind gebaut und
     // getestet, die Bildschirme dafür kommen als Nächstes.
     ScaffoldMessenger.of(context).showSnackBar(

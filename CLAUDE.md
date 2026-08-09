@@ -36,5 +36,23 @@ dart format . && flutter analyze --fatal-infos --fatal-warnings && flutter test
 
 ## Hinweis
 
-`android/` und `ios/` werden von `flutter create` erzeugt (siehe `scripts/bootstrap.ps1`).
-Handgepflegt sind dort nur die `fastlane/`-Ordner und die Signatur-Konfiguration.
+`android/` und `ios/` liegen im Repository. Handgepflegt sind dort nur die
+`fastlane/`-Ordner und die Release-Signatur in `android/app/build.gradle.kts`;
+alles andere stammt aus `flutter create`.
+
+Kein `CircularProgressIndicator` für lokale Ladevorgänge: Er flackert nur und
+bringt `pumpAndSettle` in Widget-Tests zum Hängen.
+
+## Widget-Tests mit Datenbank
+
+Vier Fallen, alle schon getreten:
+
+- `databaseFactoryFfiNoIsolate` statt `databaseFactoryFfi`. In Widget-Tests
+  läuft die Zeit simuliert; ein Future, der über eine Isolate-Grenze
+  zurückkommt, wird dort nie eingelöst.
+- Nach einem Seitenwechsel `pumpAndSettle`, bevor getippt wird. Ein Widget
+  ist schon vorhanden, während es noch hereingeschoben wird – ein Tap trifft
+  dann daneben, ohne dass der Test es merkt.
+- Nicht auf `find.text` warten, wenn derselbe Text im Eingabefeld steht.
+  Sonst ist der Test grün, obwohl nichts passiert ist. Auf Schlüssel warten.
+- `pumpAndSettle` wartet auf Animationen, nicht auf Futures.

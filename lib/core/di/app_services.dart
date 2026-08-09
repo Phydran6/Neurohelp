@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../features/calls/data/sqlite_call_repository.dart';
 import '../../features/calls/domain/call_launcher.dart';
+import '../../features/appointments/data/sqlite_appointment_repository.dart';
 import '../../features/help/domain/help_service.dart';
 import '../../features/messages/data/sqlite_message_repository.dart';
 import '../../features/messages/domain/message_sender.dart';
@@ -26,6 +27,7 @@ class AppServices {
     required this.tasks,
     required this.messages,
     required this.sender,
+    required this.appointments,
     required this.calls,
     required this.dialer,
     required this.ai,
@@ -38,19 +40,27 @@ class AppServices {
     AiClient? ai,
     MessageSender sender = const NoMessageSender(),
     CallLauncher dialer = const NoCallLauncher(),
+
+    /// Nur für Tests: eine feste Uhr statt der echten Zeit.
+    DateTime Function()? clock,
   }) {
-    final history = SqliteHistoryRepository(database.raw);
+    final history = SqliteHistoryRepository(database.raw, clock: clock);
     final aiClient = ai ?? const DisabledAiClient();
 
     return AppServices(
       help: HelpService(aiClient),
       database: database,
       history: history,
-      settings: SqliteSettingsRepository(database.raw),
-      tasks: SqliteTaskRepository(database.raw, history),
-      messages: SqliteMessageRepository(database.raw, history),
+      settings: SqliteSettingsRepository(database.raw, clock: clock),
+      tasks: SqliteTaskRepository(database.raw, history, clock: clock),
+      messages: SqliteMessageRepository(database.raw, history, clock: clock),
       sender: sender,
-      calls: SqliteCallRepository(database.raw, history),
+      appointments: SqliteAppointmentRepository(
+        database.raw,
+        history,
+        clock: clock,
+      ),
+      calls: SqliteCallRepository(database.raw, history, clock: clock),
       dialer: dialer,
       // Ohne KI-Anbindung läuft die App vollständig lokal. Der echte
       // Client kommt, sobald das Onboarding den Toggle setzt.
@@ -67,6 +77,7 @@ class AppServices {
   /// Übergabe an die System-App. In Tests bewusst wirkungslos.
   final MessageSender sender;
 
+  final SqliteAppointmentRepository appointments;
   final SqliteCallRepository calls;
 
   /// Startet das Telefonat. In Tests bewusst wirkungslos.

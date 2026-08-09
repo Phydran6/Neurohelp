@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../appointments/presentation/appointment_start_page.dart';
 import '../../calls/presentation/call_start_page.dart';
 import '../../messages/presentation/message_start_page.dart';
 import '../../tasks/presentation/task_start_page.dart';
@@ -109,6 +110,7 @@ class _MenuTile extends StatelessWidget {
       'task' => const TaskStartPage(),
       'message' => const MessageStartPage(),
       'call' => const CallStartPage(),
+      'appointment' => const AppointmentStartPage(),
       _ => null,
     };
 

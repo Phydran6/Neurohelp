@@ -154,12 +154,12 @@ Nach Abschnitt 19 des Konzepts:
 3. ✅ Lokale DB + Historie-Rückgrat
 4. 🟡 Onboarding + Konto + Sicherheit (Logik fertig, Plattform-Anbindung offen)
 5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
-6. 🟡 Feature „Aufgabe sortieren" (Logik fertig, Oberfläche offen)
-7. 🟡 Feature „Nachricht schreiben" (Logik fertig, Oberfläche offen)
+6. ✅ Feature „Aufgabe sortieren"
+7. ✅ Feature „Nachricht schreiben"
 8. 🟡 Feature „Anruf erledigen" (bedienbar; native Begleitung – Android
    Overlay, iOS Live Activity – noch offen)
-9. 🟡 Feature „Termin klären" (Logik fertig, Oberfläche offen)
-10. 🟡 Info- & Hilfe-Bereich (Logik fertig, Oberfläche offen)
+9. ✅ Feature „Termin klären"
+10. ✅ Info- & Hilfe-Bereich
 11. ⬜ Apple Developer Account
 12. ⬜ Alpha-Verteilung als APK
 

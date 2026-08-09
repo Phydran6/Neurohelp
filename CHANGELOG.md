@@ -98,6 +98,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   erst nach dem Wählen – auf iOS wäre es vorher ohnehin nicht beschreibbar
 - Anruf starten über `tel:`, hinter einer Schnittstelle; Android und iOS
   sind dafür freigeschaltet
+- **Termin klären als Oberfläche** (Konzept, Abschnitt 9): Buchungsweg
+  wählen, Telefon übergibt an den Anruf-Ablauf, Mail und Formular an den
+  Nachrichten-Ablauf – die Abläufe werden nicht doppelt gebaut
+- Die vier Nachverfolgungs-Phasen als Karten: Bestätigung, Checkliste am
+  Vortag, Anfahrt am Terminmorgen, Nachfrage danach. Jede verschwindet nach
+  dem Antippen und kommt nicht wieder
+- Die Dienste nehmen eine einstellbare Uhr entgegen, damit Tests nicht von
+  der Tageszeit abhängen
 - `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
   `pubspec.lock` eingecheckt; App-Name auf „Neurohelp" korrigiert
 

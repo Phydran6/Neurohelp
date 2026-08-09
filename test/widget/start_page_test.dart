@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurohelp/app/app.dart';
-import 'package:neurohelp/core/ai/ai_client.dart';
 import 'package:neurohelp/core/config/app_config.dart';
 import 'package:neurohelp/features/home/domain/greetings.dart';
 import 'package:neurohelp/features/home/presentation/main_menu_page.dart';

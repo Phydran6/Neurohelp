@@ -205,6 +205,17 @@ jobs:
             version:"${{ needs.prepare.outputs.ios_version }}" \
             build_number:"${{ needs.prepare.outputs.build_number }}"
 
+      - name: Signiertes IPA benennen
+        if: steps.signing.outputs.available == 'true'
+        run: |
+          # `flutter build ipa` nennt die Datei nach dem Projekt: neurohelp.ipa.
+          # Im Release soll am Namen stehen, was drin ist - und vor allem, dass
+          # das ein App-Store-Build ist, den man nicht sideloaden kann.
+          v="${{ needs.prepare.outputs.version }}"
+          mv build/ios/ipa/neurohelp.ipa \
+             "build/ios/ipa/Neurohelp-${v}-ios-appstore.ipa"
+          ls -lh build/ios/ipa/*.ipa
+
       - uses: actions/upload-artifact@v4
         with:
           name: ios-release

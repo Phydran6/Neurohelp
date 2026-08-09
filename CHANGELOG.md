@@ -7,6 +7,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.5] - 2026-08-10
+
 ### Changed
 
 - **Die App heißt technisch jetzt `will.neurohelp.help`** statt
@@ -17,8 +19,7 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   sie muss vorher deinstalliert werden. **Lokale Daten der Alpha gehen
   dabei verloren** – Aufgaben, Verläufe und Einstellungen. Einmalig, und
   nur weil noch niemand außer dir die App hat
-
-- **Auf iOS zeigt die App `0.1.0` statt `0.1.0-alpha.4`.** Apple erlaubt in
+- **Auf iOS zeigt die App `0.1.0` statt `0.1.0-alpha.5`.** Apple erlaubt in
   der Versionsnummer nur Ziffern und Punkte und weist alles andere beim
   Hochladen ab. Der Alpha-Zusatz bleibt auf Android sichtbar, wie im Konzept
   gedacht – auf iOS unterscheidet stattdessen die Build-Nummer die Uploads

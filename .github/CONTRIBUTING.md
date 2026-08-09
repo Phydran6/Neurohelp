@@ -2,7 +2,7 @@
 
 ## Leitplanken
 
-Vor jeder Änderung: [docs/KONZEPT.md](docs/KONZEPT.md), Abschnitt 4 (Designprinzipien) und
+Vor jeder Änderung: [docs/KONZEPT.md](../docs/KONZEPT.md), Abschnitt 4 (Designprinzipien) und
 Abschnitt 23 (Projektgrundsätze). Die wichtigsten in Kurzform:
 
 - Minimalistisch, reizarm, selbsterklärend
@@ -45,13 +45,13 @@ Genau das prüft auch die CI – lokal grün heißt CI grün.
 
 ## Changelog
 
-Jede nutzersichtbare Änderung kommt unter `## [Unreleased]` in die [CHANGELOG.md](CHANGELOG.md),
+Jede nutzersichtbare Änderung kommt unter `## [Unreleased]` in die [CHANGELOG.md](../CHANGELOG.md),
 Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/):
 `Added`, `Changed`, `Deprecated`, `Removed`, `Fixed`, `Security`.
 
 ## Code-Konventionen
 
-- `flutter_lints` + die Zusatzregeln aus [analysis_options.yaml](analysis_options.yaml) sind bindend
+- `flutter_lints` + die Zusatzregeln aus [analysis_options.yaml](../analysis_options.yaml) sind bindend
 - Ein Ordner pro Feature unter `lib/features/`, getrennt in `data` / `domain` / `presentation`
 - Querschnittliches (Theme, Config, DB, Services) nach `lib/core/`
 - Keine `print`-Aufrufe – Logging läuft über die Log-Schicht
@@ -69,4 +69,4 @@ Format nach [Keep a Changelog](https://keepachangelog.com/de/1.1.0/):
 ## Niemals einchecken
 
 Keystores, `key.properties`, `.env`, Service-Account-JSONs, `.p8`/`.p12`, Provisioning Profiles,
-API-Schlüssel. Alles davon läuft über GitHub-Secrets – siehe [docs/RELEASING.md](docs/RELEASING.md).
+API-Schlüssel. Alles davon läuft über GitHub-Secrets – siehe [docs/RELEASE.md](../docs/RELEASE.md).

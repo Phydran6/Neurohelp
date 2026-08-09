@@ -7,6 +7,24 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.2] - 2026-08-09
+
+Aufräumen. An der App selbst ändert sich nichts.
+
+### Changed
+
+- **Release-Dateien heißen jetzt sprechend:**
+  `Neurohelp-0.1.0-alpha.2-android.apk` statt `app-release.apk`. Man sieht am
+  Namen, was man geladen hat
+- **Startseite neu**: erklärt, was Neurohelp macht und für wen – mit direkten
+  Download-Links. Alles Technische liegt jetzt in
+  [docs/TECHNIK.md](docs/TECHNIK.md)
+- Jeder Bereich des Repositories hat eine eigene `README.md` und ein eigenes
+  `CHANGELOG.md`
+- Weniger Dateien in der Wurzel: `CONTRIBUTING.md` und `SECURITY.md` liegen in
+  `.github/`, wo GitHub sie genauso findet
+- Doku-Dateien deutsch benannt: `ARCHITEKTUR.md`, `BACKEND.md`, `RELEASE.md`
+
 ## [0.1.0-alpha.1] - 2026-08-09
 
 Erste Alpha für Android und iOS. Alle fünf Pfade laufen durch, das Backend
@@ -160,5 +178,6 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.1...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.2...HEAD
+[0.1.0-alpha.2]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.1

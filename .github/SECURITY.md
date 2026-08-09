@@ -16,7 +16,7 @@ Solange das Projekt vor 1.0 ist, wird ausschließlich die jeweils neueste Versio
 
 ## Sicherheitsmodell der App
 
-Siehe [docs/KONZEPT.md](docs/KONZEPT.md), Abschnitte 13 und 14.
+Siehe [docs/KONZEPT.md](../docs/KONZEPT.md), Abschnitte 13 und 14.
 
 - **Lokal-first:** Nutzerdaten (Historie, Kontakte, Notizen, Termine, Aufgaben) liegen auf dem Gerät
 - **App-Sperre** beim Start: Biometrie, Rückfallebene PIN/Passwort

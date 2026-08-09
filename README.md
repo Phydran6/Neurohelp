@@ -1,175 +1,156 @@
+<div align="center">
+
 # Neurohelp
 
-Eine App, die neurodivergenten Menschen im Alltag hilft – als hilfsbereiter Freund, ruhiger
-Assistent und Werkzeugkasten in einem.
+**Eine App, die im Alltag hilft, ohne Druck zu machen.**
 
-**Kernprinzip:** Hilfe zur Selbsthilfe. Nur wenn es wirklich nicht geht, übernimmt die App.
+Für Menschen, denen alltägliche Dinge schwerfallen, die für andere
+selbstverständlich sind.
 
 [![CI](https://github.com/Phydran6/Neurohelp/actions/workflows/ci.yml/badge.svg)](https://github.com/Phydran6/Neurohelp/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Lizenz: MIT](https://img.shields.io/badge/Lizenz-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/Version-0.1.0--alpha.2-orange.svg)](https://github.com/Phydran6/Neurohelp/releases)
 
-> Vollständiges Konzept: [docs/KONZEPT.md](docs/KONZEPT.md) – das ist das führende Dokument.
+[**Herunterladen**](#-herunterladen) ·
+[Was sie kann](#was-neurohelp-kann) ·
+[Für wen](#für-wen-das-gedacht-ist) ·
+[Technische Doku](docs/TECHNIK.md)
+
+</div>
 
 ---
 
-## Stack
+## Worum es geht
 
-| Komponente | Technologie |
+Manche Dinge sind objektiv klein und fühlen sich trotzdem unmöglich an. Beim
+Amt anrufen. Eine Mail schreiben, die seit drei Wochen offen ist. Einen
+Termin ausmachen. Eine Aufgabe anfangen, die eigentlich aus zwölf kleinen
+Aufgaben besteht.
+
+Neurohelp nimmt einem das nicht ab. Es zerlegt es in Schritte, die einzeln
+machbar sind, und bleibt dabei ruhig.
+
+**Hilfe zur Selbsthilfe.** Nur wenn es wirklich nicht geht, übernimmt die App.
+
+---
+
+## Was Neurohelp kann
+
+### Aufgabe sortieren
+
+Ein großer Berg wird zu einer Liste kleiner Schritte. Im Fokus-Modus siehst du
+immer nur **den nächsten** – der Rest bleibt unsichtbar, bis er dran ist.
+
+### Nachricht schreiben
+
+Du sagst, worum es geht. Die App formuliert daraus eine Nachricht, die man so
+abschicken kann. Der höfliche Rahmen kommt automatisch, damit du nicht über
+Formulierungen grübelst.
+
+### Anruf erledigen
+
+Vor dem Anruf: Was ist das Ziel, wen erreiche ich, was muss gesagt werden.
+Während des Anrufs stehen die Stichpunkte groß auf dem Bildschirm.
+
+### Termin klären
+
+Telefon, Mail oder Formular – die App schlägt den Weg vor und führt hindurch.
+Danach erinnert sie an Bestätigung, Vorbereitung und Anfahrt. Jede Erinnerung
+kommt genau einmal.
+
+### Hilfe & Einstellungen
+
+Feste Antworten auf die häufigen Fragen. Tonfall einstellbar: locker, neutral
+oder sachlich.
+
+---
+
+## Für wen das gedacht ist
+
+Für Menschen mit ADHS, Autismus, Depression, Angststörung oder einfach an
+einem Punkt, an dem der Alltag zu viel ist.
+
+Du musst keine Diagnose haben. Wenn dir das oben bekannt vorkommt, ist die App
+für dich.
+
+---
+
+## Wie sie sich anfühlt
+
+Das ist der Teil, der bei dieser App wichtiger ist als jede Funktion:
+
+| | |
 |---|---|
-| App | Flutter (Dart) – Android + iOS aus einer Codebasis |
-| Lokale DB | SQLite (Drift / sqflite) |
-| Backend | Supabase (Auth, Mailversand, KI-Proxy) |
-| KI-Anbindung | Über Backend, anbieteragnostisch (Claude, OpenAI, weitere) |
-| Anrufbegleitung Android | Overlay-Berechtigung / Split-Screen |
-| Anrufbegleitung iOS | Live Activity + Dynamic Island (ActivityKit) |
-| Build & Deployment | GitHub Actions + fastlane |
+| **Kein Zwang** | Keine Streaks, keine Punkte, keine Abzeichen |
+| **Keine Schuld** | Nichts wird rot. Nichts sagt dir, dass du etwas verpasst hast |
+| **Kein Lob** | Erledigt ist erledigt. Kein „Gut gemacht!" |
+| **Ein Schritt** | Ein Bildschirm, eine Entscheidung. Nie eine Wand aus Optionen |
+| **Kein leeres Feld** | Die App fragt nie „Was möchtest du tun?", ohne selbst anzufangen |
 
-**Datenhaltung ist lokal-first:** Nutzerdaten liegen auf dem Gerät. Über das Backend laufen nur
-KI-Verarbeitung, Reset-Mails und Kontoverwaltung.
+Erinnerungen kommen höchstens dreimal. Danach bleibt ein Vorgang still liegen,
+ohne Vorwurf.
 
 ---
 
-## Schnellstart
+## Wo deine Daten liegen
 
-```bash
-git clone https://github.com/Phydran6/Neurohelp.git
-cd Neurohelp
-```
+**Auf deinem Gerät.** Nicht in einer Cloud.
 
-```bash
-flutter pub get
-```
+Aufgaben, Nachrichten, Anrufe, Termine, deine ganze Historie – alles bleibt
+lokal in einer Datenbank auf dem Handy.
 
-> Voraussetzung: Flutter SDK (stable). `android/` und `ios/` liegen im
-> Repository – die Bootstrap-Skripte unter `scripts/` werden nur gebraucht,
-> wenn die Plattform-Ordner neu erzeugt werden müssen.
+Zum Server geht nur:
 
-App starten:
+- dein Konto (damit du dich bei einem Gerätewechsel wieder anmelden kannst)
+- Reset-Mails, wenn du das Passwort vergisst
+- der Text, den du der KI zum Formulieren gibst – und auch das nur, wenn du KI
+  eingeschaltet hast
 
-```bash
-flutter run --dart-define=FLAVOR=dev
-```
+**KI ist freiwillig.** Beim ersten Start wirst du gefragt, und die Frage hat
+zwei gleichwertige Antworten. Ohne KI funktioniert die App vollständig, nur
+formuliert sie dann nicht selbst.
 
 ---
 
-## Projektstruktur
+## 📥 Herunterladen
 
-```
-lib/
-├─ main.dart                 Einstiegspunkt
-├─ app/                      App-Wurzel, MaterialApp, globales Setup
-├─ core/                     Querschnitt: Config, Theme, Routing, DB, Services
-│  ├─ account/               Konto (Supabase Auth dahinter)
-│  ├─ ai/                    KI-Schnittstelle (kennt keinen Anbieter)
-│  ├─ config/                Build-Flavors und --dart-define-Werte
-│  ├─ db/                    SQLite: Schema, Migrationen, Zugang
-│  ├─ history/               Historie – das Rückgrat der App
-│  ├─ logging/               Log-Schicht (`print` ist verboten)
-│  ├─ router/                Navigation
-│  ├─ security/              App-Sperre, PIN-Ablage
-│  ├─ settings/              Tonfall, KI-Toggle, Art der Sperre
-│  └─ theme/                 Farben, Typografie, Themes
-├─ features/                 Ein Ordner pro Feature (Abschnitt 7 des Konzepts)
-│  └─ <feature>/
-│     ├─ data/               Repositories, lokale/entfernte Datenquellen
-│     ├─ domain/             Modelle, Geschäftslogik
-│     └─ presentation/       Screens, Widgets, State
-└─ shared/                   Feature-übergreifend wiederverwendbare Widgets
+> **Das ist eine Alpha.** Zum Ausprobieren, nicht für den täglichen Gebrauch.
+> Daten liegen lokal und sind bei einer Neuinstallation weg.
 
-test/          Unit- und Widget-Tests
-integration_test/  End-to-End-Tests auf Gerät/Emulator
-android/       Native Android-Schale + fastlane
-ios/           Native iOS-Schale + fastlane
-supabase/      Schema, Migrationen, Edge Functions (KI-Proxy)
-docs/          Konzept, Architektur, Supabase, Release-Prozess
-scripts/       Bootstrap und Hilfsskripte
-```
-
----
-
-## Entwicklungsbefehle
-
-```bash
-flutter pub get
-```
-
-```bash
-dart format .
-```
-
-```bash
-flutter analyze --fatal-infos --fatal-warnings
-```
-
-```bash
-flutter test --coverage
-```
-
-```bash
-flutter test integration_test
-```
-
----
-
-## Build-Flavors
-
-Konfiguration kommt über `--dart-define`, siehe [lib/core/config/app_config.dart](lib/core/config/app_config.dart).
-
-```bash
-flutter run --dart-define=FLAVOR=dev --dart-define=API_BASE_URL=https://dev.example
-```
-
-| Flavor | Zweck |
-|---|---|
-| `dev` | lokale Entwicklung, Debug-Banner an |
-| `staging` | interne Tests gegen Staging-Backend |
-| `prod` | Release-Builds |
-
----
-
-## Deployment
-
-Vollständig automatisiert über GitHub Actions – Details in [docs/RELEASING.md](docs/RELEASING.md).
-
-| Workflow | Auslöser | Ergebnis |
+| Plattform | Datei | Wie |
 |---|---|---|
-| [`ci.yml`](.github/workflows/ci.yml) | Push / PR | Format, Analyse, Tests, Debug-Builds |
-| [`release.yml`](.github/workflows/release.yml) | Tag `v*.*.*` | Signiertes AAB/APK + IPA, GitHub-Release |
-| [`deploy.yml`](.github/workflows/deploy.yml) | nach Release / manuell | Play Store (internal), TestFlight |
+| **Android** | [Neurohelp-0.1.0-alpha.2-android.apk](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.2/Neurohelp-0.1.0-alpha.2-android.apk) | Herunterladen, antippen, installieren |
+| **Android (Play Store)** | [Neurohelp-0.1.0-alpha.2-android-playstore.aab](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.2/Neurohelp-0.1.0-alpha.2-android-playstore.aab) | Nur zum Hochladen in die Play Console |
+| **iOS** | [Neurohelp-0.1.0-alpha.2-ios-unsigniert.ipa](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.2/Neurohelp-0.1.0-alpha.2-ios-unsigniert.ipa) | Unsigniert – muss erst signiert werden |
+| **Alle Versionen** | [Release-Übersicht](https://github.com/Phydran6/Neurohelp/releases) | Ältere Stände und Änderungslisten |
+| **Was ist neu** | [CHANGELOG.md](CHANGELOG.md) | Jede Änderung, nachvollziehbar |
 
-Ein Release auslösen:
+**Android:** Beim ersten Mal fragt das Handy, ob Installationen aus dieser
+Quelle erlaubt sind. Das ist normal bei Apps außerhalb des Play Stores.
 
-```bash
-git tag v0.1.0 && git push origin v0.1.0
-```
-
----
-
-## Bau-Reihenfolge
-
-Nach Abschnitt 19 des Konzepts:
-
-1. ✅ Projekt-Setup Flutter + GitHub Actions
-2. 🟡 Supabase (Schema + Migrationen fertig, Projekt anlegen steht aus → [docs/SUPABASE.md](docs/SUPABASE.md))
-3. ✅ Lokale DB + Historie-Rückgrat
-4. 🟡 Onboarding + Konto + Sicherheit (Logik fertig, Plattform-Anbindung offen)
-5. ✅ Backend-Schicht: KI-Proxy, anbieteragnostisch
-6. ✅ Feature „Aufgabe sortieren"
-7. ✅ Feature „Nachricht schreiben"
-8. 🟡 Feature „Anruf erledigen" (bedienbar; native Begleitung – Android
-   Overlay, iOS Live Activity – noch offen)
-9. ✅ Feature „Termin klären"
-10. ✅ Info- & Hilfe-Bereich
-11. ⬜ Apple Developer Account
-12. ⬜ Alpha-Verteilung als APK
+**iOS:** Apple erlaubt keine Installation aus dem Browser. Das IPA ist
+unsigniert und braucht TestFlight, Xcode oder ein Sideload-Werkzeug.
 
 ---
 
-## Mitwirken
+## Mitmachen
 
-Siehe [CONTRIBUTING.md](CONTRIBUTING.md). Änderungen kommen unter `[Unreleased]` in die
-[CHANGELOG.md](CHANGELOG.md).
+Rückmeldungen sind willkommen – besonders, wenn sich etwas nach Druck anfühlt.
+Genau das soll die App nicht.
 
-## Lizenz
+- [Fehler melden oder Idee vorschlagen](https://github.com/Phydran6/Neurohelp/issues)
+- [Beitragsleitfaden](.github/CONTRIBUTING.md)
 
-[MIT](LICENSE) © 2026 Philipp Fischer
+---
+
+<div align="center">
+
+**[→ Technische Dokumentation](docs/TECHNIK.md)**
+
+Aufbau, Entwicklung, Backend, Release-Prozess
+
+---
+
+[MIT-Lizenz](LICENSE) · © 2026 Philipp Fischer
+
+</div>

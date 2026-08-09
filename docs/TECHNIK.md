@@ -1,0 +1,222 @@
+# Technische Dokumentation
+
+Alles, was zum Bauen, Testen und Ausliefern nötig ist.
+Für die Beschreibung der App selbst: [← zurück zur Startseite](../README.md).
+
+---
+
+## Inhalt
+
+| Dokument | Worum es geht |
+|---|---|
+| [KONZEPT.md](KONZEPT.md) | **Das führende Dokument.** Bei Widersprüchen gewinnt es |
+| [ARCHITEKTUR.md](ARCHITEKTUR.md) | Schichten, Datenfluss, Entscheidungen |
+| [BACKEND.md](BACKEND.md) | Supabase: Schema, Migrationen, KI-Proxy |
+| [RELEASE.md](RELEASE.md) | Branches, Versionen, Veröffentlichen |
+
+---
+
+## Stack
+
+| Komponente | Technologie |
+|---|---|
+| App | Flutter (Dart) – Android + iOS aus einer Codebasis |
+| Lokale Datenbank | SQLite über `sqflite`, eigene Migrationen |
+| Backend | Supabase (Auth, Mailversand, KI-Proxy) |
+| KI-Anbindung | Über das Backend, anbieteragnostisch (Claude, OpenAI) |
+| Anrufbegleitung Android | Overlay-Berechtigung / Split-Screen *(offen)* |
+| Anrufbegleitung iOS | Live Activity + Dynamic Island *(offen)* |
+| Build & Auslieferung | GitHub Actions + fastlane |
+
+**Lokal-first:** Nutzerdaten liegen auf dem Gerät. Über das Backend laufen nur
+Kontoverwaltung, Reset-Mails und KI-Aufrufe. Neue Cloud-Speicherung ist
+begründungspflichtig.
+
+---
+
+## Schnellstart
+
+```bash
+git clone https://github.com/Phydran6/Neurohelp.git
+```
+
+```bash
+flutter pub get
+```
+
+```bash
+flutter run --dart-define=FLAVOR=dev
+```
+
+Voraussetzung ist das Flutter SDK (Kanal `stable`). `android/` und `ios/`
+liegen im Repository; die Skripte unter [scripts/](../scripts/) werden nur
+gebraucht, wenn die Plattform-Ordner neu entstehen müssen.
+
+---
+
+## Aufbau des Repositories
+
+| Bereich | Inhalt |
+|---|---|
+| [lib/](../lib/) | Der gesamte Dart-Code der App |
+| [test/](../test/) | Unit- und Widget-Tests |
+| [integration_test/](../integration_test/) | End-to-End-Tests auf Gerät oder Emulator |
+| [supabase/](../supabase/) | Schema, Migrationen, Edge Functions |
+| [scripts/](../scripts/) | Bootstrap und Hilfsskripte |
+| [docs/](.) | Diese Dokumentation |
+| [.github/](../.github/) | Workflows, Vorlagen, Beitragsleitfaden |
+| `android/`, `ios/` | Native Schalen, handgepflegt nur `fastlane/` und die Signatur |
+
+Jeder Bereich hat eine eigene `README.md` und ein eigenes `CHANGELOG.md`.
+Verbindlich fürs Release ist die große [CHANGELOG.md](../CHANGELOG.md).
+
+### Innerhalb von `lib/`
+
+```
+lib/
+├─ main.dart      Einstiegspunkt, Verdrahtung der Dienste
+├─ app/           App-Wurzel, MaterialApp, Einstiegs-Weiche
+├─ core/          Querschnitt: DB, Historie, Konto, KI, Sicherheit, Theme
+├─ features/      Ein Ordner pro Feature, je data / domain / presentation
+└─ shared/        Feature-übergreifende Widgets
+```
+
+Details in [ARCHITEKTUR.md](ARCHITEKTUR.md), Regeln in
+[lib/README.md](../lib/README.md).
+
+---
+
+## Befehle
+
+Vor jedem Commit alle drei, in dieser Reihenfolge:
+
+```bash
+dart format .
+```
+
+```bash
+flutter analyze --fatal-infos --fatal-warnings
+```
+
+```bash
+flutter test
+```
+
+Weitere:
+
+```bash
+flutter test --coverage
+```
+
+```bash
+flutter test integration_test
+```
+
+---
+
+## Build-Flavors
+
+Konfiguration kommt über `--dart-define`, siehe
+[app_config.dart](../lib/core/config/app_config.dart).
+
+```bash
+flutter run --dart-define=FLAVOR=dev
+```
+
+| Flavor | Zweck |
+|---|---|
+| `dev` | Lokale Entwicklung |
+| `staging` | Interne Tests gegen ein Staging-Backend |
+| `prod` | Release-Builds |
+
+| Define | Vorgabe |
+|---|---|
+| `FLAVOR` | `dev` |
+| `SUPABASE_URL` | das produktive Projekt |
+| `SUPABASE_KEY` | der öffentliche `sb_publishable_…`-Schlüssel |
+
+Der öffentliche Schlüssel darf im Repository stehen – er steckt ohnehin in
+jeder ausgelieferten App. Geschützt wird über Row Level Security. Der geheime
+Schlüssel bleibt ausschließlich im Backend.
+
+---
+
+## Branches
+
+| Branch | Zweck |
+|---|---|
+| `main` | Produktiv. Nur von hier wird getaggt und veröffentlicht |
+| `develop` | Entwicklung und Tests |
+
+Mehr braucht es nicht. Beide durchlaufen dieselbe CI.
+
+---
+
+## Auslieferung
+
+| Workflow | Auslöser | Ergebnis |
+|---|---|---|
+| [`ci.yml`](../.github/workflows/ci.yml) | Push / PR auf `main` oder `develop` | Format, Analyse, Tests, Debug-Builds |
+| [`release.yml`](../.github/workflows/release.yml) | Tag `v*.*.*` | APK, AAB, IPA + GitHub-Release |
+| [`deploy.yml`](../.github/workflows/deploy.yml) | nach Release / manuell | Play Store (internal), TestFlight |
+
+Ein Release auslösen:
+
+```bash
+git tag v0.1.0-alpha.2 && git push origin v0.1.0-alpha.2
+```
+
+Fehlende Store-Secrets führen nicht zum Abbruch: Die betroffenen Schritte
+warnen und bauen unsigniert weiter. Einzelheiten in [RELEASE.md](RELEASE.md).
+
+---
+
+## Harte Regeln
+
+Diese Punkte sind keine Stilfrage. Wer sie bricht, bricht das Versprechen der
+App:
+
+- **Kein Zwang** – keine Gamification, keine Streaks, keine Schuldmechanik
+- **Kein direkter KI-Aufruf aus der App** – immer über das Backend
+- **Lokal-first** – Nutzerdaten bleiben auf dem Gerät
+- **Jedes Feature startet mit einem Historie-Check**, bevor der User tippt
+- **Jeder KI-Pfad braucht einen Weg ohne KI**
+- **Plattformen nicht zueinander zwingen** – Android und iOS dürfen sich
+  bewusst unterscheiden
+- **Bei Unsicherheit: verschieben, nicht reinpacken**
+- Keine Secrets, Keystores oder API-Schlüssel im Repository
+
+---
+
+## Bau-Reihenfolge
+
+Nach Abschnitt 19 des Konzepts:
+
+| | Schritt | Stand |
+|---|---|---|
+| 1 | Projekt-Setup Flutter + GitHub Actions | ✅ |
+| 2 | Supabase-Backend | ✅ |
+| 3 | Lokale DB + Historie-Rückgrat | ✅ |
+| 4 | Onboarding + Konto + Sicherheit | ✅ |
+| 5 | Backend-Schicht: KI-Proxy | ✅ |
+| 6 | Feature „Aufgabe sortieren" | ✅ |
+| 7 | Feature „Nachricht schreiben" | ✅ |
+| 8 | Feature „Anruf erledigen" | 🟡 bedienbar, native Begleitung offen |
+| 9 | Feature „Termin klären" | ✅ |
+| 10 | Info- & Hilfe-Bereich | ✅ |
+| 11 | Apple Developer Account | 🟡 vorhanden, CI-Secrets fehlen |
+| 12 | Alpha-Verteilung | ✅ als APK im Release |
+
+---
+
+## Mitwirken
+
+[Beitragsleitfaden](../.github/CONTRIBUTING.md) ·
+[Sicherheitsrichtlinie](../.github/SECURITY.md)
+
+Nutzersichtbare Änderungen kommen unter `[Unreleased]` in die
+[CHANGELOG.md](../CHANGELOG.md).
+
+---
+
+[← zurück zur Startseite](../README.md)

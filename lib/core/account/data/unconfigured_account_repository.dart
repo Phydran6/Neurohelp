@@ -6,14 +6,14 @@ import '../account_repository.dart';
 /// Supabase Auth. Solange das Projekt nicht existiert, kann die App kein
 /// Konto anlegen – und sie tut auch nicht so.
 ///
-/// Sobald `SUPABASE_URL` und `SUPABASE_ANON_KEY` per `--dart-define`
-/// gesetzt sind, tritt die echte Umsetzung an diese Stelle.
+/// Sobald `SUPABASE_URL` und `SUPABASE_KEY` gesetzt sind, tritt
+/// `SupabaseAccountRepository` an diese Stelle.
 class UnconfiguredAccountRepository implements AccountRepository {
   const UnconfiguredAccountRepository();
 
   static const String setupHint =
       'Die Kontoverwaltung ist noch nicht eingerichtet. '
-      'Siehe docs/SUPABASE.md.';
+      'Siehe docs/BACKEND.md.';
 
   @override
   Future<Account?> currentAccount() async => null;

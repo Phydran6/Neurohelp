@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/messages/data/sqlite_message_repository.dart';
+import '../../features/messages/domain/message_sender.dart';
 import '../../features/tasks/data/sqlite_task_repository.dart';
 import '../../features/tasks/domain/task_repository.dart';
 import '../ai/ai_client.dart';
@@ -19,11 +21,17 @@ class AppServices {
     required this.history,
     required this.settings,
     required this.tasks,
+    required this.messages,
+    required this.sender,
     required this.ai,
   });
 
   /// Baut die Dienste über einer geöffneten Datenbank auf.
-  factory AppServices.from(AppDatabase database, {AiClient? ai}) {
+  factory AppServices.from(
+    AppDatabase database, {
+    AiClient? ai,
+    MessageSender sender = const NoMessageSender(),
+  }) {
     final history = SqliteHistoryRepository(database.raw);
 
     return AppServices(
@@ -31,6 +39,8 @@ class AppServices {
       history: history,
       settings: SqliteSettingsRepository(database.raw),
       tasks: SqliteTaskRepository(database.raw, history),
+      messages: SqliteMessageRepository(database.raw, history),
+      sender: sender,
       // Ohne KI-Anbindung läuft die App vollständig lokal. Der echte
       // Client kommt, sobald das Onboarding den Toggle setzt.
       ai: ai ?? const DisabledAiClient(),
@@ -41,6 +51,11 @@ class AppServices {
   final HistoryRepository history;
   final SettingsRepository settings;
   final TaskRepository tasks;
+  final SqliteMessageRepository messages;
+
+  /// Übergabe an die System-App. In Tests bewusst wirkungslos.
+  final MessageSender sender;
+
   final AiClient ai;
 
   Future<void> dispose() => database.close();

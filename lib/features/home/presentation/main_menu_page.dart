@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../messages/presentation/message_start_page.dart';
 import '../../tasks/presentation/task_start_page.dart';
 
 /// Ein Eintrag im Hauptmenü.
@@ -103,10 +104,14 @@ class _MenuTile extends StatelessWidget {
   }
 
   void _open(BuildContext context) {
-    if (entry.id == 'task') {
-      Navigator.of(
-        context,
-      ).push(MaterialPageRoute<void>(builder: (_) => const TaskStartPage()));
+    final page = switch (entry.id) {
+      'task' => const TaskStartPage(),
+      'message' => const MessageStartPage(),
+      _ => null,
+    };
+
+    if (page != null) {
+      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
       return;
     }
 

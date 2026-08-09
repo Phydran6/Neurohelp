@@ -6,6 +6,11 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>mailto</string>
+		<string>https</string>
+	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Neurohelp</string>
 	<key>CFBundleExecutable</key>

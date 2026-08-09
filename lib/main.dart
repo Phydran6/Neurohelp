@@ -4,6 +4,7 @@ import 'app/app.dart';
 import 'core/config/app_config.dart';
 import 'core/db/app_database.dart';
 import 'core/di/app_services.dart';
+import 'features/messages/data/url_launcher_message_sender.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +13,10 @@ Future<void> main() async {
   // Die Datenbank ist das Rückgrat der App und wird vor dem ersten Bild
   // geöffnet – ohne Historie kann kein Feature starten.
   final database = await AppDatabase.open();
-  final services = AppServices.from(database);
+  final services = AppServices.from(
+    database,
+    sender: const UrlLauncherMessageSender(),
+  );
 
   runApp(AppScope(services: services, child: const NeurohelpApp()));
 }

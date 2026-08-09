@@ -77,8 +77,15 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Feststellung statt Lob
 - Neue Aufgaben lassen sich selbst zerlegen: ein Feld, Eingabetaste,
   nächster Punkt
+- **Nachricht schreiben als Oberfläche** (Konzept, Abschnitt 10): ein Schritt
+  pro Bildschirm in der festgelegten Reihenfolge – Inhalt zuerst, dann grob
+  der Empfängertyp, dann die Adresse. Der Floskel-Rahmen erscheint in der
+  Vorschau
+- Übergabe an die Mail-App über `url_launcher`; Android und iOS sind dafür
+  freigeschaltet. Der Vorgang bleibt danach **offen**, nicht erledigt
+- Sanfte Nachfrage beim nächsten Öffnen mit Ja / Nein / Nicht jetzt
 - `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
-  `pubspec.lock` eingecheckt
+  `pubspec.lock` eingecheckt; App-Name auf „Neurohelp" korrigiert
 
 ### Fixed
 

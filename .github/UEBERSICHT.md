@@ -1,5 +1,8 @@
 # .github/ – Automatisierung und Projektregeln
 
+> Diese Datei heißt bewusst nicht `README.md`: GitHub würde sie sonst
+> **statt** der Startseite des Repositories anzeigen.
+
 [← Technische Doku](../docs/TECHNIK.md) · [Änderungen](CHANGELOG.md)
 
 ---

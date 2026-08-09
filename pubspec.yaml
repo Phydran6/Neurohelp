@@ -8,7 +8,7 @@ publish_to: "none"
 # Der Zusatz `-alpha.N` ist Absicht und bleibt so lange stehen, bis die App
 # wirklich für fremde Geräte taugt. Er landet im Namen der App-Version und ist
 # damit auf dem Gerät sichtbar.
-version: 0.1.0-alpha.2+1
+version: 0.1.0-alpha.3+1
 
 environment:
   # Ab 3.8 formatiert `dart format` im neuen ("tall") Stil. Die Untergrenze
@@ -31,9 +31,11 @@ dependencies:
   uuid: ^4.0.0
 
 dev_dependencies:
+  flutter_launcher_icons: ^0.14.4
   flutter_lints: ^5.0.0
   flutter_test:
     sdk: flutter
+  image: ^4.9.1
   integration_test:
     sdk: flutter
   sqflite_common_ffi: ^2.3.0
@@ -43,3 +45,24 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+
+# App-Icons erzeugen. Die Quelldateien entstehen aus dem Original über
+# `dart run tool/make_icons.dart` – erst danach hier weitermachen:
+#
+#   dart run flutter_launcher_icons
+#
+# Die erzeugten Dateien liegen in android/ und ios/ und werden mit
+# eingecheckt, damit die CI kein zusätzliches Werkzeug braucht.
+flutter_launcher_icons:
+  # iOS rundet selbst und verträgt keine Transparenz – deshalb die randlose,
+  # deckende Fassung.
+  image_path: "assets/icons/app_icon_square.png"
+
+  android: true
+  ios: true
+  remove_alpha_ios: true
+
+  # Adaptives Icon: Android schneidet je nach Gerät Kreis, Quadrat oder
+  # Squircle heraus. Der Vordergrund ist deshalb eingerückt.
+  adaptive_icon_background: "#0A1331"
+  adaptive_icon_foreground: "assets/icons/app_icon_foreground.png"

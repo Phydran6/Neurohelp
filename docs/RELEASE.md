@@ -22,6 +22,17 @@ Der Weg ist immer derselbe: auf `develop` arbeiten, per Pull Request nach
 
 ---
 
+## Vor jedem Tag
+
+1. Version in `pubspec.yaml` hochziehen
+2. Abschnitt in `CHANGELOG.md` anlegen und prüfen:
+   `bash scripts/extract_changelog.sh <version>`
+3. **Die Download-Links in `README.md` auf die neue Version setzen.**
+   `/releases/latest` funktioniert dafür nicht – GitHub überspringt dort
+   Vorabversionen, der Link liefe ins Leere
+
+---
+
 ## Versionsnummern
 
 Format `<major>.<minor>.<patch>[-alpha.N]`, die Build-Nummer hängt die CI an.

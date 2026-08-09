@@ -4,6 +4,12 @@ Verbindlich fürs Release ist die [große CHANGELOG.md](../CHANGELOG.md).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.3] - 2026-08-09
+
+- `TECHNIK.md` beschreibt, wie das App-Icon erzeugt und ausgetauscht wird
+- `RELEASE.md`: Vor jedem Tag müssen die Download-Links in der Startseite
+  mitgezogen werden – `/releases/latest` überspringt Vorabversionen
+
 ## [0.1.0-alpha.2] - 2026-08-09
 
 - `TECHNIK.md` neu: der technische Einstieg, den die Startseite verlinkt

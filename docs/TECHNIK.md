@@ -63,8 +63,9 @@ gebraucht, wenn die Plattform-Ordner neu entstehen müssen.
 | [integration_test/](../integration_test/) | End-to-End-Tests auf Gerät oder Emulator |
 | [supabase/](../supabase/) | Schema, Migrationen, Edge Functions |
 | [scripts/](../scripts/) | Bootstrap und Hilfsskripte |
+| [tool/](../tool/) | Entwicklerwerkzeuge, z.B. die Icon-Aufbereitung |
 | [docs/](.) | Diese Dokumentation |
-| [.github/](../.github/) | Workflows, Vorlagen, Beitragsleitfaden |
+| [.github/](../.github/UEBERSICHT.md) | Workflows, Vorlagen, Beitragsleitfaden |
 | `android/`, `ios/` | Native Schalen, handgepflegt nur `fastlane/` und die Signatur |
 
 Jeder Bereich hat eine eigene `README.md` und ein eigenes `CHANGELOG.md`.
@@ -138,6 +139,32 @@ flutter run --dart-define=FLAVOR=dev
 Der öffentliche Schlüssel darf im Repository stehen – er steckt ohnehin in
 jeder ausgelieferten App. Geschützt wird über Row Level Security. Der geheime
 Schlüssel bleibt ausschließlich im Backend.
+
+---
+
+## App-Icon
+
+Quelle ist `assets/icons/app_icon.png` (1024 × 1024). Daraus entstehen zwei
+Zwischenstufen, weil beide Plattformen Unterschiedliches verlangen:
+
+```bash
+dart run tool/make_icons.dart
+```
+
+```bash
+dart run flutter_launcher_icons
+```
+
+| Datei | Wofür |
+|---|---|
+| `app_icon_square.png` | randlos und deckend – iOS rundet selbst und verträgt keine Transparenz |
+| `app_icon_foreground.png` | Motiv freigestellt und eingerückt – Vordergrund des adaptiven Android-Icons |
+
+Die erzeugten Dateien liegen unter `android/` und `ios/` und sind eingecheckt.
+Die CI braucht dadurch kein zusätzliches Werkzeug.
+
+**Beim Austausch des Icons** beide Befehle nacheinander ausführen. Nur das
+Original ersetzen – die zwei Zwischenstufen entstehen automatisch neu.
 
 ---
 

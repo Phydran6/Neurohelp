@@ -7,6 +7,27 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.3] - 2026-08-09
+
+### Added
+
+- **Die App hat ein Icon.** Auf Android in fünf Auflösungen plus adaptivem
+  Icon, auf iOS in allen 21 Größen
+- `tool/make_icons.dart` bereitet das Original auf: Für iOS randlos und ohne
+  Transparenz, für Android das Motiv freigestellt und eingerückt
+
+### Fixed
+
+- **Die Startseite auf GitHub zeigte die falsche Datei.** `.github/README.md`
+  verdrängt die Wurzel-`README.md` – umbenannt in `UEBERSICHT.md`
+- Download-Links zeigen wieder auf eine gültige Datei. `/releases/latest`
+  überspringt Vorabversionen und lief ins Leere
+
+### Changed
+
+- Startseite überarbeitet: Icon und Titel oben, ein deutlicher Download-Knopf,
+  die vier Funktionen nebeneinander statt untereinander
+
 ## [0.1.0-alpha.2] - 2026-08-09
 
 Aufräumen. An der App selbst ändert sich nichts.
@@ -178,6 +199,7 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.2...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.3...HEAD
+[0.1.0-alpha.3]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.3
 [0.1.0-alpha.2]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.1

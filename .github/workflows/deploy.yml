@@ -32,7 +32,7 @@ jobs:
       (inputs.target == 'both' || inputs.target == 'android') ||
       github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Play-Secrets vorhanden?
         id: gate
@@ -101,7 +101,7 @@ jobs:
       (inputs.target == 'both' || inputs.target == 'ios') ||
       github.event.workflow_run.conclusion == 'success'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Apple-Secrets vorhanden?
         id: gate

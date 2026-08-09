@@ -106,6 +106,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   dem Antippen und kommt nicht wieder
 - Die Dienste nehmen eine einstellbare Uhr entgegen, damit Tests nicht von
   der Tageszeit abhängen
+- **Onboarding als Oberfläche** (Konzept, Abschnitt 16): fünf Schritte, einer
+  pro Bildschirm. Der KI-Toggle ist eine echte Entscheidung – zwei
+  gleichwertige Knöpfe, keine Voreinstellung. Nur die Zusatzsicherheit ist
+  überspringbar
+- Kein vorgetäuschtes Konto: Solange kein Backend eingerichtet ist, sagt die
+  App das ruhig, statt ein Konto zu erfinden
+- **App-Sperre**: Beim Öffnen wird Biometrie versucht, ohne Aufhebens; wenn
+  sie nicht geht, kommt still die PIN. Falsche PIN heißt „Das war nicht die
+  richtige PIN." – kein Vorwurf, keine Zählung
+- PIN liegt im sicheren Speicher des Geräts (Keystore / Keychain), nie in der
+  Datenbank
 - `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
   `pubspec.lock` eingecheckt; App-Name auf „Neurohelp" korrigiert
 

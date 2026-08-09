@@ -8,9 +8,13 @@ import '../../features/messages/data/sqlite_message_repository.dart';
 import '../../features/messages/domain/message_sender.dart';
 import '../../features/tasks/data/sqlite_task_repository.dart';
 import '../../features/tasks/domain/task_repository.dart';
+import '../account/account_repository.dart';
+import '../account/data/unconfigured_account_repository.dart';
 import '../ai/ai_client.dart';
 import '../db/app_database.dart';
 import '../history/data/sqlite_history_repository.dart';
+import '../security/app_lock.dart';
+import '../security/data/device_app_lock.dart';
 import '../history/domain/history_repository.dart';
 import '../settings/data/sqlite_settings_repository.dart';
 import '../settings/settings_repository.dart';
@@ -32,6 +36,8 @@ class AppServices {
     required this.dialer,
     required this.ai,
     required this.help,
+    required this.account,
+    required this.lock,
   });
 
   /// Baut die Dienste über einer geöffneten Datenbank auf.
@@ -43,6 +49,8 @@ class AppServices {
 
     /// Nur für Tests: eine feste Uhr statt der echten Zeit.
     DateTime Function()? clock,
+    AccountRepository? account,
+    AppLock? lock,
   }) {
     final history = SqliteHistoryRepository(database.raw, clock: clock);
     final aiClient = ai ?? const DisabledAiClient();
@@ -65,6 +73,10 @@ class AppServices {
       // Ohne KI-Anbindung läuft die App vollständig lokal. Der echte
       // Client kommt, sobald das Onboarding den Toggle setzt.
       ai: aiClient,
+      // Ohne eingerichtetes Backend kann kein Konto angelegt werden - die
+      // App sagt das, statt eines vorzutaeuschen.
+      account: account ?? const UnconfiguredAccountRepository(),
+      lock: lock ?? InMemoryAppLock(),
     );
   }
 
@@ -87,6 +99,9 @@ class AppServices {
 
   /// Fragen im Hilfe-Bereich – Katalog zuerst, KI nur wenn nötig.
   final HelpService help;
+
+  final AccountRepository account;
+  final AppLock lock;
 
   Future<void> dispose() => database.close();
 }

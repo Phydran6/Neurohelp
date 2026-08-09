@@ -132,15 +132,8 @@ jobs:
           MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         run: |
-          git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          bash scripts/check_match_repo.sh
           echo "GIT_TERMINAL_PROMPT=0" >> "$GITHUB_ENV"
-
-          if git ls-remote "$MATCH_GIT_URL" >/dev/null 2>&1; then
-            echo "Zugriff auf das Zertifikats-Repository steht."
-          else
-            echo "::error::Kein Zugriff auf MATCH_GIT_URL. Token abgelaufen, kein Contents-Schreibrecht, oder URL falsch."
-            exit 1
-          fi
 
       - name: Bauen & an TestFlight schicken
         if: steps.gate.outputs.ok == 'true'

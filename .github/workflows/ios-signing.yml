@@ -21,34 +21,45 @@ jobs:
 
       - name: Secrets vollstaendig?
         env:
-          KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
-          ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
-          PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
-        run: |
-          missing=""
-          for name in KEY_ID ISSUER_ID PRIVATE_KEY MATCH_PASSWORD MATCH_GIT_URL; do
-            if [ -z "${!name}" ]; then
-              missing="$missing $name"
-            fi
-          done
-          if [ -n "$missing" ]; then
-            echo "::error::Diese Secrets fehlen noch:$missing"
-            exit 1
-          fi
-          echo "Alle fuenf Secrets sind gesetzt."
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: bash scripts/check_apple_secrets.sh
 
       - name: Zugriff auf das match-Repository
         env:
           MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         run: |
-          # match klont das Zertifikats-Repository per HTTPS. Ohne Token
-          # scheitert das bei einem privaten Repository still.
-          if [ -n "$MATCH_GIT_TOKEN" ]; then
-            git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          # match klont das Zertifikats-Repository per HTTPS.
+          git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          echo "GIT_TERMINAL_PROMPT=0" >> "$GITHUB_ENV"
+
+          if git ls-remote "$MATCH_GIT_URL" >/dev/null 2>&1; then
+            echo "Zugriff auf das Zertifikats-Repository steht."
           else
-            echo "::warning::MATCH_GIT_TOKEN fehlt – klappt nur, wenn das match-Repository oeffentlich ist."
+            echo "::error::Kein Zugriff auf MATCH_GIT_URL. Token abgelaufen, kein Contents-Schreibrecht, oder URL falsch."
+            exit 1
+          fi
+
+      - name: Inhalt des Zertifikats-Repositorys
+        env:
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          # Zeigt, ob dort schon etwas liegt. Liegt etwas drin, MUSS
+          # MATCH_PASSWORD genau das von damals sein - ein neues Passwort kann
+          # bestehende Dateien nicht entschluesseln.
+          rm -rf /tmp/matchcheck
+          git clone --depth 1 --quiet "$MATCH_GIT_URL" /tmp/matchcheck
+          if [ -z "$(ls -A /tmp/matchcheck | grep -v '^\.git$')" ]; then
+            echo "Repository ist leer – match legt Zertifikat und Profil neu an."
+          else
+            echo "Repository enthaelt schon Dateien:"
+            find /tmp/matchcheck -type f -not -path '*/.git/*' | sed 's|/tmp/matchcheck/||'
+            echo "::warning::MATCH_PASSWORD muss dasselbe sein wie beim Anlegen dieser Dateien."
           fi
 
       - name: Signatur erzeugen

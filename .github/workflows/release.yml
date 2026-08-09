@@ -155,12 +155,23 @@ jobs:
 
       - name: Signing verfügbar?
         id: signing
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
         run: |
-          if [ -n "${{ secrets.APPSTORE_API_KEY_ID }}" ]; then
+          # Alle sechs pruefen, nicht nur eines. Fehlte bisher nur der
+          # Git-Token, lief der Ablauf weiter und scheiterte spaeter mit
+          # "could not read Password" - das liest sich wie ein falsches
+          # MATCH_PASSWORD und ist etwas voellig anderes.
+          if bash scripts/check_apple_secrets.sh --soft; then
             echo "available=true" >> "$GITHUB_OUTPUT"
           else
             echo "available=false" >> "$GITHUB_OUTPUT"
-            echo "::warning::Kein Apple-Developer-Zugang hinterlegt – iOS wird nur unsigniert gebaut."
+            echo "::warning::Apple-Zugang unvollstaendig – iOS wird nur unsigniert gebaut."
           fi
 
       - name: Unsigniert bauen
@@ -185,9 +196,23 @@ jobs:
         if: steps.signing.outputs.available == 'true'
         env:
           MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         run: |
-          if [ -n "$MATCH_GIT_TOKEN" ]; then
-            git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+
+          # Ohne das wartet git bei fehlendem Zugriff auf eine Eingabe und
+          # meldet dann "could not read Password" - eine Meldung, die auf die
+          # falsche Spur fuehrt. Mit GIT_TERMINAL_PROMPT=0 bricht es sofort
+          # mit "Authentication failed" ab.
+          echo "GIT_TERMINAL_PROMPT=0" >> "$GITHUB_ENV"
+
+          # Gleich hier pruefen, ob wir ueberhaupt hineinkommen, statt es
+          # fastlane 20 Minuten spaeter herausfinden zu lassen.
+          if git ls-remote "$MATCH_GIT_URL" >/dev/null 2>&1; then
+            echo "Zugriff auf das Zertifikats-Repository steht."
+          else
+            echo "::error::Kein Zugriff auf MATCH_GIT_URL. Entweder ist der Token abgelaufen, er hat kein Contents-Schreibrecht, oder die URL ist falsch."
+            exit 1
           fi
 
       - name: Signiertes IPA bauen

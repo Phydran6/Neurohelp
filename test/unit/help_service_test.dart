@@ -82,13 +82,13 @@ void main() {
     });
 
     test('ohne Treffer fragt die KI – aber nur wenn sie an ist', () async {
-      final ai = _FakeAi();
+      final ai = _FakeAi(answer: 'Das kommt von der KI.');
       final help = HelpService(ai);
 
       final answer = await help.ask('Kann ich Neurohelp auf Suaheli nutzen?');
 
       expect(answer.source, HelpSource.ai);
-      expect(answer.text, 'Antwort der KI.');
+      expect(answer.text, 'Das kommt von der KI.');
       expect(ai.lastTask, AiTask.answerHelp);
     });
 

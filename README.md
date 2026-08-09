@@ -10,8 +10,20 @@ die für andere selbstverständlich sind.
 
 <br>
 
+<!-- STORE-KNOEPFE
+     Solange die App in keinem Store liegt, steht hier der APK-Knopf. Sobald
+     Play Store und App Store live sind, die beiden Zeilen darunter
+     einkommentieren, den APK-Knopf entfernen und die zwei URLs setzen.
+     Checkliste dazu: docs/STORE.md -->
+
 [![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.4/Neurohelp-0.1.0-alpha.4-android.apk)
 [![Version](https://img.shields.io/badge/Alpha-0.1.0-FF9800?style=for-the-badge)](https://github.com/Phydran6/Neurohelp/releases)
+
+<!--
+[![Play Store](https://img.shields.io/badge/Google_Play-Neurohelp_laden-3DDC84?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=will.neurohelp.help)
+[![App Store](https://img.shields.io/badge/App_Store-Neurohelp_laden-0D96F6?style=for-the-badge&logo=appstore&logoColor=white)](https://apps.apple.com/de/app/neurohelp/idAPP_ID_EINSETZEN)
+-->
+
 
 [![CI](https://github.com/Phydran6/Neurohelp/actions/workflows/ci.yml/badge.svg)](https://github.com/Phydran6/Neurohelp/actions/workflows/ci.yml)
 [![Lizenz](https://img.shields.io/badge/Lizenz-MIT-blue)](LICENSE)
@@ -155,6 +167,15 @@ formuliert dann nur nicht selbst.
 | **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.4/Neurohelp-0.1.0-alpha.4-android-playstore.aab) | Nur zum Hochladen in die Play Console |
 | **Alle Versionen** | [Release-Übersicht](https://github.com/Phydran6/Neurohelp/releases) | Ältere Stände |
 | **Was ist neu** | [CHANGELOG.md](CHANGELOG.md) | Jede Änderung, nachvollziehbar |
+
+<!-- Sobald die Stores live sind, ersetzt diese Tabelle die obige:
+| | Wo | Hinweis |
+|:--|:--|:--|
+| **Android** | [Google Play](https://play.google.com/store/apps/details?id=will.neurohelp.help) | |
+| **iOS** | [App Store](https://apps.apple.com/de/app/neurohelp/idAPP_ID_EINSETZEN) | ab iOS 13 |
+-->
+
+**Deine Daten:** [Datenschutzerklärung](docs/DATENSCHUTZ.md)
 
 **Android:** Beim ersten Mal fragt das Handy, ob Installationen aus dieser
 Quelle erlaubt sind. Das ist normal bei Apps außerhalb des Play Stores.

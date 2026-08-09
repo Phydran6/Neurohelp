@@ -1,0 +1,116 @@
+name: Store-Bildschirmfotos
+
+# Erzeugt die Bildschirmfotos für App Store und Play Store auf einem
+# iOS-Simulator. Von Hand starten: Actions -> "Store-Bildschirmfotos".
+#
+# Ein eigener Mac ist nicht noetig – der GitHub-Runner ist einer.
+#
+# Ergebnis: ein Artefakt "store-screenshots" mit sechs PNG. Die lädt man
+# herunter und zieht sie in App Store Connect. Automatisch hochladen kann
+# `fastlane deliver` spaeter, sobald die App dort angelegt ist.
+
+on:
+  workflow_dispatch:
+    inputs:
+      device:
+        description: "Simulator. Muss 1320x2868 liefern (App-Store-Groesse 6,9 Zoll)."
+        required: true
+        default: "iPhone 16 Pro Max"
+
+jobs:
+  screenshots:
+    name: Auf dem Simulator aufnehmen
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Simulator starten
+        id: sim
+        env:
+          DEVICE: ${{ inputs.device }}
+        run: |
+          # Über die UDID statt über den Namen: Auf den Runnern liegen mehrere
+          # Simulatoren mit gleichem Namen für verschiedene iOS-Versionen, und
+          # `flutter drive` erwischt dann den falschen.
+          udid=$(xcrun simctl list devices available --json \
+            | python3 -c "
+import json, sys
+name = sys.argv[1]
+data = json.load(sys.stdin)['devices']
+for runtime in sorted(data, reverse=True):
+    for device in data[runtime]:
+        if device['name'] == name:
+            print(device['udid'])
+            sys.exit(0)
+" "$DEVICE")
+
+          if [ -z "$udid" ]; then
+            echo "::error::Simulator \"$DEVICE\" gibt es auf diesem Runner nicht. Verfuegbar:"
+            xcrun simctl list devices available | grep -E "iPhone" || true
+            exit 1
+          fi
+
+          echo "$DEVICE -> $udid"
+          echo "udid=$udid" >> "$GITHUB_OUTPUT"
+
+          xcrun simctl boot "$udid" || true
+          xcrun simctl bootstatus "$udid"
+
+          # Deutsche Oberfläche: Die Bilder sollen zur deutschen
+          # Store-Beschreibung passen.
+          xcrun simctl spawn "$udid" defaults write -g AppleLanguages -array de-DE
+          xcrun simctl spawn "$udid" defaults write -g AppleLocale -string de_DE
+
+          # Statusleiste festnageln: volle Batterie, voller Empfang, 9:41 Uhr.
+          # Sonst zeigt jedes Bild eine andere Uhrzeit und einen Ladebalken.
+          xcrun simctl status_bar "$udid" override \
+            --time "09:41" \
+            --batteryState charged \
+            --batteryLevel 100 \
+            --cellularBars 4 \
+            --wifiBars 3
+
+      - name: Bilder aufnehmen
+        run: |
+          flutter drive \
+            --driver=test_driver/screenshot_driver.dart \
+            --target=integration_test/screenshots_test.dart \
+            --dart-define=FLAVOR=dev \
+            -d "${{ steps.sim.outputs.udid }}"
+
+      - name: Groesse pruefen
+        run: |
+          shopt -s nullglob
+          files=(build/screenshots/*.png)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "::error::Keine Bilder entstanden."
+            exit 1
+          fi
+
+          fail=0
+          for f in "${files[@]}"; do
+            size=$(sips -g pixelWidth -g pixelHeight "$f" \
+              | awk '/pixelWidth/ {w=$2} /pixelHeight/ {h=$2} END {print w"x"h}')
+            echo "$(basename "$f"): $size"
+            if [ "$size" != "1320x2868" ]; then
+              echo "::warning::$(basename "$f") ist $size, App Store erwartet 1320x2868."
+              fail=1
+            fi
+          done
+
+          if [ $fail -eq 1 ]; then
+            echo "::warning::Mindestens ein Bild hat die falsche Groesse. Anderes Gerät waehlen – 6,9-Zoll-iPhone."
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: store-screenshots
+          path: build/screenshots/*.png
+          if-no-files-found: error

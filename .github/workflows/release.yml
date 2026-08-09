@@ -167,6 +167,15 @@ jobs:
           zip -qry "Neurohelp-${{ needs.prepare.outputs.version }}-ios-unsigniert.ipa" Payload
           rm -rf Payload
 
+      - name: Zugriff auf das match-Repository
+        if: steps.signing.outputs.available == 'true'
+        env:
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: |
+          if [ -n "$MATCH_GIT_TOKEN" ]; then
+            git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          fi
+
       - name: Signiertes IPA bauen
         if: steps.signing.outputs.available == 'true'
         env:

@@ -11,6 +11,8 @@
 | [ARCHITEKTUR.md](ARCHITEKTUR.md) | Schichten, Datenfluss, Entscheidungen |
 | [BACKEND.md](BACKEND.md) | Supabase: Schema, Migrationen, KI-Proxy |
 | [RELEASE.md](RELEASE.md) | Branches, Versionen, Veröffentlichen |
+| [STORE.md](STORE.md) | App Store und Play Store: was ein Mensch klicken muss |
+| [DATENSCHUTZ.md](DATENSCHUTZ.md) | Die Erklärung, auf die die Stores verlinken |
 
 ---
 

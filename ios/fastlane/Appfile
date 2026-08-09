@@ -1,4 +1,8 @@
-app_identifier("de.phytech.neurohelp")
-apple_id(ENV["APPLE_ID"])
-itc_team_id(ENV["APPSTORE_TEAM_ID"])
-team_id(ENV["DEVELOPER_TEAM_ID"])
+app_identifier("will.neurohelp.help")
+
+# Team ID (bei Apple "App ID Prefix"). Kein Geheimnis – sie steht in jedem
+# Provisioning-Profil und in der ExportOptions.plist.
+team_id("352N56D836")
+
+# Kein apple_id und kein itc_team_id: Die Anmeldung laeuft ueber den
+# App-Store-Connect-API-Key, der beides ersetzt.

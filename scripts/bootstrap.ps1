@@ -29,9 +29,12 @@ Alternativ manuell: https://docs.flutter.dev/get-started/install/windows
 flutter --version
 
 Write-Host "==> Plattform-Ordner erzeugen (android, ios)" -ForegroundColor Cyan
+# Achtung: Das ergibt die ID `will.neurohelp.neurohelp`. Die echte ID lautet
+# `will.neurohelp.help` und muss danach in android/app/build.gradle.kts,
+# MainActivity.kt und ios/Runner.xcodeproj/project.pbxproj nachgezogen werden.
 flutter create `
     --project-name neurohelp `
-    --org de.phytech `
+    --org will.neurohelp `
     --platforms android,ios `
     --overwrite `
     .

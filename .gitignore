@@ -48,7 +48,8 @@ ios/Flutter/App.framework
 ios/Flutter/flutter_export_environment.sh
 ios/Flutter/ephemeral/
 ios/Runner/GoogleService-Info.plist
-ios/ExportOptions.plist
+# ios/ExportOptions.plist ist bewusst eingecheckt: Sie enthaelt kein Geheimnis,
+# nur Team-ID und Export-Methode – und der Release-Build braucht sie.
 **/DerivedData/
 *.mobileprovision
 *.p8
@@ -84,6 +85,9 @@ supabase/.env.*
 *supabse-data.txt
 *supbase-data.txt
 secrets.txt
+*App Store Data*.txt
+*app-store-data*.txt
+AuthKey_*.p8
 
 # Build-Artefakte
 *.apk

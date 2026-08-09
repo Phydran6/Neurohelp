@@ -12,9 +12,14 @@ fi
 flutter --version
 
 echo "==> Plattform-Ordner erzeugen (android, ios)"
+# Achtung: Das ergibt die ID `will.neurohelp.neurohelp`. Die echte ID lautet
+# `will.neurohelp.help` und ist bei Apple und Google so registriert – sie muss
+# danach in android/app/build.gradle.kts, MainActivity.kt und
+# ios/Runner.xcodeproj/project.pbxproj nachgezogen werden. `flutter create`
+# kann sie nicht direkt erzeugen, weil das Dart-Paket `neurohelp` heisst.
 flutter create \
   --project-name neurohelp \
-  --org de.phytech \
+  --org will.neurohelp \
   --platforms android,ios \
   --overwrite \
   .

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Export-Einstellungen fuer `flutter build ipa`.
+
+  Enthaelt kein Geheimnis: Die Team-ID steht in jedem Provisioning-Profil.
+  Das Profil selbst legt `fastlane match` vor dem Build in den Keychain.
+-->
+<plist version="1.0">
+<dict>
+	<key>method</key>
+	<string>app-store-connect</string>
+
+	<key>teamID</key>
+	<string>352N56D836</string>
+
+	<!-- Signatur kommt aus dem match-Profil, nicht aus Xcodes Automatik. -->
+	<key>signingStyle</key>
+	<string>manual</string>
+
+	<key>provisioningProfiles</key>
+	<dict>
+		<key>will.neurohelp.help</key>
+		<string>match AppStore will.neurohelp.help</string>
+	</dict>
+
+	<!-- Crash-Berichte lesbar machen. -->
+	<key>uploadSymbols</key>
+	<true/>
+
+	<!-- Kein Bitcode mehr: Apple nimmt es seit Xcode 14 nicht mehr an. -->
+	<key>uploadBitcode</key>
+	<false/>
+
+	<key>destination</key>
+	<string>export</string>
+</dict>
+</plist>

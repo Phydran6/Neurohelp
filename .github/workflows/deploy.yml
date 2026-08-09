@@ -121,6 +121,15 @@ jobs:
           channel: ${{ env.FLUTTER_CHANNEL }}
           cache: true
 
+      - name: Zugriff auf das match-Repository
+        if: steps.gate.outputs.ok == 'true'
+        env:
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: |
+          if [ -n "$MATCH_GIT_TOKEN" ]; then
+            git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          fi
+
       - name: Bauen & an TestFlight schicken
         if: steps.gate.outputs.ok == 'true'
         env:

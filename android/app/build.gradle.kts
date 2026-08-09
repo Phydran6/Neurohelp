@@ -19,7 +19,7 @@ val keystoreProperties = Properties().apply {
 val hasReleaseSigning = keystorePropertiesFile.exists()
 
 android {
-    namespace = "de.phytech.neurohelp"
+    namespace = "will.neurohelp.help"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "de.phytech.neurohelp"
+        applicationId = "will.neurohelp.help"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode

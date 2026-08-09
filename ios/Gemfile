@@ -1,0 +1,6 @@
+# fastlane-Version festnageln, damit ein Update nicht unbemerkt den
+# Release-Ablauf aendert. Die Gemfile.lock entsteht beim ersten
+# `bundle install` und wird mit eingecheckt.
+source "https://rubygems.org"
+
+gem "fastlane", "~> 2.228"

@@ -7,6 +7,25 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Die App heißt technisch jetzt `will.neurohelp.help`** statt
+  `de.phytech.neurohelp`. Damit trägt sie keinen Firmennamen mehr im
+  Inneren – die App steht für sich
+- **Achtung beim nächsten Update:** Android sieht die neue Kennung als
+  eigenständige App. Die alte Version lässt sich nicht überinstallieren,
+  sie muss vorher deinstalliert werden. **Lokale Daten der Alpha gehen
+  dabei verloren** – Aufgaben, Verläufe und Einstellungen. Einmalig, und
+  nur weil noch niemand außer dir die App hat
+
+### Added
+
+- iOS-Signatur ist einsatzbereit: Export-Einstellungen liegen im
+  Repository, ein eigener Arbeitsablauf richtet Zertifikat und Profil
+  einmalig ein. Ein eigener Mac ist dafür nicht nötig
+- Die App erklärt Apple beim Hochladen von selbst, dass sie nur
+  Standardverschlüsselung nutzt – das ersparte Nachfragen bei jedem Upload
+
 ## [0.1.0-alpha.4] - 2026-08-09
 
 ### Fixed

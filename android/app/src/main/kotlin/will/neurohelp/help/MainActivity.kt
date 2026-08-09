@@ -1,4 +1,4 @@
-package de.phytech.neurohelp
+package will.neurohelp.help
 
 import io.flutter.embedding.android.FlutterFragmentActivity
 

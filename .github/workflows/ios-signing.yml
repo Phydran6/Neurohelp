@@ -1,0 +1,64 @@
+name: iOS Signatur einrichten
+
+# Einmalig von Hand starten: Actions -> "iOS Signatur einrichten" -> Run workflow.
+#
+# Erzeugt bei Apple ein Distributions-Zertifikat und ein App-Store-Profil fuer
+# will.neurohelp.help und legt beides verschluesselt ins match-Repository.
+# Danach braucht es diesen Lauf nie wieder – Release und Deploy holen die
+# Signatur dort nur noch ab.
+#
+# Ein eigener Mac ist nicht noetig: Der GitHub-Runner ist einer.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  signing:
+    name: Zertifikat und Profil erzeugen
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Secrets vollstaendig?
+        env:
+          KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          missing=""
+          for name in KEY_ID ISSUER_ID PRIVATE_KEY MATCH_PASSWORD MATCH_GIT_URL; do
+            if [ -z "${!name}" ]; then
+              missing="$missing $name"
+            fi
+          done
+          if [ -n "$missing" ]; then
+            echo "::error::Diese Secrets fehlen noch:$missing"
+            exit 1
+          fi
+          echo "Alle fuenf Secrets sind gesetzt."
+
+      - name: Zugriff auf das match-Repository
+        env:
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+        run: |
+          # match klont das Zertifikats-Repository per HTTPS. Ohne Token
+          # scheitert das bei einem privaten Repository still.
+          if [ -n "$MATCH_GIT_TOKEN" ]; then
+            git config --global url."https://x-access-token:$MATCH_GIT_TOKEN@github.com/".insteadOf "https://github.com/"
+          else
+            echo "::warning::MATCH_GIT_TOKEN fehlt – klappt nur, wenn das match-Repository oeffentlich ist."
+          fi
+
+      - name: Signatur erzeugen
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          cd ios
+          gem install fastlane --no-document
+          fastlane setup_signing

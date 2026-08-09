@@ -1,0 +1,71 @@
+# Einstellungen für `fastlane deliver` – das Hochladen von Texten,
+# Bildschirmfotos und Build in App Store Connect.
+#
+# Die Texte liegen unter fastlane/metadata/ und sind eingecheckt: So ist
+# nachvollziehbar, was im Store steht, und eine Änderung geht durch Review
+# wie Code.
+#
+# Die Angaben für den Apple-Prüfer stehen absichtlich NICHT im Repository.
+# Name, Telefonnummer und das Testkonto sind personenbezogen bzw. Zugangsdaten
+# und kommen aus Umgebungsvariablen (GitHub-Secrets).
+
+app_identifier "will.neurohelp.help"
+
+# Bildschirmfotos aus dem Arbeitsablauf "Store-Bildschirmfotos".
+screenshots_path "./fastlane/screenshots"
+
+# Keine HTML-Vorschau im Browser – in der CI kann sie niemand bestätigen.
+force true
+
+# In-App-Käufe gibt es nicht, die Vorprüfung darauf kann entfallen.
+precheck_include_in_app_purchases false
+
+# Nach der Freigabe nicht automatisch veröffentlichen. Der Knopf bleibt bei
+# einem Menschen.
+automatic_release false
+
+app_review_information(
+  first_name: ENV["REVIEW_FIRST_NAME"],
+  last_name: ENV["REVIEW_LAST_NAME"],
+  phone_number: ENV["REVIEW_PHONE"],
+  email_address: ENV["REVIEW_EMAIL"],
+  # Die App verlangt beim ersten Start ein Konto. Ohne Testzugang kommt der
+  # Prüfer nicht hinein – das ist der häufigste Ablehnungsgrund überhaupt.
+  demo_user: ENV["REVIEW_DEMO_USER"],
+  demo_password: ENV["REVIEW_DEMO_PASSWORD"],
+  notes: <<~NOTES,
+    Die App ist auf Deutsch. Bitte den Simulator oder das Gerät auf Deutsch
+    stellen, sonst bleibt die Oberfläche deutsch, aber der Kontext fehlt.
+
+    ANMELDUNG
+    Beim ersten Start führt die App durch ein kurzes Onboarding und legt ein
+    Konto an. Mit dem oben angegebenen Testkonto bitte den Weg
+    "Ich habe schon ein Konto" wählen.
+
+    Im Onboarding kommt eine Frage, ob KI genutzt werden soll. Beide
+    Antworten sind gleichwertig. Ohne KI funktioniert die App vollständig,
+    sie formuliert dann nur keine Texte selbst.
+
+    Danach ist eine App-Sperre einrichtbar (PIN oder Face ID). Dieser Schritt
+    lässt sich überspringen.
+
+    WAS ZU SEHEN IST
+    Startseite -> grosser Knopf -> Hauptmenü mit vier Wegen:
+    Anruf erledigen, Termin klären, Nachricht schreiben, Aufgabe sortieren.
+
+    Am schnellsten nachvollziehbar ist "Aufgabe sortieren": Titel eingeben,
+    zwei oder drei Schritte hinzufügen, starten. Danach zeigt die App immer
+    nur den nächsten Schritt.
+
+    DATEN
+    Alle Inhalte (Aufgaben, Nachrichten, Anrufe, Termine, Verlauf) liegen
+    ausschliesslich lokal in einer SQLite-Datenbank auf dem Gerät. Zum Server
+    gehen nur die Kontoanmeldung, die Passwort-Reset-Mail und – falls KI
+    eingeschaltet ist – der zu formulierende Text.
+
+    KEIN MEDIZINPRODUKT
+    Die App organisiert Alltagsaufgaben. Sie stellt keine Diagnose, gibt keine
+    medizinischen Ratschläge und ersetzt keine Therapie. Die Zielgruppe wird
+    beschrieben, aber es wird keine Wirkung auf ein Krankheitsbild behauptet.
+  NOTES
+)

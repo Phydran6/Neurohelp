@@ -116,14 +116,14 @@ Secrets erzeugt.
 ### 2. Google Play
 
 1. Play Developer Account anlegen (25 $ einmalig)
-2. App mit Package `de.phytech.neurohelp` anlegen, eine Version manuell hochladen (Play verlangt
+2. App mit Package `will.neurohelp.help` anlegen, eine Version manuell hochladen (Play verlangt
    das für den ersten Upload)
 3. Google-Cloud-Service-Account mit Play-Console-Zugriff anlegen, JSON-Schlüssel herunterladen
 
 ### 3. Apple
 
 1. Apple Developer Program (99 $/Jahr)
-2. App-ID `de.phytech.neurohelp` in App Store Connect anlegen
+2. App-ID `will.neurohelp.help` in App Store Connect anlegen
 3. App-Store-Connect-API-Key (`.p8`) erzeugen
 4. `fastlane match` einrichten – privates Repo für die Zertifikate:
    ```bash

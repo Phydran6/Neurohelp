@@ -4,6 +4,11 @@
 <dict>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
+	<!-- Die App nutzt nur HTTPS und die Systemverschluesselung. Damit ist sie
+	     von der US-Exportregelung ausgenommen. Ohne diesen Eintrag fragt
+	     App Store Connect bei jedem Upload nach. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>NSFaceIDUsageDescription</key>

@@ -22,8 +22,8 @@ port = 54324
 
 [auth]
 enabled = true
-site_url = "de.phytech.neurohelp://login-callback"
-additional_redirect_urls = ["de.phytech.neurohelp://login-callback"]
+site_url = "will.neurohelp.help://login-callback"
+additional_redirect_urls = ["will.neurohelp.help://login-callback"]
 jwt_expiry = 3600
 enable_refresh_token_rotation = true
 enable_signup = true

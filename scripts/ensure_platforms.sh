@@ -15,9 +15,12 @@ if [ -d android/app ] && [ -d ios/Runner ]; then
 fi
 
 echo "==> Plattform-Ordner werden erzeugt"
+# Siehe scripts/bootstrap.sh: Die erzeugte ID stimmt nicht mit der
+# registrierten `will.neurohelp.help` ueberein und muss nachgezogen werden.
+# In der Praxis ist dieser Zweig toter Code – die Ordner sind eingecheckt.
 flutter create \
   --project-name neurohelp \
-  --org de.phytech \
+  --org will.neurohelp \
   --platforms android,ios \
   .
 

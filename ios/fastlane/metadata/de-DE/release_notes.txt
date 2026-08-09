@@ -1,0 +1,3 @@
+Erste Version.
+
+Vier Wege durch den Alltag: Aufgabe sortieren, Nachricht schreiben, Anruf erledigen, Termin klären. Alles bleibt lokal auf dem Gerät. KI ist freiwillig und lässt sich jederzeit abschalten.

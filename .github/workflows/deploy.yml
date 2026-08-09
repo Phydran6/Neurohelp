@@ -156,8 +156,11 @@ jobs:
           ios_version="${version%%-*}"
           echo "pubspec: $version -> iOS: $ios_version"
 
-          cd ios
           gem install fastlane --no-document
-          fastlane beta \
+
+          # Ueber das Skript, nicht direkt: Es fasst einen Fehler als
+          # Annotation zusammen. Die Protokolle eines Laufs sind nur nach
+          # Anmeldung lesbar, Annotationen stehen auf der Zusammenfassung.
+          bash scripts/run_fastlane.sh beta \
             version:"$ios_version" \
             build_number:"${{ github.run_number }}"

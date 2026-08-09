@@ -217,9 +217,8 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         run: |
-          cd ios
-          bundle install --quiet || gem install fastlane --no-document
-          fastlane build_release \
+          gem install fastlane --no-document
+          bash scripts/run_fastlane.sh build_release \
             version:"${{ needs.prepare.outputs.ios_version }}" \
             build_number:"${{ needs.prepare.outputs.build_number }}"
 

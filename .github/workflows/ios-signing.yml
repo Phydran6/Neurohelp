@@ -47,6 +47,5 @@ jobs:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         run: |
-          cd ios
           gem install fastlane --no-document
-          fastlane setup_signing
+          bash scripts/run_fastlane.sh setup_signing

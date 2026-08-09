@@ -35,6 +35,33 @@ def checked_build_number(options)
   number
 end
 
+APP_IDENTIFIER = "will.neurohelp.help".freeze
+TEAM_ID = "352N56D836".freeze
+PROFILE_NAME = "match AppStore #{APP_IDENTIFIER}".freeze
+
+# Xcode auf manuelle Signatur umstellen, mit dem Profil von match.
+#
+# `flutter create` legt das Projekt mit automatischer Signatur an. Die sucht
+# ein ENTWICKLER-Zertifikat - wir haben aber ein Verteilungs-Zertifikat fuer
+# den App Store. Xcode ignoriert deshalb das match-Profil und bricht ab mit
+# "No development certificates available to code sign app for device
+# deployment". Das klingt nach einem fehlenden Zertifikat, ist aber die
+# falsche Signatur-Art.
+#
+# Bewusst zur Laufzeit statt eingecheckt: `scripts/ensure_platforms.sh` kann
+# das Projekt neu erzeugen, und dann waere die Einstellung wieder weg.
+def use_manual_signing
+  update_code_signing_settings(
+    path: File.expand_path("../Runner.xcodeproj", __dir__),
+    use_automatic_signing: false,
+    team_id: TEAM_ID,
+    bundle_identifier: APP_IDENTIFIER,
+    code_sign_identity: "Apple Distribution",
+    profile_name: PROFILE_NAME,
+    targets: ["Runner"],
+  )
+end
+
 platform :ios do
   before_all do
     # Pflicht auf einem CI-Rechner. `match` legt das Zertifikat in einen
@@ -77,6 +104,8 @@ platform :ios do
       git_url: ENV["MATCH_GIT_URL"],
     )
 
+    use_manual_signing
+
     sh(
       "cd .. && cd .. && flutter build ipa --release " \
       "--build-name=#{version} " \
@@ -98,6 +127,8 @@ platform :ios do
       api_key: api_key,
       git_url: ENV["MATCH_GIT_URL"],
     )
+
+    use_manual_signing
 
     # Die Version muss hier stehen. Ohne sie nimmt der Build den Wert aus der
     # pubspec.yaml, und `0.1.0-alpha.4` ist fuer Apple ungueltig (ITMS-90060).
@@ -139,6 +170,8 @@ platform :ios do
       api_key: api_key,
       git_url: ENV["MATCH_GIT_URL"],
     )
+
+    use_manual_signing
 
     sh(
       "cd .. && cd .. && flutter build ipa --release " \

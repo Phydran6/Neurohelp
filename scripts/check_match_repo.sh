@@ -115,7 +115,26 @@ if git clone --depth 1 --quiet "$url" klon 2>/dev/null; then
     echo "  Repository ist leer - match legt Zertifikat und Profil neu an."
   else
     echo "  Es liegen schon Dateien darin:"
-    find klon -type f -not -path '*/.git/*' | sed 's|^klon/|    |'
+    liste=$(find klon -type f -not -path '*/.git/*' | sed 's|^klon/||' | sort)
+    echo "$liste" | sed 's/^/    /'
+
+    # Als Annotation, damit die Liste ohne Anmeldung lesbar ist: Protokolle
+    # eines Actions-Laufs sind es nicht, Annotationen schon.
+    echo "::warning::Zertifikats-Repository:%0A$(echo "$liste" | sed -z 's/\n/%0A/g')"
+
+    # Ein Zertifikat allein genuegt nicht. Zum Signieren braucht es das Paar
+    # aus Zertifikat (.cer) und privatem Schluessel (.p12). Fehlt der
+    # Schluessel, meldet match "There are no local code signing identities
+    # found" - und das liest sich wie ein Schluesselbund-Problem.
+    if ! echo "$liste" | grep -q '\.p12$'; then
+      echo "::error::Im Zertifikats-Repository liegt kein .p12 - der private Schluessel fehlt. Ohne ihn kann nichts signiert werden. Repository leeren und 'iOS Signatur einrichten' erneut starten."
+      exit 1
+    fi
+    if ! echo "$liste" | grep -qE '\.mobileprovision$'; then
+      echo "::error::Im Zertifikats-Repository liegt kein Provisioning-Profil (.mobileprovision). Repository leeren und 'iOS Signatur einrichten' erneut starten."
+      exit 1
+    fi
+    echo "  Zertifikat, privater Schluessel und Profil sind vorhanden."
     echo "::warning::MATCH_PASSWORD muss dasselbe sein wie beim Anlegen dieser Dateien."
   fi
 else

@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:neurohelp/core/companion/companion_style.dart';
 import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/history/data/sqlite_history_repository.dart';
 import 'package:neurohelp/core/history/domain/history_entry.dart';

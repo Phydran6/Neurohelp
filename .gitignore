@@ -77,6 +77,14 @@ supabase/.temp/
 supabase/.env
 supabase/.env.*
 
+# Schlüssel und Zugangsdaten – gehören nie ins Repository
+*api-key*.txt
+*api_key*.txt
+*supabase-data.txt
+*supabse-data.txt
+*supbase-data.txt
+secrets.txt
+
 # Build-Artefakte
 *.apk
 *.aab

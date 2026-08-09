@@ -7,6 +7,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.1] - 2026-08-09
+
+Erste Alpha für Android und iOS. Alle fünf Pfade laufen durch, das Backend
+steht. **Nicht für den täglichen Gebrauch gedacht** – Daten liegen lokal und
+sind bei einer Neuinstallation weg.
+
 ### Added
 
 - **Historie-Rückgrat** (Konzept, Abschnitt 12): lokale SQLite-Datenbank mit
@@ -117,6 +123,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   richtige PIN." – kein Vorwurf, keine Zählung
 - PIN liegt im sicheren Speicher des Geräts (Keystore / Keychain), nie in der
   Datenbank
+- **Backend angebunden**: Registrierung, Anmeldung und Reset-Mail laufen über
+  Supabase Auth; das Konto entsteht wirklich, statt nur so zu tun
+- KI-Zugang über die Backend-Funktion `ai-proxy`. Die App kennt weiterhin
+  weder Anbieter noch Modell – nur den Aufgabentyp
+- Ist kein Backend erreichbar, läuft die App vollständig lokal weiter und
+  sagt das ruhig, statt einen Fehler anzuzeigen
 - `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
   `pubspec.lock` eingecheckt; App-Name auf „Neurohelp" korrigiert
 
@@ -126,7 +138,7 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Stil von `dart format`. Sie liegt jetzt bei 3.8, damit lokal und CI
   denselben Stil verwenden
 
-## [0.1.0] - 2026-08-08
+## 0.1.0 - 2026-08-08 (nie veröffentlicht)
 
 Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 (siehe [docs/KONZEPT.md](docs/KONZEPT.md), Abschnitt 19, Punkt 1).
@@ -148,5 +160,5 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.1...HEAD
+[0.1.0-alpha.1]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.1

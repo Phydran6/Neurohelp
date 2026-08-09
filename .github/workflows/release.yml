@@ -148,6 +148,15 @@ jobs:
             --build-number="${{ needs.prepare.outputs.build_number }}" \
             --dart-define=FLAVOR=prod
 
+          # Ohne Apple-Zugang gibt es kein installierbares IPA. Damit trotzdem
+          # etwas Greifbares im Release liegt, wird die gebaute App als
+          # unsigniertes IPA verpackt - zum Signieren oder Sideloaden.
+          mkdir -p build/ios/ipa/Payload
+          cp -R build/ios/iphoneos/Runner.app build/ios/ipa/Payload/
+          cd build/ios/ipa
+          zip -qry "Neurohelp-${{ needs.prepare.outputs.version }}-unsigniert.ipa" Payload
+          rm -rf Payload
+
       - name: Signiertes IPA bauen
         if: steps.signing.outputs.available == 'true'
         env:
@@ -173,6 +182,8 @@ jobs:
     name: GitHub Release veröffentlichen
     runs-on: ubuntu-latest
     needs: [prepare, android, ios]
+    # Android muss stehen. iOS darf fehlen - ohne Apple-Zugang wird dort nur
+    # unsigniert gebaut, das soll das Release nicht blockieren.
     if: always() && needs.android.result == 'success'
     steps:
       - uses: actions/download-artifact@v4

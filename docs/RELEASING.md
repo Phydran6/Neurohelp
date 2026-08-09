@@ -3,8 +3,32 @@
 Ziel: ein Tag pushen, alles andere läuft automatisch.
 
 ```bash
-git tag v0.1.0 && git push origin v0.1.0
+git tag v0.1.0-alpha.2 && git push origin v0.1.0-alpha.2
 ```
+
+---
+
+## Branches
+
+Es gibt genau zwei, mehr braucht ein Projekt dieser Größe nicht:
+
+| Branch | Zweck |
+|---|---|
+| `main` | Produktiv. Nur von hier wird getaggt und veröffentlicht |
+| `develop` | Entwicklung und Tests. Alles landet zuerst hier |
+
+Der Weg ist immer derselbe: auf `develop` arbeiten, per Pull Request nach
+`main`, dann taggen. Beide Branches durchlaufen dieselbe CI.
+
+---
+
+## Versionsnummern
+
+Format `<major>.<minor>.<patch>[-alpha.N]`, die Build-Nummer hängt die CI an.
+
+Der Zusatz `-alpha.N` steht in `pubspec.yaml` und ist auf dem Gerät sichtbar.
+Er bleibt, solange die App nicht wirklich für fremde Geräte taugt. GitHub
+markiert solche Releases automatisch als Vorabversion.
 
 ---
 

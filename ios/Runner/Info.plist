@@ -10,6 +10,7 @@
 	<array>
 		<string>mailto</string>
 		<string>https</string>
+		<string>tel</string>
 	</array>
 	<key>CFBundleDisplayName</key>
 	<string>Neurohelp</string>

@@ -91,6 +91,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Datenhinweis sichtbar auf der Seite
 - Beide über ruhige Symbole auf der Startseite erreichbar, ohne sie zu
   überladen
+- **Anruf erledigen als Oberfläche** (Konzept, Abschnitt 8): Kategorie
+  zuerst, dann der Historie-Check auf frühere Vorgänge derselben Kategorie,
+  dann Ziel, Ansprechpartner und Stichpunkte
+- Während des Anrufs stehen die Stichpunkte groß da; das Notizfeld erscheint
+  erst nach dem Wählen – auf iOS wäre es vorher ohnehin nicht beschreibbar
+- Anruf starten über `tel:`, hinter einer Schnittstelle; Android und iOS
+  sind dafür freigeschaltet
 - `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
   `pubspec.lock` eingecheckt; App-Name auf „Neurohelp" korrigiert
 

@@ -4,6 +4,7 @@ import 'app/app.dart';
 import 'core/config/app_config.dart';
 import 'core/db/app_database.dart';
 import 'core/di/app_services.dart';
+import 'features/calls/data/url_launcher_call_launcher.dart';
 import 'features/messages/data/url_launcher_message_sender.dart';
 
 Future<void> main() async {
@@ -16,6 +17,7 @@ Future<void> main() async {
   final services = AppServices.from(
     database,
     sender: const UrlLauncherMessageSender(),
+    dialer: const UrlLauncherCallLauncher(),
   );
 
   runApp(AppScope(services: services, child: const NeurohelpApp()));

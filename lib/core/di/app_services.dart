@@ -1,5 +1,7 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/calls/data/sqlite_call_repository.dart';
+import '../../features/calls/domain/call_launcher.dart';
 import '../../features/help/domain/help_service.dart';
 import '../../features/messages/data/sqlite_message_repository.dart';
 import '../../features/messages/domain/message_sender.dart';
@@ -24,6 +26,8 @@ class AppServices {
     required this.tasks,
     required this.messages,
     required this.sender,
+    required this.calls,
+    required this.dialer,
     required this.ai,
     required this.help,
   });
@@ -33,6 +37,7 @@ class AppServices {
     AppDatabase database, {
     AiClient? ai,
     MessageSender sender = const NoMessageSender(),
+    CallLauncher dialer = const NoCallLauncher(),
   }) {
     final history = SqliteHistoryRepository(database.raw);
     final aiClient = ai ?? const DisabledAiClient();
@@ -45,6 +50,8 @@ class AppServices {
       tasks: SqliteTaskRepository(database.raw, history),
       messages: SqliteMessageRepository(database.raw, history),
       sender: sender,
+      calls: SqliteCallRepository(database.raw, history),
+      dialer: dialer,
       // Ohne KI-Anbindung läuft die App vollständig lokal. Der echte
       // Client kommt, sobald das Onboarding den Toggle setzt.
       ai: aiClient,
@@ -59,6 +66,11 @@ class AppServices {
 
   /// Übergabe an die System-App. In Tests bewusst wirkungslos.
   final MessageSender sender;
+
+  final SqliteCallRepository calls;
+
+  /// Startet das Telefonat. In Tests bewusst wirkungslos.
+  final CallLauncher dialer;
 
   final AiClient ai;
 

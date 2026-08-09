@@ -36,6 +36,18 @@ def checked_build_number(options)
 end
 
 platform :ios do
+  before_all do
+    # Pflicht auf einem CI-Rechner. `match` legt das Zertifikat in einen
+    # Schluesselbund, und der Anmelde-Schluesselbund eines Runners ist gesperrt
+    # bzw. gehoert keiner angemeldeten Sitzung. `setup_ci` erzeugt stattdessen
+    # einen temporaeren, entsperrten Schluesselbund.
+    #
+    # Ohne das scheitert der Build an der Schluesselbund-Sperre, und die
+    # Meldung spricht von einem Passwort - das liest sich wie ein falsches
+    # MATCH_PASSWORD und ist etwas anderes.
+    setup_ci if ENV["CI"]
+  end
+
   # Einmalig, bevor der erste Build laufen kann: Zertifikat und Profil bei
   # Apple erzeugen und verschluesselt ins match-Repository legen. Alle
   # spaeteren Laeufe holen sie nur noch ab (`readonly: true`).

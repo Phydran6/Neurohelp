@@ -80,28 +80,42 @@ echo "== Zugriff per git =="
 git config --global url."https://x-access-token:$token@github.com/".insteadOf "https://github.com/"
 export GIT_TERMINAL_PROMPT=0
 
-if git ls-remote "$url" >/dev/null 2>/tmp/match_git_err.txt; then
+# WICHTIG: ausserhalb des ausgecheckten Repositorys arbeiten.
+#
+# `actions/checkout` schreibt in dessen lokale Konfiguration
+#   http.https://github.com/.extraheader = AUTHORIZATION: basic <GITHUB_TOKEN>
+# Dieser Kopfzeilen-Eintrag gewinnt gegen Zugangsdaten in der URL. Innerhalb
+# des Arbeitsverzeichnisses benutzt git also das Workflow-Token, und das darf
+# nur in dieses eine Repository. GitHub antwortet dann mit "Repository not
+# found", um die Existenz privater Repositories nicht zu verraten - man sucht
+# daraufhin einen Tippfehler, den es nicht gibt.
+#
+# `match` selbst ist davon nicht betroffen: Es klont in ein temporaeres
+# Verzeichnis, wo nur die globale Konfiguration greift.
+work="$(mktemp -d)"
+cd "$work" || fail "Temporaeres Verzeichnis nicht nutzbar."
+
+if git ls-remote "$url" >/dev/null 2>err.txt; then
   echo "  git kommt hinein - alles in Ordnung."
 else
   echo "  git scheitert, obwohl der Token das Repository sehen darf."
-  if grep -qi "could not read Password\|Authentication failed" /tmp/match_git_err.txt; then
-    fail "git wurde die Anmeldung verweigert. Das passiert, wenn die Ersetzungsregel nicht greift - pruefe, ob MATCH_GIT_URL genau mit https://github.com/ beginnt."
+  if grep -qi "could not read Password\|Authentication failed" err.txt; then
+    fail "git wurde die Anmeldung verweigert. Pruefe, ob MATCH_GIT_URL genau mit https://github.com/ beginnt."
   fi
-  if grep -qi "not found\|does not exist" /tmp/match_git_err.txt; then
-    fail "git findet das Repository nicht, obwohl die API es sieht. Tippfehler im Repo-Namen?"
+  if grep -qi "not found\|does not exist" err.txt; then
+    fail "git findet das Repository nicht, obwohl die API es sieht. Das deutet auf einen Tippfehler im Repo-Namen."
   fi
   fail "git ls-remote ist gescheitert. Ursache steht in der maskierten Ausgabe oben."
 fi
 
 echo "== Inhalt =="
 
-rm -rf /tmp/matchcheck
-if git clone --depth 1 --quiet "$url" /tmp/matchcheck 2>/dev/null; then
-  if [ -z "$(ls -A /tmp/matchcheck 2>/dev/null | grep -v '^\.git$')" ]; then
+if git clone --depth 1 --quiet "$url" klon 2>/dev/null; then
+  if [ -z "$(ls -A klon 2>/dev/null | grep -v '^\.git$')" ]; then
     echo "  Repository ist leer - match legt Zertifikat und Profil neu an."
   else
     echo "  Es liegen schon Dateien darin:"
-    find /tmp/matchcheck -type f -not -path '*/.git/*' | sed 's|/tmp/matchcheck/|    |'
+    find klon -type f -not -path '*/.git/*' | sed 's|^klon/|    |'
     echo "::warning::MATCH_PASSWORD muss dasselbe sein wie beim Anlegen dieser Dateien."
   fi
 else

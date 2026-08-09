@@ -84,6 +84,13 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - Übergabe an die Mail-App über `url_launcher`; Android und iOS sind dafür
   freigeschaltet. Der Vorgang bleibt danach **offen**, nicht erledigt
 - Sanfte Nachfrage beim nächsten Öffnen mit Ja / Nein / Nicht jetzt
+- **Einstellungen**: Tonfall und KI-Toggle. Der Hinweis unter dem Schalter
+  sagt je nach Stellung, was das konkret bedeutet
+- **Hilfe & Info als Oberfläche**: FAQ zum Aufklappen, freie Frage nur wenn
+  der Katalog nichts hergibt, „Über die App" mit Lizenzen und dem
+  Datenhinweis sichtbar auf der Seite
+- Beide über ruhige Symbole auf der Startseite erreichbar, ohne sie zu
+  überladen
 - `android/` und `ios/` erzeugt, Release-Signatur in Gradle eingerichtet;
   `pubspec.lock` eingecheckt; App-Name auf „Neurohelp" korrigiert
 

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/big_action_button.dart';
+import '../../help/presentation/help_page.dart';
+import '../../settings/presentation/settings_page.dart';
 import '../domain/greetings.dart';
 import 'main_menu_page.dart';
 
@@ -26,6 +28,31 @@ class StartPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Ruhig auffindbar, ohne den Startbildschirm zu stören
+              // (Konzept, Abschnitt 15).
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  IconButton(
+                    key: const Key('start_help'),
+                    icon: const Icon(Icons.help_outline),
+                    tooltip: 'Hilfe & Info',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(builder: (_) => const HelpPage()),
+                    ),
+                  ),
+                  IconButton(
+                    key: const Key('start_settings'),
+                    icon: const Icon(Icons.settings_outlined),
+                    tooltip: 'Einstellungen',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const SettingsPage(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               const Spacer(flex: 2),
               Text(
                 'Neurohelp',

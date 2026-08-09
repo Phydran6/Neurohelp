@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import '../../features/help/domain/help_service.dart';
 import '../../features/messages/data/sqlite_message_repository.dart';
 import '../../features/messages/domain/message_sender.dart';
 import '../../features/tasks/data/sqlite_task_repository.dart';
@@ -24,6 +25,7 @@ class AppServices {
     required this.messages,
     required this.sender,
     required this.ai,
+    required this.help,
   });
 
   /// Baut die Dienste über einer geöffneten Datenbank auf.
@@ -33,8 +35,10 @@ class AppServices {
     MessageSender sender = const NoMessageSender(),
   }) {
     final history = SqliteHistoryRepository(database.raw);
+    final aiClient = ai ?? const DisabledAiClient();
 
     return AppServices(
+      help: HelpService(aiClient),
       database: database,
       history: history,
       settings: SqliteSettingsRepository(database.raw),
@@ -43,7 +47,7 @@ class AppServices {
       sender: sender,
       // Ohne KI-Anbindung läuft die App vollständig lokal. Der echte
       // Client kommt, sobald das Onboarding den Toggle setzt.
-      ai: ai ?? const DisabledAiClient(),
+      ai: aiClient,
     );
   }
 
@@ -57,6 +61,9 @@ class AppServices {
   final MessageSender sender;
 
   final AiClient ai;
+
+  /// Fragen im Hilfe-Bereich – Katalog zuerst, KI nur wenn nötig.
+  final HelpService help;
 
   Future<void> dispose() => database.close();
 }

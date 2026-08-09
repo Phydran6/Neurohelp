@@ -165,7 +165,7 @@ Nach Abschnitt 19 des Konzepts:
 8. 🟡 Feature „Anruf erledigen" + Anrufbegleitung (Logik fertig, Oberfläche
    und native Begleitung offen)
 9. 🟡 Feature „Termin klären" (Logik fertig, Oberfläche offen)
-10. ⬜ Info- & Hilfe-Bereich
+10. 🟡 Info- & Hilfe-Bereich (Logik fertig, Oberfläche offen)
 11. ⬜ Apple Developer Account
 12. ⬜ Alpha-Verteilung als APK
 

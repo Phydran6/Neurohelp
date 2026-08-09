@@ -14,7 +14,11 @@ enum AiTask {
   prepareCall('call.prepare'),
 
   /// Den wahrscheinlichsten Buchungsweg für einen Termin vorschlagen.
-  routeAppointment('appointment.route');
+  routeAppointment('appointment.route'),
+
+  /// Eine freie Frage zur App beantworten, wenn die festen FAQ-Antworten
+  /// nicht passen.
+  answerHelp('help.ask');
 
   const AiTask(this.wireName);
 

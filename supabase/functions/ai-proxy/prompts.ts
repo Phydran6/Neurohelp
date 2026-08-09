@@ -10,6 +10,7 @@ export const TASKS = [
   'message.compose',
   'call.prepare',
   'appointment.route',
+  'help.ask',
 ] as const;
 
 export type TaskName = (typeof TASKS)[number];
@@ -71,6 +72,18 @@ Bestimme den wahrscheinlichsten Buchungsweg für den beschriebenen Termin.
 Gib genau eine der Optionen aus: TELEFON, ONLINE, MAIL, FORMULAR.
 Danach in einer Zeile die Begründung in höchstens 15 Wörtern.
 Der User kann die Auswahl überstimmen – formuliere sie als Vorschlag.
+`.trim(),
+
+  'help.ask': `
+Beantworte eine Frage zur App Neurohelp.
+
+Regeln:
+- Höchstens vier Sätze.
+- Sag klar, wenn du etwas nicht sicher weißt, statt zu raten.
+- Erfinde keine Funktionen, die es nicht gibt.
+- Bei Fragen zu Datenschutz gilt: Nutzerdaten liegen lokal auf dem Gerät.
+  Über das Backend laufen nur Konto, Reset-Mails und – bei
+  eingeschalteter KI – die zu verarbeitenden Texte.
 `.trim(),
 };
 

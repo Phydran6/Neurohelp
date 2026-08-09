@@ -60,6 +60,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Schuldmechanik
 - Kalender-Schnittstelle mit Kollisionsprüfung und ICS-Export; ohne
   Kalenderzugriff blockiert nichts, es entfällt nur die Prüfung
+- **Info- und Hilfe-Bereich** (Konzept, Abschnitt 15): fester FAQ-Katalog,
+  der ohne KI allein trägt; die KI antwortet nur, wenn im Katalog nichts
+  passt und der User sie eingeschaltet hat
+- „Über die App" mit Herkunft, Entwickler, Version, Lizenzen und einem
+  sichtbaren Hinweis zur Datenhaltung
+- Neue KI-Aufgabe `help.ask` in App und Backend
 
 ### Fixed
 

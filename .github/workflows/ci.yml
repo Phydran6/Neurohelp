@@ -74,7 +74,20 @@ jobs:
 
       - run: flutter pub get
       - run: bash scripts/ensure_platforms.sh
-      - run: flutter build apk --debug --dart-define=FLAVOR=dev
+
+      # Erneut auflösen: Die Plugin-Registrierung für Android entsteht erst,
+      # wenn der Plattform-Ordner existiert.
+      - run: flutter pub get
+
+      - name: APK bauen
+        run: |
+          set +e
+          flutter build apk --debug --dart-define=FLAVOR=dev 2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            echo "::error::$(tail -c 3000 build.log | sed -z 's/\n/%0A/g')"
+          fi
+          exit "$code"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -96,4 +109,18 @@ jobs:
 
       - run: flutter pub get
       - run: bash scripts/ensure_platforms.sh
-      - run: flutter build ios --debug --no-codesign --dart-define=FLAVOR=dev
+
+      # Erneut auflösen: Die Plugin-Registrierung für iOS entsteht erst,
+      # wenn der Plattform-Ordner existiert.
+      - run: flutter pub get
+
+      - name: iOS bauen
+        run: |
+          set +e
+          flutter build ios --debug --no-codesign --dart-define=FLAVOR=dev \
+            2>&1 | tee build.log
+          code=${PIPESTATUS[0]}
+          if [ "$code" -ne 0 ]; then
+            echo "::error::$(tail -c 3000 build.log | sed -z 's/\n/%0A/g')"
+          fi
+          exit "$code"

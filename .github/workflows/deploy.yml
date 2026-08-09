@@ -60,7 +60,9 @@ jobs:
 
       - name: Plattform-Ordner sicherstellen
         if: steps.gate.outputs.ok == 'true'
-        run: bash scripts/ensure_platforms.sh
+        run: |
+          bash scripts/ensure_platforms.sh
+          flutter pub get
 
       - name: Signing-Dateien schreiben
         if: steps.gate.outputs.ok == 'true'
@@ -130,6 +132,7 @@ jobs:
         run: |
           flutter pub get
           bash scripts/ensure_platforms.sh
+          flutter pub get
           cd ios
           gem install fastlane --no-document
           fastlane beta build_number:"${{ github.run_number }}"

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../core/config/app_config.dart';
 import '../core/theme/app_theme.dart';
-import '../features/home/presentation/home_page.dart';
+import '../features/home/presentation/start_page.dart';
 
 class NeurohelpApp extends StatelessWidget {
   const NeurohelpApp({super.key});
@@ -15,7 +15,7 @@ class NeurohelpApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
-      home: const HomePage(),
+      home: const StartPage(),
     );
   }
 }

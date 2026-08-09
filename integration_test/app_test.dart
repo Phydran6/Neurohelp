@@ -13,6 +13,6 @@ void main() {
     await tester.pumpWidget(const NeurohelpApp());
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('home_flavor_label')), findsOneWidget);
+    expect(find.byKey(const Key('start_button')), findsOneWidget);
   });
 }

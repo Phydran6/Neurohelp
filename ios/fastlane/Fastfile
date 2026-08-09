@@ -10,6 +10,31 @@ def app_store_api_key
   )
 end
 
+# Version pruefen, bevor gebaut wird. Apple erlaubt in
+# CFBundleShortVersionString nur Ziffern und hoechstens drei Punkte – ein
+# `0.1.0-alpha.4` bricht erst beim Upload ab, nach 20 Minuten Bauzeit. Lieber
+# gleich hier.
+def checked_version(options)
+  version = options[:version].to_s
+  UI.user_error!("Parameter version: fehlt.") if version.empty?
+
+  unless version.match?(/\A\d+(\.\d+){0,2}\z/)
+    UI.user_error!(
+      "Version \"#{version}\" ist fuer Apple ungueltig. Erlaubt sind nur " \
+      "Ziffern und hoechstens drei durch Punkte getrennte Teile, z.B. 0.1.0. " \
+      "Vorabzusaetze wie -alpha.4 muss die CI abschneiden.",
+    )
+  end
+
+  version
+end
+
+def checked_build_number(options)
+  number = options[:build_number].to_s
+  UI.user_error!("Parameter build_number: fehlt.") if number.empty?
+  number
+end
+
 platform :ios do
   # Einmalig, bevor der erste Build laufen kann: Zertifikat und Profil bei
   # Apple erzeugen und verschluesselt ins match-Repository legen. Alle
@@ -29,6 +54,8 @@ platform :ios do
 
   desc "Signiertes Release-IPA bauen"
   lane :build_release do |options|
+    version = checked_version(options)
+    build_number = checked_build_number(options)
     api_key = app_store_api_key
 
     match(
@@ -40,8 +67,8 @@ platform :ios do
 
     sh(
       "cd .. && cd .. && flutter build ipa --release " \
-      "--build-name=#{options[:version]} " \
-      "--build-number=#{options[:build_number]} " \
+      "--build-name=#{version} " \
+      "--build-number=#{build_number} " \
       "--dart-define=FLAVOR=prod " \
       "--export-options-plist=ios/ExportOptions.plist",
     )
@@ -49,6 +76,8 @@ platform :ios do
 
   desc "Build bauen und an TestFlight schicken"
   lane :beta do |options|
+    version = checked_version(options)
+    build_number = checked_build_number(options)
     api_key = app_store_api_key
 
     match(
@@ -58,9 +87,12 @@ platform :ios do
       git_url: ENV["MATCH_GIT_URL"],
     )
 
+    # Die Version muss hier stehen. Ohne sie nimmt der Build den Wert aus der
+    # pubspec.yaml, und `0.1.0-alpha.4` ist fuer Apple ungueltig (ITMS-90060).
     sh(
       "cd .. && cd .. && flutter build ipa --release " \
-      "--build-number=#{options[:build_number]} " \
+      "--build-name=#{version} " \
+      "--build-number=#{build_number} " \
       "--dart-define=FLAVOR=prod " \
       "--export-options-plist=ios/ExportOptions.plist",
     )
@@ -85,6 +117,8 @@ platform :ios do
 
   desc "Build hochladen und zur Prüfung einreichen"
   lane :release_store do |options|
+    version = checked_version(options)
+    build_number = checked_build_number(options)
     api_key = app_store_api_key
 
     match(
@@ -96,8 +130,8 @@ platform :ios do
 
     sh(
       "cd .. && cd .. && flutter build ipa --release " \
-      "--build-name=#{options[:version]} " \
-      "--build-number=#{options[:build_number]} " \
+      "--build-name=#{version} " \
+      "--build-number=#{build_number} " \
       "--dart-define=FLAVOR=prod " \
       "--export-options-plist=ios/ExportOptions.plist",
     )
@@ -105,7 +139,7 @@ platform :ios do
     deliver(
       api_key: api_key,
       ipa: "../build/ios/ipa/neurohelp.ipa",
-      app_version: options[:version],
+      app_version: version,
       submit_for_review: true,
       # Ohne Verschlüsselung ausserhalb des Standards – der Eintrag steht
       # auch in der Info.plist, hier nur zur Sicherheit.

@@ -27,6 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.v.outputs.version }}
+      ios_version: ${{ steps.v.outputs.ios_version }}
       build_number: ${{ github.run_number }}
     steps:
       - uses: actions/checkout@v4
@@ -35,10 +36,22 @@ jobs:
         id: v
         run: |
           if [ -n "${{ github.event.inputs.version }}" ]; then
-            echo "version=${{ github.event.inputs.version }}" >> "$GITHUB_OUTPUT"
+            version="${{ github.event.inputs.version }}"
           else
-            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+            version="${GITHUB_REF_NAME#v}"
           fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          # Apple erlaubt in CFBundleShortVersionString nur Ziffern und
+          # höchstens drei Punkte. `0.1.0-alpha.4` lehnt App Store Connect mit
+          # ITMS-90060 ab, Android nimmt es dagegen anstandslos. Für iOS wird
+          # der Vorabzusatz deshalb abgeschnitten: 0.1.0-alpha.4 -> 0.1.0
+          #
+          # Verwechslungsgefahr gibt es nicht: Innerhalb einer Version
+          # unterscheidet die Build-Nummer die Uploads, und die zaehlt mit
+          # jedem CI-Lauf hoch.
+          echo "ios_version=${version%%-*}" >> "$GITHUB_OUTPUT"
+          echo "Android: $version / iOS: ${version%%-*}"
 
       - name: Release Notes aus CHANGELOG extrahieren
         run: bash scripts/extract_changelog.sh "${{ steps.v.outputs.version }}" > RELEASE_NOTES.md
@@ -153,8 +166,9 @@ jobs:
       - name: Unsigniert bauen
         if: steps.signing.outputs.available == 'false'
         run: |
+          # ios_version, nicht version: Apple nimmt kein `-alpha.N`.
           flutter build ios --release --no-codesign \
-            --build-name="${{ needs.prepare.outputs.version }}" \
+            --build-name="${{ needs.prepare.outputs.ios_version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
             --dart-define=FLAVOR=prod
 
@@ -188,7 +202,7 @@ jobs:
           cd ios
           bundle install --quiet || gem install fastlane --no-document
           fastlane build_release \
-            version:"${{ needs.prepare.outputs.version }}" \
+            version:"${{ needs.prepare.outputs.ios_version }}" \
             build_number:"${{ needs.prepare.outputs.build_number }}"
 
       - uses: actions/upload-artifact@v4

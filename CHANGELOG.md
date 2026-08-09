@@ -7,6 +7,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.4] - 2026-08-09
+
+### Fixed
+
+- **Konto anlegen schlug im Release-Build immer fehl** („Ich erreiche den
+  Server gerade nicht"). Der App fehlte die Internet-Berechtigung: Flutter
+  legt sie nur in den Debug- und Profile-Manifesten an, im Release fehlte
+  sie. Betraf Konto, Reset-Mail und KI – alles Lokale lief normal weiter
+- Ein Test prüft das jetzt mit, damit es nicht wiederkommt. Er achtet
+  zugleich darauf, dass keine unnötigen Berechtigungen dazukommen
+
 ## [0.1.0-alpha.3] - 2026-08-09
 
 ### Added
@@ -199,7 +210,8 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.3...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.4...HEAD
+[0.1.0-alpha.4]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.4
 [0.1.0-alpha.3]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.3
 [0.1.0-alpha.2]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.2
 [0.1.0-alpha.1]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.1

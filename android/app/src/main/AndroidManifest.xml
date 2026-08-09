@@ -1,4 +1,12 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--
+        Ohne diese Zeile hat der Release-Build keinen Netzzugriff: Flutter
+        legt die Berechtigung nur in den Debug- und Profile-Manifesten an.
+        Gebraucht wird sie fuer Konto, Reset-Mail und den KI-Proxy - alles
+        andere laeuft weiterhin lokal.
+    -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+
     <application
         android:label="Neurohelp"
         android:name="${applicationName}"

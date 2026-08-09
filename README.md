@@ -10,7 +10,7 @@ die für andere selbstverständlich sind.
 
 <br>
 
-[![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.3/Neurohelp-0.1.0-alpha.3-android.apk)
+[![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.4/Neurohelp-0.1.0-alpha.4-android.apk)
 [![Version](https://img.shields.io/badge/Alpha-0.1.0-FF9800?style=for-the-badge)](https://github.com/Phydran6/Neurohelp/releases)
 
 [![CI](https://github.com/Phydran6/Neurohelp/actions/workflows/ci.yml/badge.svg)](https://github.com/Phydran6/Neurohelp/actions/workflows/ci.yml)
@@ -150,9 +150,9 @@ formuliert dann nur nicht selbst.
 
 | | Datei | Hinweis |
 |:--|:--|:--|
-| **Android** | [**APK herunterladen**](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.3/Neurohelp-0.1.0-alpha.3-android.apk) | Antippen, installieren, fertig |
-| **iOS** | [IPA (unsigniert)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.3/Neurohelp-0.1.0-alpha.3-ios-unsigniert.ipa) | Braucht TestFlight, Xcode oder Sideloading |
-| **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.3/Neurohelp-0.1.0-alpha.3-android-playstore.aab) | Nur zum Hochladen in die Play Console |
+| **Android** | [**APK herunterladen**](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.4/Neurohelp-0.1.0-alpha.4-android.apk) | Antippen, installieren, fertig |
+| **iOS** | [IPA (unsigniert)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.4/Neurohelp-0.1.0-alpha.4-ios-unsigniert.ipa) | Braucht TestFlight, Xcode oder Sideloading |
+| **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.4/Neurohelp-0.1.0-alpha.4-android-playstore.aab) | Nur zum Hochladen in die Play Console |
 | **Alle Versionen** | [Release-Übersicht](https://github.com/Phydran6/Neurohelp/releases) | Ältere Stände |
 | **Was ist neu** | [CHANGELOG.md](CHANGELOG.md) | Jede Änderung, nachvollziehbar |
 

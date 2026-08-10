@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../core/config/app_config.dart';
 import '../core/di/app_services.dart';
-import '../core/settings/app_settings.dart';
 import '../core/theme/app_theme.dart';
 import '../features/home/presentation/start_page.dart';
 import '../features/onboarding/presentation/onboarding_page.dart';
@@ -35,38 +34,52 @@ class _Entry extends StatefulWidget {
 }
 
 class _EntryState extends State<_Entry> {
-  AppSettings? _settings;
   bool _unlocked = false;
+  bool _started = false;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_settings == null) unawaited(_load());
+    if (_started) return;
+    _started = true;
+
+    final settings = AppScope.of(context).settings;
+    if (settings.isLoaded) {
+      _unlocked = !settings.current.isLocked;
+    } else {
+      unawaited(_load());
+    }
   }
 
   Future<void> _load() async {
-    final settings = await AppScope.of(context).settings.load();
+    final loaded = await AppScope.of(context).settings.load();
     if (!mounted) return;
-    setState(() {
-      _settings = settings;
-      // Ohne eingerichtete Sperre gibt es nichts zu entsperren.
-      _unlocked = !settings.isLocked;
-    });
+    // Ohne eingerichtete Sperre gibt es nichts zu entsperren.
+    setState(() => _unlocked = !loaded.isLocked);
   }
 
   @override
   Widget build(BuildContext context) {
-    final settings = _settings;
-    if (settings == null) return const SizedBox.shrink();
+    final controller = AppScope.of(context).settings;
 
-    if (!settings.onboardingCompleted) {
-      return OnboardingPage(onDone: () => unawaited(_load()));
-    }
+    // Am Controller horchen: Ton, KI-Schalter und Sperre dürfen sich zur
+    // Laufzeit ändern und sollen sofort ankommen.
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) {
+        if (!controller.isLoaded) return const SizedBox.shrink();
+        final settings = controller.current;
 
-    if (settings.isLocked && !_unlocked) {
-      return LockScreen(onUnlocked: () => setState(() => _unlocked = true));
-    }
+        if (!settings.onboardingCompleted) {
+          return OnboardingPage(onDone: () => setState(() => _unlocked = true));
+        }
 
-    return const StartPage();
+        if (settings.isLocked && !_unlocked) {
+          return LockScreen(onUnlocked: () => setState(() => _unlocked = true));
+        }
+
+        return const StartPage();
+      },
+    );
   }
 }

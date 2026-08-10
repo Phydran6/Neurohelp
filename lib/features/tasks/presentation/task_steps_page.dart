@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ai/ai_client.dart';
 import '../../../core/di/app_services.dart';
+import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import 'task_focus_page.dart';
 
@@ -43,6 +45,16 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     });
     // Direkt weitertippen können, ohne erneut ins Feld zu tippen.
     _stepFocus.requestFocus();
+  }
+
+  /// Übernimmt einen KI-Vorschlag. Doppelte fliegen still raus – die Liste
+  /// soll nicht durch zweimaliges Tippen wachsen.
+  void _acceptSuggestions(List<String> suggestions) {
+    setState(() {
+      for (final suggestion in suggestions) {
+        if (!_steps.contains(suggestion)) _steps.add(suggestion);
+      }
+    });
   }
 
   bool get _canStart =>
@@ -111,7 +123,19 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
                 ),
                 onSubmitted: (_) => _addStep(),
               ),
-              const SizedBox(height: 16),
+              // Der Moment der KI-Hilfe: aus dem Titel werden Mikroschritte,
+              // die als Vorschlag in der Liste landen. Ohne KI fehlt genau
+              // dieser Block, sonst nichts.
+              AiSuggestionBox(
+                task: AiTask.splitTask,
+                inputBuilder: () {
+                  final title = _titleController.text.trim();
+                  return title.isEmpty ? null : title;
+                },
+                onAccept: (suggestion) => _acceptSuggestions([suggestion]),
+                onAcceptAll: _acceptSuggestions,
+              ),
+              const SizedBox(height: 8),
               Expanded(
                 child: ListView.builder(
                   itemCount: _steps.length,

@@ -111,14 +111,18 @@ jobs:
           flutter build appbundle --release \
             --build-name="${{ needs.prepare.outputs.version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
-            --dart-define=FLAVOR=prod
+            --dart-define=FLAVOR=prod \
+            --dart-define=APP_VERSION="${{ needs.prepare.outputs.version }}" \
+            --dart-define=APP_BUILD_NUMBER="${{ needs.prepare.outputs.build_number }}"
 
       - name: APK bauen
         run: |
           flutter build apk --release \
             --build-name="${{ needs.prepare.outputs.version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
-            --dart-define=FLAVOR=prod
+            --dart-define=FLAVOR=prod \
+            --dart-define=APP_VERSION="${{ needs.prepare.outputs.version }}" \
+            --dart-define=APP_BUILD_NUMBER="${{ needs.prepare.outputs.build_number }}"
 
       - name: Artefakte benennen
         run: |
@@ -181,7 +185,9 @@ jobs:
           flutter build ios --release --no-codesign \
             --build-name="${{ needs.prepare.outputs.ios_version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
-            --dart-define=FLAVOR=prod
+            --dart-define=FLAVOR=prod \
+            --dart-define=APP_VERSION="${{ needs.prepare.outputs.ios_version }}" \
+            --dart-define=APP_BUILD_NUMBER="${{ needs.prepare.outputs.build_number }}"
 
           # Ohne Apple-Zugang gibt es kein installierbares IPA. Damit trotzdem
           # etwas Greifbares im Release liegt, wird die gebaute App als

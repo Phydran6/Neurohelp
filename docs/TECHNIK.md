@@ -32,6 +32,22 @@ Für die Beschreibung der App selbst: [← zurück zur Startseite](../README.md)
 Kontoverwaltung, Reset-Mails und KI-Aufrufe. Neue Cloud-Speicherung ist
 begründungspflichtig.
 
+### Mindestversionen
+
+| Plattform | Ab |
+|---|---|
+| iOS | 15.0 |
+| Android | was Flutter vorgibt (`flutter.minSdkVersion`) |
+
+Die iOS-Untergrenze steht an zwei Stellen und muss an beiden gleich sein:
+`IPHONEOS_DEPLOYMENT_TARGET` in
+[project.pbxproj](../ios/Runner.xcodeproj/project.pbxproj) und `platform :ios`
+im [Podfile](../ios/Podfile). Weicht eine ab, baut Xcode trotzdem – und Apple
+meldet sich erst nach dem Upload mit **ITMS-90068**. Genau das ist bei Build 7
+passiert, damals mit 13.0.
+[ios_deployment_target_test.dart](../test/unit/ios_deployment_target_test.dart)
+hält beide zusammen.
+
 ---
 
 ## Schnellstart
@@ -135,6 +151,15 @@ flutter run --dart-define=FLAVOR=dev
 | `FLAVOR` | `dev` |
 | `SUPABASE_URL` | das produktive Projekt |
 | `SUPABASE_KEY` | der öffentliche `sb_publishable_…`-Schlüssel |
+| `APP_VERSION` | `AppVersion.fallbackName` aus `pubspec.yaml` |
+| `APP_BUILD_NUMBER` | `AppVersion.fallbackBuild` aus `pubspec.yaml` |
+
+`APP_VERSION` und `APP_BUILD_NUMBER` setzt die CI beim Release. Sie landen im
+Info-Bereich der App. Ohne sie greift die Konstante in
+[app_version.dart](../lib/core/config/app_version.dart), die
+[app_version_test.dart](../test/unit/app_version_test.dart) mit `pubspec.yaml`
+zusammenhält – eine falsche Versionsnummer ist schlimmer als keine, weil sich
+Fehlermeldungen aus der Alpha dann keinem Build zuordnen lassen.
 
 Der öffentliche Schlüssel darf im Repository stehen – er steckt ohnehin in
 jeder ausgelieferten App. Geschützt wird über Row Level Security. Der geheime

@@ -32,6 +32,24 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
+            <!--
+                Rueckweg aus einer Bestaetigungs- oder Reset-Mail.
+
+                Die App arbeitet mit sechsstelligen Codes, weil Links aus
+                Mail-Apps regelmaessig im falschen Browser landen. Der Link
+                steht trotzdem in jeder Mail - ohne diesen Filter passiert
+                beim Antippen gar nichts. Der Wert muss zur Site-URL des
+                Supabase-Projekts passen (siehe docs/BACKEND.md).
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="will.neurohelp.help"
+                    android:host="login-callback"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

@@ -82,11 +82,52 @@ abstract final class FaqCatalog {
       id: 'pin-vergessen',
       question: 'Ich habe meine PIN vergessen. Was jetzt?',
       answer:
-          'Melde dich mit deinem Konto neu an. Über „Passwort vergessen" '
-          'bekommst du eine Mail und kannst danach eine neue PIN setzen. '
-          'Falls du beim Einrichten einen Wiederherstellungs-Code '
-          'gespeichert hast, geht es auch damit.',
+          'Melde dich mit deinem Konto neu an. Beim ersten Bildschirm gibt es '
+          '„Passwort vergessen": Du bekommst einen sechsstelligen Code per '
+          'Mail, setzt damit ein neues Passwort und kannst danach eine neue '
+          'PIN vergeben.',
       keywords: ['pin', 'vergessen', 'passwort', 'wiederherstellung'],
+    ),
+    FaqEntry(
+      id: 'bestaetigungs-code',
+      question: 'Warum bekomme ich einen Code statt eines Links per Mail?',
+      answer:
+          'Weil ein Link in der Mail erst im Browser landet und von dort '
+          'zurück in die App finden muss. Das geht oft schief. Ein '
+          'sechsstelliger Code wird abgetippt und funktioniert überall. Er '
+          'gilt eine Stunde; danach lässt du dir einfach einen neuen '
+          'schicken.',
+      keywords: ['code', 'mail', 'bestätigung', 'link', 'registrierung'],
+    ),
+    FaqEntry(
+      id: 'schon-ein-konto',
+      question: 'Ich habe die App neu installiert und schon ein Konto.',
+      answer:
+          'Beim ersten Bildschirm gibt es „Ich habe schon ein Konto". Melde '
+          'dich mit E-Mail und Passwort an und richte danach die App-Sperre '
+          'neu ein. Deine alten Vorgänge waren auf dem alten Gerät und '
+          'kommen nicht mit – das ist Absicht, sie lagen nie auf einem '
+          'Server.',
+      keywords: ['anmelden', 'login', 'konto', 'neu', 'gerätewechsel'],
+    ),
+    FaqEntry(
+      id: 'zwei-faktor',
+      question: 'Was ist die Zwei-Faktor-Anmeldung und muss ich die haben?',
+      answer:
+          'Nein, sie ist freiwillig. Sie verlangt beim Anmelden zusätzlich '
+          'einen Code aus einer Authenticator-App. Du kannst sie im '
+          'Onboarding überspringen und jederzeit in den Einstellungen '
+          'nachholen – oder wieder entfernen.',
+      keywords: ['2fa', 'mfa', 'zwei-faktor', 'authenticator', 'totp'],
+    ),
+    FaqEntry(
+      id: 'biometrie-abschalten',
+      question: 'Kann ich Fingerabdruck oder Gesicht wieder abschalten?',
+      answer:
+          'Ja. In den Einstellungen unter „App-Sperre" gibt es dafür einen '
+          'Schalter. Danach wird beim Öffnen nur noch die PIN gefragt. Die '
+          'PIN änderst du an derselben Stelle.',
+      keywords: ['biometrie', 'fingerabdruck', 'gesicht', 'abschalten', 'pin'],
     ),
     FaqEntry(
       id: 'nachricht-wirklich-gesendet',
@@ -121,8 +162,10 @@ abstract final class FaqCatalog {
       id: 'daten-loeschen',
       question: 'Wie werde ich alles wieder los?',
       answer:
-          'App deinstallieren – die Daten liegen auf deinem Gerät und gehen '
-          'damit mit. Dein Konto löschst du in den Einstellungen.',
+          'Zwei Schritte, beide von dir auslösbar: In den Einstellungen unter '
+          '„Konto löschen" verschwindet alles, was serverseitig zu dir '
+          'gehört – du bekommst darüber eine Mail. Und beim Deinstallieren '
+          'der App gehen die Daten auf dem Gerät mit.',
       keywords: ['löschen', 'deinstallieren', 'konto'],
     ),
   ];

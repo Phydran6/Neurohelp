@@ -6,15 +6,22 @@ import 'package:neurohelp/features/help/domain/help_service.dart';
 
 /// KI, die eine feste Antwort liefert und mitzählt, wie oft sie dran war.
 class _FakeAi implements AiClient {
-  _FakeAi({this.enabled = true, this.answer = 'Antwort der KI.'});
+  _FakeAi({bool enabled = true, this.answer = 'Antwort der KI.'})
+    : _enabled = enabled;
 
-  final bool enabled;
+  bool _enabled;
   final String answer;
   int calls = 0;
   AiTask? lastTask;
 
   @override
-  bool get isEnabled => enabled;
+  bool get isEnabled => _enabled;
+
+  @override
+  void setEnabled({required bool enabled}) => _enabled = enabled;
+
+  @override
+  Future<void> probe() async {}
 
   @override
   Future<String> run(
@@ -32,6 +39,12 @@ class _FakeAi implements AiClient {
 class _UnreachableAi implements AiClient {
   @override
   bool get isEnabled => true;
+
+  @override
+  void setEnabled({required bool enabled}) {}
+
+  @override
+  Future<void> probe() async => throw const AiUnavailableException('kein Netz');
 
   @override
   Future<String> run(

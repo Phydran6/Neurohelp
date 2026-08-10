@@ -28,8 +28,12 @@ class _LockScreenState extends State<LockScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_triedBiometrics) {
-      _triedBiometrics = true;
+    if (_triedBiometrics) return;
+    _triedBiometrics = true;
+
+    // Nur, wenn der User Biometrie auch will. Wer sie in den Einstellungen
+    // abgeschaltet hat, soll nicht bei jedem Start das Systemfenster sehen.
+    if (AppScope.of(context).settings.current.usesBiometrics) {
       unawaited(_tryBiometrics());
     }
   }
@@ -123,11 +127,12 @@ class _LockScreenState extends State<LockScreen> {
                 onPressed: _pin.text.trim().isEmpty ? null : _submitPin,
               ),
               const SizedBox(height: 8),
-              TextButton(
-                key: const Key('lock_biometrics'),
-                onPressed: _tryBiometrics,
-                child: const Text('Fingerabdruck oder Gesicht'),
-              ),
+              if (AppScope.of(context).settings.current.usesBiometrics)
+                TextButton(
+                  key: const Key('lock_biometrics'),
+                  onPressed: _tryBiometrics,
+                  child: const Text('Fingerabdruck oder Gesicht'),
+                ),
             ],
           ),
         ),

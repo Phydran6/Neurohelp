@@ -111,6 +111,8 @@ platform :ios do
       "--build-name=#{version} " \
       "--build-number=#{build_number} " \
       "--dart-define=FLAVOR=prod " \
+      "--dart-define=APP_VERSION=#{version} " \
+      "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
       "--export-options-plist=ios/ExportOptions.plist",
     )
   end
@@ -137,6 +139,8 @@ platform :ios do
       "--build-name=#{version} " \
       "--build-number=#{build_number} " \
       "--dart-define=FLAVOR=prod " \
+      "--dart-define=APP_VERSION=#{version} " \
+      "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
       "--export-options-plist=ios/ExportOptions.plist",
     )
 
@@ -178,6 +182,8 @@ platform :ios do
       "--build-name=#{version} " \
       "--build-number=#{build_number} " \
       "--dart-define=FLAVOR=prod " \
+      "--dart-define=APP_VERSION=#{version} " \
+      "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
       "--export-options-plist=ios/ExportOptions.plist",
     )
 

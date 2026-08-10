@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
+import '../../../shared/widgets/history_check.dart';
 import '../domain/appointment.dart';
+import 'appointment_book_page.dart';
 import 'appointment_route_page.dart';
 
 /// Der Einstieg in „Termin klären" (Konzept, Abschnitt 9).
@@ -22,6 +24,8 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
   final _title = TextEditingController();
 
   List<({Appointment appointment, FollowUpPhase phase})> _due = const [];
+  List<Appointment> _unbooked = const [];
+  HistoryCheckState _check = HistoryCheckState.running;
   bool _loading = true;
 
   @override
@@ -37,12 +41,32 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
   }
 
   Future<void> _load() async {
-    final due = await AppScope.of(context).appointments.pendingNotifications();
+    final appointments = AppScope.of(context).appointments;
+    final due = await appointments.pendingNotifications();
+    final unbooked = await appointments.unbooked();
     if (!mounted) return;
+
     setState(() {
       _due = due;
+      _unbooked = unbooked;
       _loading = false;
+      _check = due.isEmpty && unbooked.isEmpty
+          ? HistoryCheckState.empty
+          : HistoryCheckState.found;
     });
+  }
+
+  /// Weitermachen, wo der Ablauf abgebrochen wurde: Steht der Weg schon
+  /// fest, geht es direkt ans Eintragen.
+  Future<void> _resume(Appointment appointment) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => appointment.route == BookingRoute.undecided
+            ? AppointmentRoutePage(appointmentId: appointment.id)
+            : AppointmentBookPage(appointmentId: appointment.id),
+      ),
+    );
+    if (mounted) unawaited(_load());
   }
 
   Future<void> _acknowledge(
@@ -86,6 +110,9 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasSomething = _due.isNotEmpty || _unbooked.isNotEmpty;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Termin klären')),
       body: SafeArea(
@@ -96,26 +123,45 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (_due.isNotEmpty)
+                    HistoryCheckHeader(state: _check),
+                    if (hasSomething)
                       Expanded(
-                        child: ListView.separated(
-                          itemCount: _due.length,
-                          separatorBuilder: (_, _) =>
+                        child: ListView(
+                          children: [
+                            for (final entry in _due) ...[
+                              _PhaseCard(
+                                appointment: entry.appointment,
+                                phase: entry.phase,
+                                onAcknowledge: () => _acknowledge(
+                                  entry.appointment,
+                                  entry.phase,
+                                ),
+                                onAnswer: ({required bool wentWell}) =>
+                                    _answerAfter(
+                                      entry.appointment,
+                                      wentWell: wentWell,
+                                    ),
+                              ),
                               const SizedBox(height: 12),
-                          itemBuilder: (context, index) {
-                            final entry = _due[index];
-                            return _PhaseCard(
-                              appointment: entry.appointment,
-                              phase: entry.phase,
-                              onAcknowledge: () =>
-                                  _acknowledge(entry.appointment, entry.phase),
-                              onAnswer: ({required bool wentWell}) =>
-                                  _answerAfter(
-                                    entry.appointment,
-                                    wentWell: wentWell,
-                                  ),
-                            );
-                          },
+                            ],
+                            if (_unbooked.isNotEmpty) ...[
+                              Text(
+                                'Angefangen, noch nicht gebucht',
+                                key: const Key('appt_unbooked_title'),
+                                style: theme.textTheme.titleSmall?.copyWith(
+                                  color: theme.colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              for (final appointment in _unbooked) ...[
+                                _UnbookedTile(
+                                  appointment: appointment,
+                                  onTap: () => _resume(appointment),
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            ],
+                          ],
                         ),
                       )
                     else
@@ -138,10 +184,50 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
                       label: 'Weiter',
                       onPressed: _title.text.trim().isEmpty ? null : _startNew,
                     ),
-                    if (_due.isEmpty) const Spacer(),
+                    if (!hasSomething) const Spacer(),
                   ],
                 ),
               ),
+      ),
+    );
+  }
+}
+
+/// Ein angefangener Termin, bei dem die Buchung noch aussteht.
+class _UnbookedTile extends StatelessWidget {
+  const _UnbookedTile({required this.appointment, required this.onTap});
+
+  final Appointment appointment;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        key: Key('appt_unbooked_${appointment.id}'),
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  appointment.title,
+                  style: theme.textTheme.titleMedium,
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

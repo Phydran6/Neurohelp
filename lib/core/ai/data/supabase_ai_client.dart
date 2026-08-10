@@ -10,16 +10,26 @@ import '../ai_client.dart';
 /// schickt einen Aufgabentyp und bekommt Text zurück. Ein Anbieterwechsel
 /// passiert im Backend, nicht hier.
 class SupabaseAiClient implements AiClient {
-  const SupabaseAiClient(this._client, {required bool enabled})
-    : _enabled = enabled;
+  SupabaseAiClient(this._client, {required bool enabled}) : _enabled = enabled;
 
   final SupabaseClient _client;
-  final bool _enabled;
+  bool _enabled;
 
   static const String _functionName = 'ai-proxy';
 
   @override
   bool get isEnabled => _enabled;
+
+  @override
+  void setEnabled({required bool enabled}) => _enabled = enabled;
+
+  @override
+  Future<void> probe() async {
+    await run(
+      AiTask.answerHelp,
+      input: 'Verbindungstest. Antworte mit einem kurzen Satz.',
+    );
+  }
 
   @override
   Future<String> run(

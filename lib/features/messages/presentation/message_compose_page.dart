@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/ai/ai_client.dart';
 import '../../../core/di/app_services.dart';
+import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../domain/message_draft.dart';
 import '../domain/message_flow.dart';
@@ -83,6 +85,20 @@ class _MessageComposePageState extends State<MessageComposePage> {
     });
   }
 
+  /// Was die KI zum Formulieren braucht: Betreff, Empfängertyp und die
+  /// Stichpunkte, die schon im Feld stehen.
+  String? _composeInput() {
+    final notes = _controller.text.trim();
+    if (notes.isEmpty) return null;
+
+    final draft = _flow.draft;
+    return [
+      'Betreff: ${draft.subject}',
+      if (draft.recipientType != null) 'Empfänger: ${draft.recipientType}',
+      'Stichpunkte: $notes',
+    ].join('\n');
+  }
+
   Future<void> _handOver() async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -137,7 +153,7 @@ class _MessageComposePageState extends State<MessageComposePage> {
               const SizedBox(height: 24),
               if (isReview)
                 Expanded(child: _Preview(draft: _flow.draft))
-              else
+              else ...[
                 Expanded(
                   child: TextField(
                     key: const Key('msg_field'),
@@ -154,6 +170,20 @@ class _MessageComposePageState extends State<MessageComposePage> {
                     onChanged: (_) => setState(() {}),
                   ),
                 ),
+                // Der Moment der KI-Hilfe (Konzept, Abschnitt 10, Schritt 4):
+                // aus Stichpunkten wird ein Vorschlag, den der User übernimmt
+                // oder liegen lässt. Nichts wird automatisch eingesetzt.
+                if (_flow.step == MessageStep.compose)
+                  AiSuggestionBox(
+                    task: AiTask.composeMessage,
+                    singleLine: true,
+                    acceptLabel: 'Einsetzen',
+                    inputBuilder: _composeInput,
+                    onAccept: (suggestion) => setState(() {
+                      _controller.text = suggestion;
+                    }),
+                  ),
+              ],
               const SizedBox(height: 16),
               if (isReview) ...[
                 BigActionButton(

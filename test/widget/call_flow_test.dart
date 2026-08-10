@@ -172,11 +172,33 @@ void main() {
     await services.calls.save(earlier.copyWith(goal: 'Rezept abholen'));
 
     await pumpApp(tester);
+
+    // Historie-Check beim Einstieg: Der offene Vorgang steht schon da,
+    // bevor eine Kategorie angetippt wurde.
+    expect(find.byKey(const Key('history_check_found')), findsOneWidget);
+    expect(find.byKey(Key('call_open_${earlier.id}')), findsOneWidget);
+
     await tester.tap(find.byKey(const Key('call_category_Arzt')));
     await pumpUntil(tester, find.byKey(const Key('call_earlier_title')));
 
     // „Geht's um das von letztem Mal?" – Konzept, Abschnitt 8, Schritt 2.
-    expect(find.text('Rezept abholen'), findsOneWidget);
+    // Auf den Eintrag im Blatt prüfen: Derselbe Text steht auch in der
+    // Liste dahinter, und ein findsOneWidget wäre dort schon erfüllt.
+    expect(
+      find.descendant(
+        of: find.byKey(Key('call_earlier_${earlier.id}')),
+        matching: find.text('Rezept abholen'),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const Key('call_earlier_new')), findsOneWidget);
+  });
+
+  testWidgets('sagt auch, wenn die Historie nichts hergibt', (tester) async {
+    await pumpApp(tester);
+
+    // Der stumme Fall war der Fehler: Ohne Rückmeldung weiß der User nicht,
+    // ob überhaupt gesucht wurde.
+    expect(find.byKey(const Key('history_check_empty')), findsOneWidget);
   });
 }

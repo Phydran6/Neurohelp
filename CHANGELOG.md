@@ -7,6 +7,65 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.6] - 2026-08-10
+
+### Added
+
+- **Anmelden und Passwort zurücksetzen beim ersten Start.** Bisher bot die
+  App ausschließlich an, ein neues Konto anzulegen. Wer die App neu
+  installiert hatte oder sein Passwort nicht mehr wusste, saß fest. Beides
+  steht jetzt als ruhiger Textknopf unter dem Anlegen-Feld
+- **Bestätigung per sechsstelligem Code statt Link.** Der Link aus der Mail
+  landete im Browser und endete dort mit „Email link is invalid or has
+  expired". Der Code wird abgetippt und funktioniert überall – bei der
+  Registrierung wie beim Passwort-Reset
+- **Die Zwei-Faktor-Anmeldung gibt es wirklich.** Im Onboarding stand
+  vorher nur ein „Später"-Knopf und sonst nichts. Jetzt: Schlüssel
+  anzeigen, in die Authenticator-App übernehmen, einmal den Code abtippen.
+  Überspringen geht weiterhin – dann sagt die App **einmal** Bescheid, dass
+  es offen bleibt, und danach nie wieder
+- **Konto löschen in den Einstellungen.** Löscht restlos alles, was
+  serverseitig zum Konto gehört, und schickt darüber eine Bestätigung per
+  Mail
+- **Die KI tut endlich etwas.** An vier Stellen erscheint bei
+  eingeschalteter KI ein Knopf, der einen Vorschlag erzeugt: Mikroschritte
+  für eine neue Aufgabe, der Text einer Nachricht, Ziel und Leitfaden für
+  einen Anruf, der Buchungsweg für einen Termin. Der Vorschlag steht in der
+  Auswahlliste – übernommen wird nur, was angetippt wird
+- **Fingerabdruck und Gesicht sind abschaltbar**, in den Einstellungen unter
+  „App-Sperre". Die PIN lässt sich dort ebenfalls ändern
+- **Links im Info-Bereich:** Quelltext, Konzept, Datenschutz, Changelog,
+  Lizenz und Fehler melden – vorher gab es dort keinen einzigen Verweis
+- Störungen beim Anmelden zeigen hinter „Details" den technischen
+  Hintergrund zum Kopieren. Vorher endete jede Störung in einem
+  freundlichen Satz ohne jeden Anhaltspunkt
+
+### Changed
+
+- **Mindestens iOS 15.** Apple hatte Build 7 mit ITMS-90068 beanstandet: Ab
+  Frühjahr 2027 wird kein Upload unter 15.0 mehr angenommen. Ein Test hält
+  die Version im Xcode-Projekt und im Podfile jetzt zusammen
+- **Der gewählte Ton wirkt sich aus.** Die Frage „Wie soll ich mit dir
+  reden?" kam im Onboarding, wurde gespeichert – und danach klang die App
+  überall gleich. Jetzt ändern sich Begrüßung, Knöpfe und der Stil der
+  KI-Vorschläge
+- **Der KI-Schalter wirkt sofort und sagt, ob es geklappt hat.** Vorher zog
+  der KI-Zugang seinen Schalter nur beim App-Start, und beim Umlegen
+  passierte sichtbar gar nichts
+- **Jeder Ablauf beginnt sichtbar mit dem Blick in die Historie** – auch
+  wenn nichts gefunden wird. Der stumme Fall war der Fehler: Man konnte
+  nicht wissen, ob überhaupt gesucht wurde
+- Die Mail-Vorlagen sind deutsch, erklären, was zu tun ist, und stellen den
+  Code voran
+- Die Version im Info-Bereich kommt aus dem Build. Vorher stand dort
+  dauerhaft „0.1.0 (1)", egal was installiert war
+
+### Removed
+
+- **„Etwas anderes" im Hauptmenü.** Der Eintrag versprach einen Bildschirm
+  und lieferte den Hinweis, dass es ihn bald gibt. Er kommt zurück, wenn der
+  Ablauf dahinter gebaut ist
+
 ## [0.1.0-alpha.5] - 2026-08-10
 
 ### Changed
@@ -235,7 +294,9 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.4...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.6...HEAD
+[0.1.0-alpha.6]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.6
+[0.1.0-alpha.5]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.5
 [0.1.0-alpha.4]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.4
 [0.1.0-alpha.3]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.3
 [0.1.0-alpha.2]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.2

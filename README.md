@@ -16,7 +16,7 @@ die für andere selbstverständlich sind.
      einkommentieren, den APK-Knopf entfernen und die zwei URLs setzen.
      Checkliste dazu: docs/STORE.md -->
 
-[![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.5/Neurohelp-0.1.0-alpha.5-android.apk)
+[![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.6/Neurohelp-0.1.0-alpha.6-android.apk)
 [![Version](https://img.shields.io/badge/Alpha-0.1.0-FF9800?style=for-the-badge)](https://github.com/Phydran6/Neurohelp/releases)
 
 <!--
@@ -162,9 +162,9 @@ formuliert dann nur nicht selbst.
 
 | | Datei | Hinweis |
 |:--|:--|:--|
-| **Android** | [**APK herunterladen**](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.5/Neurohelp-0.1.0-alpha.5-android.apk) | Antippen, installieren, fertig |
+| **Android** | [**APK herunterladen**](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.6/Neurohelp-0.1.0-alpha.6-android.apk) | Antippen, installieren, fertig |
 | **iOS** | über **TestFlight** – Einladung auf Anfrage | Das IPA im Release ist ein App-Store-Build und lässt sich nicht sideloaden |
-| **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.5/Neurohelp-0.1.0-alpha.5-android-playstore.aab) | Nur zum Hochladen in die Play Console |
+| **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.6/Neurohelp-0.1.0-alpha.6-android-playstore.aab) | Nur zum Hochladen in die Play Console |
 | **Alle Versionen** | [Release-Übersicht](https://github.com/Phydran6/Neurohelp/releases) | Ältere Stände |
 | **Was ist neu** | [CHANGELOG.md](CHANGELOG.md) | Jede Änderung, nachvollziehbar |
 
@@ -172,7 +172,7 @@ formuliert dann nur nicht selbst.
 | | Wo | Hinweis |
 |:--|:--|:--|
 | **Android** | [Google Play](https://play.google.com/store/apps/details?id=will.neurohelp.help) | |
-| **iOS** | [App Store](https://apps.apple.com/de/app/neurohelp/idAPP_ID_EINSETZEN) | ab iOS 13 |
+| **iOS** | [App Store](https://apps.apple.com/de/app/neurohelp/idAPP_ID_EINSETZEN) | ab iOS 15 |
 -->
 
 **Deine Daten:** [Datenschutzerklärung](docs/DATENSCHUTZ.md)

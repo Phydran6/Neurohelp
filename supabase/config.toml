@@ -16,12 +16,23 @@ enabled = true
 port = 54323
 
 [local_smtp]
-# Lokaler Mail-Catcher – fängt Reset-Mails in der Entwicklung ab.
+# Lokaler Mail-Catcher – fängt Bestätigungs- und Reset-Mails in der
+# Entwicklung ab.
 enabled = true
 port = 54324
 
 [auth]
 enabled = true
+
+# Wichtig: Die Standard-Site-URL eines neuen Supabase-Projekts ist
+# http://localhost:3000. Steht sie so, zeigt jeder Bestätigungs-Link dorthin
+# und endet im Browser mit "otp_expired" – genau der Fehler aus der Alpha.
+# Neurohelp arbeitet mit sechsstelligen Codes; die Site-URL zeigt trotzdem
+# auf die App, damit ein versehentlich angeklickter Link nicht ins Leere
+# läuft.
+#
+# Diese Datei gilt nur lokal. Am gehosteten Projekt muss derselbe Wert unter
+# Authentication → URL Configuration stehen (siehe docs/BACKEND.md).
 site_url = "will.neurohelp.help://login-callback"
 additional_redirect_urls = ["will.neurohelp.help://login-callback"]
 jwt_expiry = 3600
@@ -33,6 +44,39 @@ enable_signup = true
 enable_confirmations = true
 double_confirm_changes = true
 
+# Die Vorlagen sind deutsch und stellen den Code voran, nicht den Link.
+# Ein Link muss aus der Mail-App über den Browser zurück in die App finden –
+# das geht regelmäßig schief. Ein Code wird abgetippt und funktioniert immer.
+[auth.email.template.confirmation]
+subject = "Dein Bestätigungs-Code für Neurohelp"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Neues Passwort für Neurohelp"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.magic_link]
+subject = "Dein Anmelde-Code für Neurohelp"
+content_path = "./supabase/templates/magic_link.html"
+
+[auth.email.template.email_change]
+subject = "Neue E-Mail-Adresse für Neurohelp bestätigen"
+content_path = "./supabase/templates/email_change.html"
+
+# Zwei-Faktor über eine Authenticator-App (Konzept, Abschnitt 13).
+# Freiwillig – die App weist einmal darauf hin und dann nie wieder.
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
 [functions.ai-proxy]
 # Ohne gültiges Nutzer-Token kein KI-Aufruf.
+verify_jwt = true
+
+[functions.delete-account]
+# Löschen darf nur, wer angemeldet ist – und nur das eigene Konto. Wer das
+# ist, entscheidet ausschließlich das Token, nie der Request-Body.
 verify_jwt = true

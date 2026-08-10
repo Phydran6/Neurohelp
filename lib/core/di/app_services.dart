@@ -17,7 +17,7 @@ import '../security/app_lock.dart';
 import '../security/data/device_app_lock.dart';
 import '../history/domain/history_repository.dart';
 import '../settings/data/sqlite_settings_repository.dart';
-import '../settings/settings_repository.dart';
+import '../settings/settings_controller.dart';
 
 /// Alles, was die Oberfläche braucht, an einer Stelle.
 ///
@@ -54,12 +54,20 @@ class AppServices {
   }) {
     final history = SqliteHistoryRepository(database.raw, clock: clock);
     final aiClient = ai ?? const DisabledAiClient();
+    final settings = SettingsController(
+      SqliteSettingsRepository(database.raw, clock: clock),
+    );
+
+    // Der KI-Schalter muss sofort wirken, nicht erst nach einem Neustart.
+    settings.addListener(
+      () => aiClient.setEnabled(enabled: settings.current.aiEnabled),
+    );
 
     return AppServices(
       help: HelpService(aiClient),
       database: database,
       history: history,
-      settings: SqliteSettingsRepository(database.raw, clock: clock),
+      settings: settings,
       tasks: SqliteTaskRepository(database.raw, history, clock: clock),
       messages: SqliteMessageRepository(database.raw, history, clock: clock),
       sender: sender,
@@ -82,7 +90,10 @@ class AppServices {
 
   final AppDatabase database;
   final HistoryRepository history;
-  final SettingsRepository settings;
+
+  /// Einstellungen samt aktuellem Stand. Seiten dürfen daran horchen, damit
+  /// ein Umstellen von Ton oder KI-Schalter sofort ankommt.
+  final SettingsController settings;
   final TaskRepository tasks;
   final SqliteMessageRepository messages;
 
@@ -103,7 +114,10 @@ class AppServices {
   final AccountRepository account;
   final AppLock lock;
 
-  Future<void> dispose() => database.close();
+  Future<void> dispose() {
+    settings.dispose();
+    return database.close();
+  }
 }
 
 /// Reicht die [AppServices] durch den Widget-Baum.

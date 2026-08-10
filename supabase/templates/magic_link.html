@@ -1,0 +1,34 @@
+<!--
+  Anmeldung ohne Passwort.
+
+  Neurohelp benutzt diesen Weg derzeit nicht – die Vorlage steht trotzdem
+  hier, damit im Fall der Fälle nicht die englische Standard-Mail rausgeht.
+-->
+<div style="margin:0;padding:24px;background:#f4f5f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1b1c1f;">
+  <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;">
+
+    <p style="margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#6b6f76;">
+      Neurohelp
+    </p>
+
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;">
+      Dein Anmelde-Code
+    </h1>
+
+    <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#3c4048;">
+      Trag diesen Code in der App ein, um dich anzumelden.
+    </p>
+
+    <div style="margin:0 0 24px;padding:20px;background:#0a1331;border-radius:12px;text-align:center;">
+      <span style="font-size:34px;font-weight:700;letter-spacing:.22em;color:#ffffff;font-family:'SF Mono',Menlo,Consolas,monospace;">
+        {{ .Token }}
+      </span>
+    </div>
+
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#6b6f76;">
+      Der Code gilt eine Stunde. Du hast das nicht angefordert? Dann ignorier
+      diese Mail.
+    </p>
+
+  </div>
+</div>

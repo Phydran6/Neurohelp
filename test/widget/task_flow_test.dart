@@ -104,7 +104,7 @@ void main() {
 
     // Historie-Check: der offene Vorgang steht da, ohne dass der User
     // etwas eingeben musste.
-    expect(find.byKey(const Key('task_open_title')), findsOneWidget);
+    expect(find.byKey(const Key('history_check_found')), findsOneWidget);
     await tester.tap(find.byKey(Key('task_open_$entryId')));
     await pumpUntil(tester, find.text('Lohnbescheinigung suchen'));
 
@@ -127,6 +127,14 @@ void main() {
 
     // Kein Lob, keine Gamification – nur eine Feststellung.
     expect(find.text('Alles abgehakt.'), findsOneWidget);
+  });
+
+  testWidgets('sagt auch, wenn die Historie nichts hergibt', (tester) async {
+    await pumpApp(tester);
+
+    // Der stumme Fall war der Fehler: Ohne Rückmeldung weiß der User nicht,
+    // ob überhaupt gesucht wurde.
+    expect(find.byKey(const Key('history_check_empty')), findsOneWidget);
   });
 
   testWidgets('ohne Titel oder Schritte bleibt der Knopf aus', (tester) async {

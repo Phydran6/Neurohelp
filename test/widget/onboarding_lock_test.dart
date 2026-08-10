@@ -131,7 +131,11 @@ void main() {
       await tester.tap(find.byKey(const Key('onb_pin_save')));
       await pumpUntil(tester, find.byKey(const Key('onb_extra_skip')));
 
+      // „Später" sagt einmal Bescheid, dass die Zwei-Faktor-Anmeldung
+      // offen bleibt – und danach nie wieder.
       await tester.tap(find.byKey(const Key('onb_extra_skip')));
+      await pumpUntil(tester, find.byKey(const Key('onb_mfa_hint_ok')));
+      await tester.tap(find.byKey(const Key('onb_mfa_hint_ok')));
       await pumpUntil(tester, find.byKey(const Key('onb_tone_sachlich')));
 
       await tester.tap(find.byKey(const Key('onb_tone_sachlich')));

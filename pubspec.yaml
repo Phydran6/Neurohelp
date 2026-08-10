@@ -8,7 +8,7 @@ publish_to: "none"
 # Der Zusatz `-alpha.N` ist Absicht und bleibt so lange stehen, bis die App
 # wirklich für fremde Geräte taugt. Er landet im Namen der App-Version und ist
 # damit auf dem Gerät sichtbar.
-version: 0.1.0-alpha.5+1
+version: 0.1.0-alpha.6+1
 
 environment:
   # Ab 3.8 formatiert `dart format` im neuen ("tall") Stil. Die Untergrenze

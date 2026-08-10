@@ -19,4 +19,8 @@ abstract interface class SettingsRepository {
 
   /// Merkt sich die einmalige Wahl der Anrufbegleitung.
   Future<AppSettings> setCompanionStyle(CompanionStyle style);
+
+  /// Merkt sich, dass der Hinweis auf die Zwei-Faktor-Anmeldung zu sehen war.
+  /// Er kommt danach nicht wieder.
+  Future<AppSettings> setMfaHintShown({required bool shown});
 }

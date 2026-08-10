@@ -60,6 +60,26 @@ void main() {
     expect(settings.aiEnabled, isFalse);
   });
 
+  test('der Zwei-Faktor-Hinweis merkt sich, dass er dran war', () async {
+    expect((await repository.load()).mfaHintShown, isFalse);
+
+    final settings = await repository.setMfaHintShown(shown: true);
+
+    // Damit er genau einmal kommt und danach nie wieder.
+    expect(settings.mfaHintShown, isTrue);
+  });
+
+  test('Biometrie lässt sich zugunsten der PIN abschalten', () async {
+    await repository.setLockMethod(LockMethod.biometric);
+    expect((await repository.load()).usesBiometrics, isTrue);
+
+    final settings = await repository.setLockMethod(LockMethod.pin);
+
+    expect(settings.usesBiometrics, isFalse);
+    // Abgeschaltete Biometrie heißt nicht: keine Sperre.
+    expect(settings.isLocked, isTrue);
+  });
+
   test('überlebt einen Neustart der App', () async {
     await repository.setTone(AiTone.sachlich);
     await repository.setOnboardingCompleted(completed: true);

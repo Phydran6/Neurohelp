@@ -1,0 +1,52 @@
+<!--
+  Bestätigung der Registrierung.
+
+  Der Code steht groß und zuerst. Der Link darunter ist nur die Zugabe für
+  Leute, die lieber klicken – die App fragt nach dem sechsstelligen Code.
+
+  Anlass: Die Standard-Vorlage von Supabase besteht aus zwei englischen
+  Sätzen und einem Link, der ohne passend gesetzte Site-URL auf
+  http://localhost:3000 zeigt und dort mit "otp_expired" endet. Das ist für
+  niemanden nachvollziehbar.
+-->
+<div style="margin:0;padding:24px;background:#f4f5f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#1b1c1f;">
+  <div style="max-width:520px;margin:0 auto;background:#ffffff;border-radius:16px;padding:32px;">
+
+    <p style="margin:0 0 4px;font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:#6b6f76;">
+      Neurohelp
+    </p>
+
+    <h1 style="margin:0 0 16px;font-size:22px;font-weight:600;">
+      Dein Bestätigungs-Code
+    </h1>
+
+    <p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#3c4048;">
+      Du hast dir gerade ein Neurohelp-Konto angelegt. Trag diesen Code in
+      der App ein – dann ist deine Adresse bestätigt und es geht weiter.
+    </p>
+
+    <div style="margin:0 0 24px;padding:20px;background:#0a1331;border-radius:12px;text-align:center;">
+      <span style="font-size:34px;font-weight:700;letter-spacing:.22em;color:#ffffff;font-family:'SF Mono',Menlo,Consolas,monospace;">
+        {{ .Token }}
+      </span>
+    </div>
+
+    <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#6b6f76;">
+      Der Code gilt eine Stunde. Wenn er abgelaufen ist, lässt du dir in der
+      App einfach einen neuen schicken – das kostet nichts und geht sofort.
+    </p>
+
+    <p style="margin:0 0 24px;font-size:14px;line-height:1.6;color:#6b6f76;">
+      Lieber klicken? Das geht auch:
+      <a href="{{ .ConfirmationURL }}" style="color:#3457d5;">Adresse bestätigen</a>
+    </p>
+
+    <hr style="border:none;border-top:1px solid #e6e8ec;margin:0 0 20px;" />
+
+    <p style="margin:0;font-size:13px;line-height:1.6;color:#6b6f76;">
+      Du hast dich gar nicht angemeldet? Dann ignorier diese Mail. Ohne den
+      Code passiert nichts, und ein Konto entsteht nicht.
+    </p>
+
+  </div>
+</div>

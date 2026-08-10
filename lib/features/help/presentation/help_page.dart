@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../core/config/app_version.dart';
 import '../../../core/di/app_services.dart';
+import '../../../core/logging/app_logger.dart';
 import '../domain/about_info.dart';
 import '../domain/faq.dart';
 import '../domain/help_service.dart';
@@ -11,8 +14,14 @@ import '../domain/help_service.dart';
 /// aber nur, wenn der Katalog nichts hergibt und der User KI eingeschaltet
 /// hat.
 class HelpPage extends StatefulWidget {
-  const HelpPage({super.key, this.version = '0.1.0', this.buildNumber = '1'});
+  const HelpPage({
+    super.key,
+    this.version = AppVersion.name,
+    this.buildNumber = AppVersion.build,
+  });
 
+  /// Kommt aus dem Build, nicht aus dem Quelltext – sonst steht hier
+  /// dauerhaft eine Version, die nie jemand installiert hat.
   final String version;
   final String buildNumber;
 
@@ -29,6 +38,32 @@ class _HelpPageState extends State<HelpPage> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+
+  Future<void> _open(AboutLink link) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final uri = Uri.parse(link.url);
+
+    try {
+      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (opened) return;
+    } on Exception catch (error, stackTrace) {
+      AppLogger.error(
+        'Link ließ sich nicht öffnen',
+        scope: 'help',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    // Kein Browser da oder abgelehnt: Dann wenigstens die Adresse zeigen,
+    // statt wortlos nichts zu tun.
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text('Konnte nicht geöffnet werden: ${link.url}'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   Future<void> _ask() async {
@@ -142,6 +177,21 @@ class _HelpPageState extends State<HelpPage> {
                 style: theme.textTheme.bodyMedium,
               ),
             ),
+            const SizedBox(height: 24),
+            // Alles, was nachvollziehbar sein soll, liegt öffentlich. Ein
+            // Info-Bereich ohne einen einzigen Verweis nach draußen ist eine
+            // Behauptung, keine Nachvollziehbarkeit.
+            Text('Zum Nachlesen', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final link in AboutInfo.links)
+              ListTile(
+                key: Key('about_link_${link.id}'),
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.open_in_new, size: 20),
+                title: Text(link.label),
+                subtitle: Text(link.hint),
+                onTap: () => _open(link),
+              ),
             const SizedBox(height: 24),
             Text('Verwendete Bibliotheken', style: theme.textTheme.titleSmall),
             const SizedBox(height: 8),

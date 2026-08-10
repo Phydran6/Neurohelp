@@ -67,6 +67,22 @@ class SqliteCallRepository {
     return rows.map(CallPlan.fromRow).toList();
   }
 
+  /// Alle offenen Anrufe, unabhängig von der Kategorie.
+  ///
+  /// Das ist der Historie-Check beim Einstieg: Er läuft, **bevor** der User
+  /// eine Kategorie antippt. Die Frage „Geht's um das von letztem Mal?" kommt
+  /// danach zusätzlich, pro Kategorie.
+  Future<List<CallPlan>> openPlans({int limit = 10}) async {
+    final rows = await _db.query(
+      DbSchema.tableCalls,
+      where: 'outcome = ?',
+      whereArgs: [CallOutcome.open.name],
+      orderBy: 'created_at DESC',
+      limit: limit,
+    );
+    return rows.map(CallPlan.fromRow).toList();
+  }
+
   Future<CallPlan> save(CallPlan plan) async {
     await _db.update(
       DbSchema.tableCalls,

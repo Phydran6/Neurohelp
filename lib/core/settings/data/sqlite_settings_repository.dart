@@ -19,6 +19,7 @@ class SqliteSettingsRepository implements SettingsRepository {
   static const _keyTone = 'tone';
   static const _keyLockMethod = 'lock_method';
   static const _keyCompanionStyle = 'companion_style';
+  static const _keyMfaHintShown = 'mfa_hint_shown';
 
   @override
   Future<AppSettings> load() async {
@@ -41,6 +42,8 @@ class SqliteSettingsRepository implements SettingsRepository {
       companionStyle:
           _readEnum(CompanionStyle.values, values[_keyCompanionStyle]) ??
           defaults.companionStyle,
+      mfaHintShown:
+          _readBool(values[_keyMfaHintShown]) ?? defaults.mfaHintShown,
     );
   }
 
@@ -62,6 +65,10 @@ class SqliteSettingsRepository implements SettingsRepository {
   @override
   Future<AppSettings> setCompanionStyle(CompanionStyle style) =>
       _write(_keyCompanionStyle, style.name);
+
+  @override
+  Future<AppSettings> setMfaHintShown({required bool shown}) =>
+      _write(_keyMfaHintShown, shown ? '1' : '0');
 
   Future<AppSettings> _write(String key, String value) async {
     await _db.insert(DbSchema.tableSettings, {

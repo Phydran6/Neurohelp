@@ -149,6 +149,23 @@ class SqliteMessageRepository {
     return updated;
   }
 
+  /// Angefangene Nachrichten, die noch nicht raus sind.
+  ///
+  /// Das ist der Historie-Check am Anfang des Features: Wer neulich etwas
+  /// angefangen und weggelegt hat, findet es hier wieder, ohne sich den
+  /// Betreff gemerkt zu haben. Nachrichten ohne Betreff sind Fehlstarts und
+  /// bleiben draußen.
+  Future<List<MessageDraft>> unfinished({int limit = 10}) async {
+    final rows = await _db.query(
+      DbSchema.tableMessages,
+      where: "state in (?, ?) and trim(subject) <> ''",
+      whereArgs: [MessageState.draft.name, MessageState.notSent.name],
+      orderBy: 'created_at DESC',
+      limit: limit,
+    );
+    return rows.map(MessageDraft.fromRow).toList();
+  }
+
   /// Nachrichten, bei denen offen ist, ob sie rausgingen.
   Future<List<MessageDraft>> awaitingConfirmation() async {
     final rows = await _db.query(

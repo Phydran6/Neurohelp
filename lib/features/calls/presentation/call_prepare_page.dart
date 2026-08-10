@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/ai/ai_client.dart';
 import '../../../core/di/app_services.dart';
+import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../domain/call_plan.dart';
 import 'call_active_page.dart';
@@ -70,6 +72,47 @@ class _CallPreparePageState extends State<CallPreparePage> {
       _point.clear();
     });
     _pointFocus.requestFocus();
+  }
+
+  void _addPoints(Iterable<String> texts) {
+    setState(() {
+      for (final text in texts) {
+        if (!_points.contains(text)) _points.add(text);
+      }
+    });
+  }
+
+  /// Was die KI zum Vorbereiten braucht: Kategorie und, falls schon da, das
+  /// Ziel und der Ansprechpartner.
+  String? _prepareInput() {
+    final plan = _plan;
+    if (plan == null) return null;
+
+    final goal = _goal.text.trim();
+    final contact = _contact.text.trim();
+
+    return [
+      'Kategorie: ${plan.category}',
+      if (goal.isNotEmpty) 'Ziel: $goal',
+      if (contact.isNotEmpty) 'Ansprechpartner: $contact',
+    ].join('\n');
+  }
+
+  /// Übernimmt einen kompletten Vorschlag.
+  ///
+  /// Der Backend-Prompt liefert erst das Ziel, dann den Ansprechpartner, dann
+  /// die Stichpunkte. Leere Felder werden gefüllt, ausgefüllte bleiben stehen
+  /// – überschrieben wird nichts, was der User selbst getippt hat.
+  void _acceptAll(List<String> lines) {
+    if (lines.isEmpty) return;
+
+    setState(() {
+      if (_goal.text.trim().isEmpty) _goal.text = lines.first;
+      if (lines.length > 1 && _contact.text.trim().isEmpty) {
+        _contact.text = lines[1];
+      }
+    });
+    _addPoints(lines.skip(lines.length > 1 ? 2 : 1));
   }
 
   bool get _ready => _number.text.trim().isNotEmpty && _points.isNotEmpty;
@@ -167,6 +210,15 @@ class _CallPreparePageState extends State<CallPreparePage> {
                               ),
                             ),
                             onSubmitted: (_) => _addPoint(),
+                          ),
+                          // Der Moment der KI-Hilfe (Konzept, Abschnitt 8,
+                          // Schritte 3 bis 5): Ziel, Ansprechpartner und ein
+                          // Leitfaden als Vorschlag – kein Skript zum Ablesen.
+                          AiSuggestionBox(
+                            task: AiTask.prepareCall,
+                            inputBuilder: _prepareInput,
+                            onAccept: (suggestion) => _addPoints([suggestion]),
+                            onAcceptAll: _acceptAll,
                           ),
                           for (var i = 0; i < _points.length; i++)
                             ListTile(

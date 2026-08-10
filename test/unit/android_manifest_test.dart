@@ -24,6 +24,22 @@ void main() {
       );
     });
 
+    test('kennt den Rückweg aus einer Bestätigungs-Mail', () {
+      final content = manifest.readAsStringSync();
+
+      // Die App arbeitet mit sechsstelligen Codes, weil Links aus Mail-Apps
+      // im falschen Browser landen. Der Link steht trotzdem in jeder Mail –
+      // ohne dieses Schema passiert beim Antippen gar nichts.
+      expect(
+        content,
+        contains('android:scheme="will.neurohelp.help"'),
+        reason:
+            'Muss zur Site-URL des Supabase-Projekts passen, '
+            'siehe docs/BACKEND.md.',
+      );
+      expect(content, contains('android.intent.category.BROWSABLE'));
+    });
+
     test('fragt keine Berechtigungen, die die App nicht braucht', () {
       final content = manifest.readAsStringSync();
 

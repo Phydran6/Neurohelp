@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/companion/tone_texts.dart';
+import '../../../core/di/app_services.dart';
 import '../../appointments/presentation/appointment_start_page.dart';
 import '../../calls/presentation/call_start_page.dart';
 import '../../messages/presentation/message_start_page.dart';
@@ -17,11 +19,16 @@ class MenuEntry {
 /// Das Hauptmenü (Konzept, Abschnitt 7).
 ///
 /// Auswahl vor Eingabe: Der User tippt auf das, was er vorhat, statt in ein
-/// leeres Feld zu schreiben. Die freie Eingabe steht bewusst zuletzt.
+/// leeres Feld zu schreiben.
 class MainMenuPage extends StatelessWidget {
   const MainMenuPage({super.key});
 
   /// Statt Emojis ruhige Symbole – gleiche Bedeutung, weniger Bildrauschen.
+  ///
+  /// Hier steht **nur**, was auch funktioniert. Der Eintrag „Etwas anderes"
+  /// hat einen Bildschirm versprochen und eine Notiz geliefert, dass es ihn
+  /// bald gibt – das ist schlimmer als eine kürzere Liste. Er kommt zurück,
+  /// wenn der freie Ablauf gebaut ist (Konzept, Abschnitt 7).
   static const List<MenuEntry> entries = [
     MenuEntry(id: 'call', label: 'Anruf erledigen', icon: Icons.call_outlined),
     MenuEntry(
@@ -39,16 +46,12 @@ class MainMenuPage extends StatelessWidget {
       label: 'Aufgabe sortieren',
       icon: Icons.checklist_outlined,
     ),
-    MenuEntry(
-      id: 'free',
-      label: 'Etwas anderes',
-      icon: Icons.chat_bubble_outline,
-    ),
   ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final texts = ToneTexts(AppScope.of(context).settings.current.tone);
 
     return Scaffold(
       appBar: AppBar(),
@@ -57,7 +60,7 @@ class MainMenuPage extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
           children: [
             Text(
-              'Was geht? Womit kann ich helfen?',
+              texts.menuTitle,
               key: const Key('menu_title'),
               style: theme.textTheme.headlineSmall,
             ),
@@ -111,21 +114,11 @@ class _MenuTile extends StatelessWidget {
       'message' => const MessageStartPage(),
       'call' => const CallStartPage(),
       'appointment' => const AppointmentStartPage(),
-      _ => null,
+      // Nicht erreichbar: [MainMenuPage.entries] enthält nur Einträge mit
+      // gebautem Bildschirm. Wer hier ergänzt, soll darüber stolpern.
+      _ => throw StateError('Kein Bildschirm für ${entry.id}.'),
     };
 
-    if (page != null) {
-      Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
-      return;
-    }
-
-    // Ehrlich statt so tun als ob: Die Abläufe dahinter sind gebaut und
-    // getestet, die Bildschirme dafür kommen als Nächstes.
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('„${entry.label}“ ist gleich fertig.'),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
   }
 }

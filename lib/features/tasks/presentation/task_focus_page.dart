@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/companion/tone_texts.dart';
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../domain/task_node.dart';
@@ -54,6 +55,7 @@ class _TaskFocusPageState extends State<TaskFocusPage> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final texts = ToneTexts(AppScope.of(context).settings.current.tone);
 
     return Scaffold(
       appBar: AppBar(title: Text(widget.title)),
@@ -63,13 +65,13 @@ class _TaskFocusPageState extends State<TaskFocusPage> {
           child: _loading
               ? const SizedBox.shrink()
               : _done
-              ? const _AllDone(key: Key('focus_done'))
+              ? _AllDone(key: const Key('focus_done'), text: texts.allDone)
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     const Spacer(),
                     Text(
-                      'Als Nächstes',
+                      texts.nextStepLabel,
                       key: const Key('focus_label'),
                       textAlign: TextAlign.center,
                       style: theme.textTheme.labelLarge?.copyWith(
@@ -118,7 +120,9 @@ class _TaskFocusPageState extends State<TaskFocusPage> {
 }
 
 class _AllDone extends StatelessWidget {
-  const _AllDone({super.key});
+  const _AllDone({required this.text, super.key});
+
+  final String text;
 
   @override
   Widget build(BuildContext context) {
@@ -135,7 +139,7 @@ class _AllDone extends StatelessWidget {
         const SizedBox(height: 20),
         // Feststellung, kein Lob. Konzept, Abschnitt 4: kein Coach.
         Text(
-          'Alles abgehakt.',
+          text,
           textAlign: TextAlign.center,
           style: theme.textTheme.headlineSmall,
         ),

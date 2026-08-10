@@ -13,6 +13,23 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Damit du Neurohelp mit deinem Gesicht entsperren kannst.</string>
+	<!-- Rueckweg aus einer Bestaetigungs- oder Reset-Mail. Die App arbeitet
+	     mit sechsstelligen Codes; der Link in der Mail ist die Zugabe und
+	     braucht dieses Schema, sonst passiert beim Antippen nichts. Der Wert
+	     muss zur Site-URL des Supabase-Projekts passen (docs/BACKEND.md). -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>will.neurohelp.help</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>will.neurohelp.help</string>
+			</array>
+		</dict>
+	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>mailto</string>

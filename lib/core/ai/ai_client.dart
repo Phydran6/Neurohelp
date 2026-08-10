@@ -39,6 +39,12 @@ abstract interface class AiClient {
   /// Ist das `false`, muss jeder Ablauf einen vollständig lokalen Weg haben.
   bool get isEnabled;
 
+  /// Übernimmt den KI-Schalter aus den Einstellungen **zur Laufzeit**.
+  ///
+  /// Ohne das wirkt ein Umlegen des Schalters erst nach einem Neustart der
+  /// App – für den User heißt das: es passiert nichts.
+  void setEnabled({required bool enabled});
+
   /// Führt eine Aufgabe aus und liefert den Antworttext.
   ///
   /// Wirft [AiUnavailableException], wenn die KI nicht erreichbar ist – der
@@ -48,6 +54,13 @@ abstract interface class AiClient {
     required String input,
     AiTone tone = AiTone.locker,
   });
+
+  /// Fragt einmal beim Backend nach, ob die KI gerade antwortet.
+  ///
+  /// Damit der User nach dem Umlegen des Schalters eine echte Rückmeldung
+  /// bekommt statt eines stummen Schalters. Wirft
+  /// [AiUnavailableException] mit einem Grund, den man anzeigen kann.
+  Future<void> probe();
 }
 
 /// Die KI ist gerade nicht nutzbar – kein Fehler des Users.
@@ -71,6 +84,12 @@ class DisabledAiClient implements AiClient {
   @override
   bool get isEnabled => false;
 
+  /// Ohne eingerichtetes Backend lässt sich die KI nicht anschalten. Der
+  /// Schalter in den Einstellungen darf trotzdem existieren – er speichert
+  /// die Absicht, und sobald ein Backend da ist, greift sie.
+  @override
+  void setEnabled({required bool enabled}) {}
+
   @override
   Future<String> run(
     AiTask task, {
@@ -78,5 +97,29 @@ class DisabledAiClient implements AiClient {
     AiTone tone = AiTone.locker,
   }) {
     throw const AiUnavailableException('KI ist in den Einstellungen aus.');
+  }
+
+  @override
+  Future<void> probe() async {
+    throw const AiUnavailableException(
+      'Für diese App ist kein KI-Backend hinterlegt.',
+    );
+  }
+}
+
+/// Zerlegt eine KI-Antwort in einzelne Vorschläge.
+///
+/// Die Modelle liefern trotz Prompt gern Nummerierungen, Spiegelstriche oder
+/// eine Leerzeile zwischendurch. Das hier ist die eine Stelle, die das
+/// aufräumt – nicht jede Seite für sich.
+abstract final class AiSuggestions {
+  static final RegExp _bullet = RegExp(r'^\s*(?:[-*•·]|\d+[.)])\s*');
+
+  static List<String> linesOf(String answer) {
+    return answer
+        .split('\n')
+        .map((line) => line.replaceFirst(_bullet, '').trim())
+        .where((line) => line.isNotEmpty)
+        .toList();
   }
 }

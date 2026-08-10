@@ -3,14 +3,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/di/app_services.dart';
+import '../../../shared/widgets/history_check.dart';
 import '../domain/call_plan.dart';
 import 'call_prepare_page.dart';
 
 /// Der Einstieg in „Anruf erledigen" (Konzept, Abschnitt 8).
 ///
-/// **Auswahl vor Eingabe:** zuerst die Kategorie antippen. Danach schaut die
-/// App nach, ob es dazu schon einen Vorgang gab.
-class CallStartPage extends StatelessWidget {
+/// **Historie zuerst, dann Auswahl vor Eingabe.** Die App schaut nach, ob
+/// noch ein Anruf offen ist – und sagt auch, wenn nichts da war. Erst danach
+/// die Kategorien.
+class CallStartPage extends StatefulWidget {
   const CallStartPage({super.key});
 
   /// Die häufigsten Fälle aus dem Konzept, plus ein offener Punkt.
@@ -23,6 +25,38 @@ class CallStartPage extends StatelessWidget {
   ];
 
   @override
+  State<CallStartPage> createState() => _CallStartPageState();
+}
+
+class _CallStartPageState extends State<CallStartPage> {
+  List<CallPlan> _open = const [];
+  HistoryCheckState _check = HistoryCheckState.running;
+  bool _loaded = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_loaded) unawaited(_load());
+  }
+
+  Future<void> _load() async {
+    final open = await AppScope.of(context).calls.openPlans();
+    if (!mounted) return;
+    setState(() {
+      _open = open;
+      _loaded = true;
+      _check = open.isEmpty ? HistoryCheckState.empty : HistoryCheckState.found;
+    });
+  }
+
+  Future<void> _resume(CallPlan plan) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(builder: (_) => CallPreparePage(planId: plan.id)),
+    );
+    if (mounted) unawaited(_load());
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
@@ -32,14 +66,20 @@ class CallStartPage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
           children: [
+            HistoryCheckHeader(state: _check),
+            for (final plan in _open) ...[
+              _OpenCallTile(plan: plan, onTap: () => _resume(plan)),
+              const SizedBox(height: 12),
+            ],
+            const SizedBox(height: 12),
             Text(
               'Wen rufst du an?',
               key: const Key('call_title'),
               style: theme.textTheme.headlineSmall,
             ),
             const SizedBox(height: 24),
-            for (final category in categories) ...[
-              _CategoryTile(category: category),
+            for (final category in CallStartPage.categories) ...[
+              _CategoryTile(category: category, onDone: _load),
               const SizedBox(height: 12),
             ],
           ],
@@ -49,10 +89,67 @@ class CallStartPage extends StatelessWidget {
   }
 }
 
+/// Ein offener Anruf aus der Historie.
+class _OpenCallTile extends StatelessWidget {
+  const _OpenCallTile({required this.plan, required this.onTap});
+
+  final CallPlan plan;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Material(
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        key: Key('call_open_${plan.id}'),
+        borderRadius: BorderRadius.circular(16),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      plan.goal?.isNotEmpty ?? false
+                          ? plan.goal!
+                          : plan.category,
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      plan.contactName ?? plan.category,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _CategoryTile extends StatelessWidget {
-  const _CategoryTile({required this.category});
+  const _CategoryTile({required this.category, required this.onDone});
 
   final String category;
+
+  /// Nach der Rückkehr neu nachschauen – der Vorgang kann jetzt erledigt sein.
+  final Future<void> Function() onDone;
 
   @override
   Widget build(BuildContext context) {
@@ -111,6 +208,7 @@ class _CategoryTile extends StatelessWidget {
         ),
       );
     }
+    await onDone();
   }
 
   Future<void> _startNew(BuildContext context) async {

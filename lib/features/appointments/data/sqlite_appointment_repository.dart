@@ -166,6 +166,20 @@ class SqliteAppointmentRepository {
     return appointment;
   }
 
+  /// Angefangene Termine, bei denen die Buchung noch aussteht.
+  ///
+  /// Das ist der Historie-Check beim Einstieg: Wer den Ablauf abgebrochen
+  /// hat, findet ihn hier wieder, statt von vorn anzufangen.
+  Future<List<Appointment>> unbooked({int limit = 10}) async {
+    final rows = await _db.query(
+      DbSchema.tableAppointments,
+      where: 'booked_at IS NULL',
+      orderBy: 'created_at DESC',
+      limit: limit,
+    );
+    return rows.map(Appointment.fromRow).toList();
+  }
+
   /// Termine, bei denen jetzt eine Phase fällig ist.
   Future<List<({Appointment appointment, FollowUpPhase phase})>>
   pendingNotifications() async {

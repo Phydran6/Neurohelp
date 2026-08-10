@@ -26,6 +26,7 @@ class AppSettings {
     this.tone = AiTone.locker,
     this.lockMethod = LockMethod.none,
     this.companionStyle = CompanionStyle.none,
+    this.mfaHintShown = false,
   });
 
   /// Ob das Onboarding vollständig durchlaufen wurde.
@@ -45,8 +46,18 @@ class AppSettings {
   /// bei jedem Anruf neu kommt (Konzept, Abschnitt 8a).
   final CompanionStyle companionStyle;
 
+  /// Ob der Hinweis auf die noch fehlende Zwei-Faktor-Anmeldung schon einmal
+  /// zu sehen war.
+  ///
+  /// Er kommt **genau einmal** – danach nie wieder. Ein Hinweis, der bei
+  /// jedem Start erneut aufpoppt, ist Druck (Konzept, Abschnitt 4).
+  final bool mfaHintShown;
+
   /// Ob die App beim Start gesperrt ist.
   bool get isLocked => lockMethod != LockMethod.none;
+
+  /// Ob beim Entsperren zuerst Fingerabdruck bzw. Gesicht versucht wird.
+  bool get usesBiometrics => lockMethod == LockMethod.biometric;
 
   AppSettings copyWith({
     bool? onboardingCompleted,
@@ -54,6 +65,7 @@ class AppSettings {
     AiTone? tone,
     LockMethod? lockMethod,
     CompanionStyle? companionStyle,
+    bool? mfaHintShown,
   }) {
     return AppSettings(
       onboardingCompleted: onboardingCompleted ?? this.onboardingCompleted,
@@ -61,6 +73,7 @@ class AppSettings {
       tone: tone ?? this.tone,
       lockMethod: lockMethod ?? this.lockMethod,
       companionStyle: companionStyle ?? this.companionStyle,
+      mfaHintShown: mfaHintShown ?? this.mfaHintShown,
     );
   }
 
@@ -71,7 +84,8 @@ class AppSettings {
       other.aiEnabled == aiEnabled &&
       other.tone == tone &&
       other.lockMethod == lockMethod &&
-      other.companionStyle == companionStyle;
+      other.companionStyle == companionStyle &&
+      other.mfaHintShown == mfaHintShown;
 
   @override
   int get hashCode => Object.hash(
@@ -80,5 +94,6 @@ class AppSettings {
     tone,
     lockMethod,
     companionStyle,
+    mfaHintShown,
   );
 }

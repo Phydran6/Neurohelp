@@ -53,5 +53,24 @@ void main() {
       );
       expect(double.parse(match!.group(1)!), greaterThanOrEqualTo(required));
     });
+
+    test('App.framework meldet dieselbe Version', () {
+      final content = File(
+        'ios/Flutter/AppFrameworkInfo.plist',
+      ).readAsStringSync();
+
+      final match = RegExp(
+        r'<key>MinimumOSVersion</key>\s*<string>([0-9.]+)</string>',
+      ).firstMatch(content);
+
+      expect(
+        match,
+        isNotNull,
+        reason:
+            'Ohne den Schluessel setzt Flutter das Engine-Minimum in '
+            'App.framework – Apple sieht dann wieder 13.0.',
+      );
+      expect(double.parse(match!.group(1)!), greaterThanOrEqualTo(required));
+    });
   });
 }

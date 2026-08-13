@@ -7,6 +7,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **iOS 15 gilt jetzt auch für `App.framework`.** Xcode-Projekt und Podfile
+  standen bereits auf 15.0; das eingebettete Flutter-Framework bekam ohne
+  eigenen Eintrag weiterhin das Engine-Minimum 13.0 – und damit ITMS-90068
+
 ## [0.1.0-alpha.6] - 2026-08-10
 
 ### Added

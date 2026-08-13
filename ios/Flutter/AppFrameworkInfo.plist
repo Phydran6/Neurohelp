@@ -20,5 +20,10 @@
   <string>????</string>
   <key>CFBundleVersion</key>
   <string>1.0</string>
+  <!-- App.framework traegt eine eigene MinimumOSVersion. Fehlt sie hier,
+       setzt das Flutter-Werkzeug das Engine-Minimum (13.0) ein – und Apple
+       meldet ITMS-90068, obwohl Xcode-Projekt und Podfile auf 15.0 stehen. -->
+  <key>MinimumOSVersion</key>
+  <string>15.0</string>
 </dict>
 </plist>

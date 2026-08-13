@@ -105,7 +105,7 @@ jobs:
             echo "::warning::Mindestens ein Bild hat die falsche Groesse. Anderes Gerät waehlen – 6,9-Zoll-iPhone."
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: store-screenshots
           path: build/screenshots/*.png

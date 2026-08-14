@@ -93,7 +93,11 @@ class SqliteHistoryRepository implements HistoryRepository {
   }
 
   @override
-  Future<List<HistoryEntry>> search(String query, {int limit = 20}) {
+  Future<List<HistoryEntry>> search(
+    String query, {
+    HistoryFeature? feature,
+    int limit = 20,
+  }) {
     final trimmed = query.trim();
     if (trimmed.isEmpty) {
       return Future<List<HistoryEntry>>.value(const []);
@@ -106,11 +110,51 @@ class SqliteHistoryRepository implements HistoryRepository {
         .replaceAll('%', r'\%')
         .replaceAll('_', r'\_');
 
-    return _queryEntries(
+    final where = StringBuffer(
       "(title LIKE ? ESCAPE '\\' OR contact LIKE ? ESCAPE '\\')",
-      ['%$escaped%', '%$escaped%'],
-      limit,
     );
+    final args = <Object?>['%$escaped%', '%$escaped%'];
+
+    if (feature != null) {
+      where.write(' AND feature = ?');
+      args.add(feature.name);
+    }
+
+    return _queryEntries(where.toString(), args, limit);
+  }
+
+  @override
+  Future<Map<HistoryFeature, ({int open, int total})>> countsByFeature() async {
+    final openStates = HistoryStatus.values
+        .where((status) => !_endStates.contains(status))
+        .map((status) => status.name)
+        .toList();
+    final placeholders = List.filled(openStates.length, '?').join(', ');
+
+    final rows = await _db.rawQuery(
+      'SELECT feature, '
+      'COUNT(*) AS total, '
+      'SUM(CASE WHEN status IN ($placeholders) THEN 1 ELSE 0 END) AS open '
+      'FROM ${DbSchema.tableEntries} GROUP BY feature',
+      openStates,
+    );
+
+    final counts = <HistoryFeature, ({int open, int total})>{};
+    for (final row in rows) {
+      final name = row['feature'] as String?;
+      final feature = HistoryFeature.values
+          .where((value) => value.name == name)
+          .firstOrNull;
+      // Ein Feature, das es in dieser Version nicht mehr gibt, wird
+      // übersprungen statt die ganze Übersicht zu sprengen.
+      if (feature == null) continue;
+
+      counts[feature] = (
+        open: (row['open'] as int?) ?? 0,
+        total: (row['total'] as int?) ?? 0,
+      );
+    }
+    return counts;
   }
 
   @override
@@ -144,9 +188,17 @@ class SqliteHistoryRepository implements HistoryRepository {
   }
 
   @override
-  Future<HistoryEntry> rename(String entryId, String title) async {
+  Future<HistoryEntry> rename(
+    String entryId,
+    String title, {
+    String? contact,
+  }) async {
     final entry = await _require(entryId);
-    final updated = entry.copyWith(title: title, updatedAt: _now());
+    final updated = entry.copyWith(
+      title: title,
+      contact: contact,
+      updatedAt: _now(),
+    );
 
     await _write(updated);
     return updated;
@@ -202,18 +254,28 @@ class SqliteHistoryRepository implements HistoryRepository {
 
   @override
   Future<List<HistoryEntry>> entriesDueForFollowUp({
+    HistoryFeature? feature,
     Duration minPause = const Duration(days: 2),
     int limit = 3,
   }) async {
     final cutoff = _now().subtract(minPause).millisecondsSinceEpoch;
 
+    final where = StringBuffer(
+      'closed_at IS NULL '
+      'AND follow_up_count < ? '
+      'AND (last_follow_up_at IS NULL OR last_follow_up_at <= ?)',
+    );
+    final args = <Object?>[HistoryEntry.maxFollowUps, cutoff];
+
+    if (feature != null) {
+      where.write(' AND feature = ?');
+      args.add(feature.name);
+    }
+
     final rows = await _db.query(
       DbSchema.tableEntries,
-      where:
-          'closed_at IS NULL '
-          'AND follow_up_count < ? '
-          'AND (last_follow_up_at IS NULL OR last_follow_up_at <= ?)',
-      whereArgs: [HistoryEntry.maxFollowUps, cutoff],
+      where: where.toString(),
+      whereArgs: args,
       orderBy: 'updated_at ASC',
       limit: limit,
     );
@@ -244,6 +306,16 @@ class SqliteHistoryRepository implements HistoryRepository {
 
   @override
   Future<void> deleteEntry(String entryId) async {
+    // Das Protokoll ausdrücklich mitlöschen, statt sich auf ON DELETE CASCADE
+    // zu verlassen: Die Fremdschlüssel hängen an einem PRAGMA, das pro
+    // Verbindung gesetzt wird. Fällt das einmal aus, bleiben sonst
+    // verwaiste Ereignisse zu einem Vorgang liegen, den der User gelöscht
+    // hat – genau das, was „gelöscht" nicht heißen darf.
+    await _db.delete(
+      DbSchema.tableEvents,
+      where: 'entry_id = ?',
+      whereArgs: [entryId],
+    );
     await _db.delete(
       DbSchema.tableEntries,
       where: 'id = ?',

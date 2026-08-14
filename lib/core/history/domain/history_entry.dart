@@ -64,12 +64,13 @@ class HistoryEntry {
     int? followUpCount,
     DateTime? lastFollowUpAt,
     bool clearClosedAt = false,
+    bool clearContact = false,
   }) {
     return HistoryEntry(
       id: id,
       feature: feature,
       title: title ?? this.title,
-      contact: contact ?? this.contact,
+      contact: clearContact ? null : (contact ?? this.contact),
       status: status ?? this.status,
       createdAt: createdAt,
       updatedAt: updatedAt ?? this.updatedAt,

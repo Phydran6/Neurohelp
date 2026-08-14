@@ -4,6 +4,7 @@ import '../../../core/companion/tone_texts.dart';
 import '../../../core/di/app_services.dart';
 import '../../appointments/presentation/appointment_start_page.dart';
 import '../../calls/presentation/call_start_page.dart';
+import '../../history/presentation/history_page.dart';
 import '../../messages/presentation/message_start_page.dart';
 import '../../tasks/presentation/task_start_page.dart';
 
@@ -69,6 +70,21 @@ class MainMenuPage extends StatelessWidget {
               _MenuTile(entry: entry),
               const SizedBox(height: 12),
             ],
+            const SizedBox(height: 20),
+            // Ruhig darunter statt als fünfte Kachel: Nachschauen ist kein
+            // Vorhaben, sondern der Weg dahin, wenn man das Vorhaben vergessen
+            // hat (Konzept, Abschnitt 12).
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                key: const Key('menu_history'),
+                icon: const Icon(Icons.history, size: 18),
+                label: const Text('Was war da nochmal?'),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(builder: (_) => const HistoryPage()),
+                ),
+              ),
+            ),
           ],
         ),
       ),

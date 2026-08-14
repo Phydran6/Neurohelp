@@ -28,9 +28,19 @@ abstract interface class HistoryRepository {
     int limit = 20,
   });
 
-  /// Volltextsuche über den Titel – für „Ich weiß nur, dass da was war"
-  /// (Konzept, Abschnitt 10, Schritt 2).
-  Future<List<HistoryEntry>> search(String query, {int limit = 20});
+  /// Volltextsuche über Titel und Ansprechpartner – für „Ich weiß nur, dass
+  /// da was war" (Konzept, Abschnitt 10, Schritt 2).
+  Future<List<HistoryEntry>> search(
+    String query, {
+    HistoryFeature? feature,
+    int limit = 20,
+  });
+
+  /// Wie viele Vorgänge es je Feature gibt, aufgeteilt in offen und gesamt.
+  ///
+  /// Grundlage für die Übersicht im Historie-Bereich: Der User soll sehen,
+  /// was da ist, ohne jede Liste einzeln aufzuklappen.
+  Future<Map<HistoryFeature, ({int open, int total})>> countsByFeature();
 
   Future<HistoryEntry> updateStatus(
     String entryId,
@@ -38,7 +48,13 @@ abstract interface class HistoryRepository {
     String? note,
   });
 
-  Future<HistoryEntry> rename(String entryId, String title);
+  /// Benennt einen Vorgang um und hält optional den Ansprechpartner nach.
+  ///
+  /// Features legen ihren Vorgang an, bevor der User den Titel getippt hat –
+  /// sonst stünde der Historie-Check am Anfang vor einer leeren Tabelle.
+  /// Damit in der Historie danach nicht „Ohne Titel" steht, muss das Feature
+  /// nachziehen, sobald es den Titel kennt.
+  Future<HistoryEntry> rename(String entryId, String title, {String? contact});
 
   /// Schließt einen Vorgang ab. [status] muss ein Endzustand sein.
   Future<HistoryEntry> closeEntry(
@@ -62,6 +78,7 @@ abstract interface class HistoryRepository {
   /// Liefert nur Einträge, die [HistoryEntry.maxFollowUps] noch nicht erreicht
   /// haben und deren letzte Nachfrage mindestens [minPause] her ist.
   Future<List<HistoryEntry>> entriesDueForFollowUp({
+    HistoryFeature? feature,
     Duration minPause = const Duration(days: 2),
     int limit = 3,
   });

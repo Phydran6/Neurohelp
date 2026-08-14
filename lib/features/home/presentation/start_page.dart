@@ -4,6 +4,7 @@ import '../../../core/companion/tone_texts.dart';
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../help/presentation/help_page.dart';
+import '../../history/presentation/history_page.dart';
 import '../../settings/presentation/settings_page.dart';
 import '../domain/greetings.dart';
 import 'main_menu_page.dart';
@@ -44,6 +45,19 @@ class StartPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
+                      // Die Historie ist das Rückgrat der App (Konzept,
+                      // Abschnitt 12) – bis hierher war sie nur für die App
+                      // sichtbar, nicht für den User.
+                      IconButton(
+                        key: const Key('start_history'),
+                        icon: const Icon(Icons.history),
+                        tooltip: 'Deine Historie',
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute<void>(
+                            builder: (_) => const HistoryPage(),
+                          ),
+                        ),
+                      ),
                       IconButton(
                         key: const Key('start_help'),
                         icon: const Icon(Icons.help_outline),

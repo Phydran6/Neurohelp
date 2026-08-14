@@ -5,6 +5,7 @@ import 'package:neurohelp/core/ai/ai_client.dart';
 import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/di/app_services.dart';
 import 'package:neurohelp/core/security/data/device_app_lock.dart';
+import 'package:neurohelp/core/security/recovery_codes.dart';
 import 'package:neurohelp/core/settings/app_settings.dart';
 import 'package:neurohelp/features/settings/presentation/settings_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -218,6 +219,18 @@ void main() {
     );
     await tester.pump();
     await tester.tap(find.byKey(const Key('mfa_confirm')));
+
+    // Nach dem Bestätigen kommt die Sicherung: Schlüssel und
+    // Wiederherstellungs-Codes, einmalig und zum Mitnehmen (Konzept,
+    // Abschnitt 13). Ohne sie wäre ein verlorenes Handy eine Sackgasse.
+    await pumpUntil(tester, find.byKey(const Key('mfa_done')));
+    expect(find.byKey(const Key('mfa_save_backup')), findsOneWidget);
+    expect(
+      await services.lock.remainingRecoveryCodes,
+      RecoveryCodes.defaultCount,
+    );
+
+    await tester.tap(find.byKey(const Key('mfa_backup_done')));
     await pumpUntil(tester, find.byKey(const Key('settings_message')));
 
     expect(await account.hasMfa(), isTrue);

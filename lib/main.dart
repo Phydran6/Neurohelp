@@ -9,6 +9,7 @@ import 'core/ai/data/supabase_ai_client.dart';
 import 'core/config/app_config.dart';
 import 'core/db/app_database.dart';
 import 'core/di/app_services.dart';
+import 'core/files/file_saver.dart';
 import 'core/logging/app_logger.dart';
 import 'core/security/data/device_app_lock.dart';
 import 'features/calls/data/url_launcher_call_launcher.dart';
@@ -28,6 +29,7 @@ Future<void> main() async {
     sender: const UrlLauncherMessageSender(),
     dialer: const UrlLauncherCallLauncher(),
     lock: const DeviceAppLock(),
+    files: const ShareFileSaver(),
     account: client == null
         ? const UnconfiguredAccountRepository()
         : SupabaseAccountRepository(client),

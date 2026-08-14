@@ -6,6 +6,7 @@ import 'package:local_auth/local_auth.dart';
 import '../../logging/app_logger.dart';
 import '../app_lock.dart';
 import '../pin_credential.dart';
+import '../recovery_codes.dart';
 
 /// Die App-Sperre auf dem echten Gerät.
 ///
@@ -23,6 +24,7 @@ class DeviceAppLock implements AppLock {
   final LocalAuthentication? _biometrics;
 
   static const String _key = 'pin_credential';
+  static const String _recoveryKey = 'recovery_codes';
 
   LocalAuthentication get _auth => _biometrics ?? LocalAuthentication();
 
@@ -76,6 +78,48 @@ class DeviceAppLock implements AppLock {
   @override
   Future<bool> get hasPin async => await _read() != null;
 
+  @override
+  Future<void> setRecoveryCodes(RecoveryCodes codes) =>
+      _storage.write(key: _recoveryKey, value: jsonEncode(codes.toJson()));
+
+  @override
+  Future<int> get remainingRecoveryCodes async =>
+      (await _readRecovery())?.remaining ?? 0;
+
+  @override
+  Future<UnlockResult> unlockWithRecoveryCode(String code) async {
+    final stored = await _readRecovery();
+    if (stored == null || stored.isEmpty) return UnlockResult.unavailable;
+
+    final left = stored.consume(code);
+    if (left == null) return UnlockResult.failed;
+
+    // Verbraucht ist verbraucht: Erst schreiben, dann entsperren. Andersherum
+    // bliebe der Code nach einem Absturz gültig.
+    await setRecoveryCodes(left);
+    return UnlockResult.success;
+  }
+
+  @override
+  Future<void> clearRecoveryCodes() => _storage.delete(key: _recoveryKey);
+
+  Future<RecoveryCodes?> _readRecovery() async {
+    final raw = await _storage.read(key: _recoveryKey);
+    if (raw == null) return null;
+
+    try {
+      return RecoveryCodes.fromJson(jsonDecode(raw) as Map<String, Object?>);
+    } on Exception catch (error, stackTrace) {
+      AppLogger.error(
+        'Gespeicherte Wiederherstellungs-Codes sind unlesbar',
+        scope: 'security',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
   Future<PinCredential?> _read() async {
     final raw = await _storage.read(key: _key);
     if (raw == null) return null;
@@ -101,6 +145,7 @@ class InMemoryAppLock implements AppLock {
 
   final bool biometricAvailable;
   PinCredential? _credential;
+  RecoveryCodes? _recovery;
 
   @override
   Future<bool> get isBiometricAvailable async => biometricAvailable;
@@ -127,4 +172,25 @@ class InMemoryAppLock implements AppLock {
 
   @override
   Future<bool> get hasPin async => _credential != null;
+
+  @override
+  Future<void> setRecoveryCodes(RecoveryCodes codes) async => _recovery = codes;
+
+  @override
+  Future<int> get remainingRecoveryCodes async => _recovery?.remaining ?? 0;
+
+  @override
+  Future<UnlockResult> unlockWithRecoveryCode(String code) async {
+    final stored = _recovery;
+    if (stored == null || stored.isEmpty) return UnlockResult.unavailable;
+
+    final left = stored.consume(code);
+    if (left == null) return UnlockResult.failed;
+
+    _recovery = left;
+    return UnlockResult.success;
+  }
+
+  @override
+  Future<void> clearRecoveryCodes() async => _recovery = null;
 }

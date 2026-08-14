@@ -8,7 +8,9 @@ import '../../../core/di/app_services.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../shared/widgets/error_details.dart';
 import '../../help/presentation/help_page.dart';
+import '../../history/presentation/history_page.dart';
 import '../../security/presentation/mfa_setup_page.dart';
+import '../../security/presentation/recovery_codes_page.dart';
 
 /// Die Einstellungen (Konzept, Abschnitte 5, 13, 14, 15).
 ///
@@ -36,6 +38,9 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _biometricAvailable = false;
   bool _busy = false;
 
+  /// Wie viele Wiederherstellungs-Codes noch offen sind.
+  int _recoveryLeft = 0;
+
   String? _message;
   String? _technical;
 
@@ -49,6 +54,7 @@ class _SettingsPageState extends State<SettingsPage> {
     final services = AppScope.of(context);
     final settings = await services.settings.load();
     final biometric = await services.lock.isBiometricAvailable;
+    final recoveryLeft = await services.lock.remainingRecoveryCodes;
 
     Account? account;
     var hasMfa = false;
@@ -61,6 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
     setState(() {
       _settings = settings;
       _biometricAvailable = biometric;
+      _recoveryLeft = recoveryLeft;
       _account = account;
       _hasMfa = hasMfa;
       _loading = false;
@@ -179,6 +186,18 @@ class _SettingsPageState extends State<SettingsPage> {
       if (!mounted) return;
       setState(() => _message = error.message.toString());
     }
+  }
+
+  Future<void> _openRecoveryCodes() async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<bool>(
+        builder: (_) => RecoveryCodesPage(remaining: _recoveryLeft),
+      ),
+    );
+    if (!mounted) return;
+
+    final left = await AppScope.of(context).lock.remainingRecoveryCodes;
+    if (mounted) setState(() => _recoveryLeft = left);
   }
 
   // ------------------------------------------------------------------- Konto
@@ -328,6 +347,21 @@ class _SettingsPageState extends State<SettingsPage> {
                   ..._accountSection(theme),
                   const SizedBox(height: 32),
                   ListTile(
+                    key: const Key('settings_history'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.history),
+                    title: const Text('Deine Historie'),
+                    subtitle: const Text(
+                      'Alles, was du mit mir angegangen bist – offen und '
+                      'erledigt',
+                    ),
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const HistoryPage(),
+                      ),
+                    ),
+                  ),
+                  ListTile(
                     key: const Key('settings_help'),
                     contentPadding: EdgeInsets.zero,
                     leading: const Icon(Icons.help_outline),
@@ -447,6 +481,23 @@ class _SettingsPageState extends State<SettingsPage> {
       leading: const Icon(Icons.pin_outlined),
       title: const Text('PIN ändern'),
       onTap: _changePin,
+    ),
+    // Der Notausgang aus Abschnitt 13. Er gehört hierher, zur Sperre, an der
+    // er vorbeiführt – nicht zum Konto.
+    ListTile(
+      key: const Key('settings_recovery_codes'),
+      contentPadding: EdgeInsets.zero,
+      leading: const Icon(Icons.key_outlined),
+      title: const Text('Wiederherstellungs-Codes'),
+      subtitle: Text(
+        _recoveryLeft > 0
+            ? 'Noch $_recoveryLeft offen. Damit kommst du rein, wenn PIN und '
+                  'Fingerabdruck nicht mehr gehen.'
+            : 'Noch keine da. Ohne sie ist ein vergessener Zugang eine '
+                  'Sackgasse.',
+      ),
+      isThreeLine: true,
+      onTap: _openRecoveryCodes,
     ),
   ];
 

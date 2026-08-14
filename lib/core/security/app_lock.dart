@@ -1,3 +1,5 @@
+import 'recovery_codes.dart';
+
 /// Ergebnis eines Entsperrversuchs.
 enum UnlockResult {
   /// Entsperrt – ab hier ist alles frei nutzbar.
@@ -40,4 +42,22 @@ abstract interface class AppLock {
 
   /// Ob überhaupt eine PIN hinterlegt ist.
   Future<bool> get hasPin;
+
+  /// Hinterlegt einen frischen Satz Wiederherstellungs-Codes.
+  ///
+  /// Ersetzt einen vorhandenen Satz vollständig – halbe Sätze aus zwei
+  /// Einrichtungen wären nicht nachvollziehbar.
+  Future<void> setRecoveryCodes(RecoveryCodes codes);
+
+  /// Wie viele Wiederherstellungs-Codes noch offen sind.
+  Future<int> get remainingRecoveryCodes;
+
+  /// Löst einen Wiederherstellungs-Code ein.
+  ///
+  /// Der Code ist danach verbraucht. [UnlockResult.unavailable] heißt: Es sind
+  /// gar keine Codes hinterlegt.
+  Future<UnlockResult> unlockWithRecoveryCode(String code);
+
+  /// Verwirft alle Wiederherstellungs-Codes.
+  Future<void> clearRecoveryCodes();
 }

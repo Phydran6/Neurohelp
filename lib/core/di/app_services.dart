@@ -6,6 +6,7 @@ import '../../features/appointments/data/sqlite_appointment_repository.dart';
 import '../../features/help/domain/help_service.dart';
 import '../../features/messages/data/sqlite_message_repository.dart';
 import '../../features/messages/domain/message_sender.dart';
+import '../files/file_saver.dart';
 import '../../features/tasks/data/sqlite_task_repository.dart';
 import '../../features/tasks/domain/task_repository.dart';
 import '../account/account_repository.dart';
@@ -38,6 +39,7 @@ class AppServices {
     required this.help,
     required this.account,
     required this.lock,
+    required this.files,
   });
 
   /// Baut die Dienste über einer geöffneten Datenbank auf.
@@ -51,6 +53,7 @@ class AppServices {
     DateTime Function()? clock,
     AccountRepository? account,
     AppLock? lock,
+    FileSaver files = const NoFileSaver(),
   }) {
     final history = SqliteHistoryRepository(database.raw, clock: clock);
     final aiClient = ai ?? const DisabledAiClient();
@@ -85,6 +88,7 @@ class AppServices {
       // App sagt das, statt eines vorzutaeuschen.
       account: account ?? const UnconfiguredAccountRepository(),
       lock: lock ?? InMemoryAppLock(),
+      files: files,
     );
   }
 
@@ -113,6 +117,10 @@ class AppServices {
 
   final AccountRepository account;
   final AppLock lock;
+
+  /// Gibt Dateien aus der App heraus – die Sicherung des Zugangs, den
+  /// ICS-Export eines Termins. In Tests bewusst wirkungslos.
+  final FileSaver files;
 
   Future<void> dispose() {
     settings.dispose();

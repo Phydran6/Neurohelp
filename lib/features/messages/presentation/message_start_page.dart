@@ -27,6 +27,17 @@ class _MessageStartPageState extends State<MessageStartPage> {
   HistoryCheckState _check = HistoryCheckState.running;
   bool _loaded = false;
 
+  /// Wofür in diesem Besuch schon eine Nachfrage gezählt wurde.
+  ///
+  /// Ohne das zählte jedes Neuladen der Seite – Rückkehr aus dem Entwurf,
+  /// Antwort auf eine andere Karte – als weitere Nachfrage, und die drei
+  /// erlaubten wären in einer Minute aufgebraucht.
+  final Set<String> _counted = {};
+
+  /// Karten, die der User in diesem Besuch schon erledigt oder weggeschoben
+  /// hat. Sie kommen erst beim nächsten Öffnen wieder – falls überhaupt.
+  final Set<String> _hidden = {};
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -39,24 +50,47 @@ class _MessageStartPageState extends State<MessageStartPage> {
     final unfinished = await messages.unfinished();
     if (!mounted) return;
 
+    // Gezeigt heißt gefragt: Der Zähler steht in der Historie, damit die App
+    // nach drei Nachfragen von selbst aufhört (Konzept, Abschnitt 10,
+    // Schritt 7).
+    for (final draft in awaiting) {
+      if (_counted.add(draft.id)) {
+        await messages.registerAsked(draft);
+      }
+    }
+    if (!mounted) return;
+
     setState(() {
-      _awaiting = awaiting;
+      // Was in diesem Besuch schon einmal dastand, bleibt stehen – sonst
+      // verschwindet die Karte unter den Fingern, weil das Nachfragen sie
+      // selbst aus der Liste nimmt.
+      _awaiting = [
+        ...awaiting,
+        ..._awaiting.where(
+          (draft) => awaiting.every((other) => other.id != draft.id),
+        ),
+      ].where((draft) => !_hidden.contains(draft.id)).toList();
       _unfinished = unfinished;
       _loaded = true;
-      _check = awaiting.isEmpty && unfinished.isEmpty
+      _check = _awaiting.isEmpty && unfinished.isEmpty
           ? HistoryCheckState.empty
           : HistoryCheckState.found;
     });
   }
 
   Future<void> _answer(MessageDraft draft, {required bool sent}) async {
+    _hidden.add(draft.id);
     await AppScope.of(context).messages.confirmSent(draft.id, sent: sent);
     if (mounted) unawaited(_load());
   }
 
   /// „Nicht jetzt" – der Vorgang bleibt, die Frage verschwindet für diesmal.
+  ///
+  /// Die Nachfrage ist beim Anzeigen schon gezählt worden; nach drei davon
+  /// bleibt der Vorgang still liegen. Kein Endlos-Gebettel, keine Schuld.
   void _dismiss(MessageDraft draft) {
     setState(() {
+      _hidden.add(draft.id);
       _awaiting = _awaiting.where((entry) => entry.id != draft.id).toList();
     });
   }
@@ -76,6 +110,11 @@ class _MessageStartPageState extends State<MessageStartPage> {
     await Navigator.of(context).push(
       MaterialPageRoute<bool>(builder: (_) => MessageComposePage(draft: draft)),
     );
+    if (!mounted) return;
+
+    // Wer sofort wieder zurückgeht, soll dafür keinen namenlosen Vorgang in
+    // der Historie behalten.
+    await services.messages.discardIfEmpty(draft.id);
     if (mounted) unawaited(_load());
   }
 

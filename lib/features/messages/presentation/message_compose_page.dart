@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/ai/ai_client.dart';
@@ -45,7 +47,7 @@ class _MessageComposePageState extends State<MessageComposePage> {
     _ => '',
   };
 
-  void _applyAndAdvance() {
+  Future<void> _applyAndAdvance() async {
     final text = _controller.text.trim();
 
     final draft = switch (_flow.step) {
@@ -66,6 +68,13 @@ class _MessageComposePageState extends State<MessageComposePage> {
     while (next.step == MessageStep.historyCheck && next.nextStep != null) {
       next = next.advance();
     }
+
+    // Jeder Schritt geht sofort in die Datenbank. Vorher wurde erst beim
+    // Übergeben gespeichert – wer mittendrin aufhörte, verlor alles, und die
+    // Liste „Angefangen und liegengeblieben" blieb für immer leer, weil es
+    // nie eine liegengebliebene Zeile gab.
+    await AppScope.of(context).messages.save(draft);
+    if (!mounted) return;
 
     setState(() {
       _flow = next;
@@ -205,7 +214,7 @@ class _MessageComposePageState extends State<MessageComposePage> {
                   label: 'Weiter',
                   onPressed: _controller.text.trim().isEmpty
                       ? null
-                      : _applyAndAdvance,
+                      : () => unawaited(_applyAndAdvance()),
                 ),
             ],
           ),

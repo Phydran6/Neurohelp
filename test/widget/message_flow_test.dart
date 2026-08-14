@@ -31,10 +31,15 @@ void main() {
   late AppServices services;
   late _RecordingSender sender;
 
+  /// Stellbare Uhr: Die Pause zwischen zwei Nachfragen zählt in Tagen. Ohne
+  /// sie ließe sich nicht prüfen, dass die App irgendwann von selbst aufhört.
+  late DateTime now;
+
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
     sender = _RecordingSender();
-    services = AppServices.from(database, sender: sender);
+    now = DateTime(2026, 8, 14, 10);
+    services = AppServices.from(database, sender: sender, clock: () => now);
   });
 
   tearDown(() => database.close());
@@ -127,9 +132,51 @@ void main() {
     expect(sender.handedOver, isNotNull);
 
     // Übergeben heißt nicht gesendet – der Vorgang bleibt offen.
-    final open = await services.messages.awaitingConfirmation();
-    expect(open, hasLength(1));
-    expect(open.single.state, MessageState.handedOver);
+    //
+    // Geprüft wird der Vorgang selbst, nicht `awaitingConfirmation`: Die
+    // Startseite hat die Nachfrage beim Zurückkommen schon gestellt und
+    // gezählt. Sie kommt bewusst erst nach einer Pause wieder – höchstens
+    // drei Nachfragen insgesamt (Konzept, Abschnitt 10, Schritt 7).
+    final draft = (await services.messages.unfinished()).firstOrNull;
+    expect(
+      draft,
+      isNull,
+      reason: 'übergeben ist kein liegengebliebener Entwurf',
+    );
+
+    final entry = await services.history.entryById(sender.handedOver!.entryId);
+    expect(entry!.status, HistoryStatus.handedOver);
+    expect(entry.isOpen, isTrue);
+  });
+
+  testWidgets('hört nach drei Nachfragen von selbst auf', (tester) async {
+    final draft = await services.messages.create(subject: 'Neue Karte');
+    await services.messages.save(
+      draft.copyWith(recipient: 'a@b.example', body: 'Text'),
+    );
+    await services.messages.handOver(draft.id);
+
+    // Drei Nachfragen, wie sie beim Anzeigen der Karte gezählt werden – je
+    // eine pro Woche, damit die Pause dazwischen nicht der Grund ist.
+    for (var round = 0; round < HistoryEntry.maxFollowUps; round++) {
+      expect(
+        await services.messages.awaitingConfirmation(),
+        hasLength(1),
+        reason: 'Nachfrage ${round + 1} ist noch erlaubt',
+      );
+      await services.messages.registerAsked(draft);
+      now = now.add(const Duration(days: 7));
+    }
+
+    // Danach ist Schluss. Kein Endlos-Gebettel, keine Schuld – der Vorgang
+    // bleibt still als offene Aufgabe liegen.
+    expect(await services.messages.awaitingConfirmation(), isEmpty);
+
+    await pumpApp(tester);
+    expect(find.byKey(Key('msg_followup_${draft.id}')), findsNothing);
+
+    final entry = await services.history.entryById(draft.entryId);
+    expect(entry!.isOpen, isTrue);
   });
 
   testWidgets('fragt beim nächsten Öffnen sanft nach, mit Ausweg', (

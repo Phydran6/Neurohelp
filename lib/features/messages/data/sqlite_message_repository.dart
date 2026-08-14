@@ -60,6 +60,10 @@ class SqliteMessageRepository {
   }
 
   /// Speichert Zwischenstände. Der Text geht nie verloren.
+  ///
+  /// Zieht dabei den Historien-Vorgang nach: Der entsteht beim Anlegen mit
+  /// leerem Titel, weil der Betreff da noch nicht getippt ist. Ohne dieses
+  /// Nachziehen hieße **jede** Nachricht in der Historie „Ohne Titel".
   Future<MessageDraft> save(MessageDraft draft) async {
     await _db.update(
       DbSchema.tableMessages,
@@ -67,6 +71,15 @@ class SqliteMessageRepository {
       where: 'id = ?',
       whereArgs: [draft.id],
     );
+
+    final subject = draft.subject.trim();
+    if (subject.isNotEmpty) {
+      await _history.rename(
+        draft.entryId,
+        subject,
+        contact: draft.recipient ?? draft.recipientType,
+      );
+    }
 
     if (draft.recipient != null) {
       await _history.logEvent(
@@ -76,6 +89,21 @@ class SqliteMessageRepository {
       );
     }
     return draft;
+  }
+
+  /// Wirft einen Entwurf weg, aus dem nie etwas wurde.
+  ///
+  /// Der Vorgang entsteht beim Antippen von „Neue Nachricht", nicht erst beim
+  /// Tippen. Wer es sich sofort anders überlegt, soll dafür keinen leeren
+  /// Eintrag in seiner Historie behalten.
+  Future<void> discardIfEmpty(String id) async {
+    final draft = await byId(id);
+    if (draft == null) return;
+    if (draft.subject.trim().isNotEmpty || draft.body.trim().isNotEmpty) return;
+    if (draft.state != MessageState.draft) return;
+
+    await _db.delete(DbSchema.tableMessages, where: 'id = ?', whereArgs: [id]);
+    await _history.deleteEntry(draft.entryId);
   }
 
   /// Übergibt an die System-App.
@@ -166,16 +194,42 @@ class SqliteMessageRepository {
     return rows.map(MessageDraft.fromRow).toList();
   }
 
-  /// Nachrichten, bei denen offen ist, ob sie rausgingen.
+  /// Nachrichten, bei denen offen ist, ob sie rausgingen – und bei denen die
+  /// App noch fragen **darf**.
+  ///
+  /// Konzept, Abschnitt 10, Schritt 7: höchstens drei Nachfragen insgesamt,
+  /// ruhig verteilt, danach hört die App von selbst auf. Vorher hing die
+  /// Karte allein am Zustand `handedOver` – wer nie „Ja" oder „Nein" gedrückt
+  /// hat, bekam sie bei **jedem** Öffnen wieder. Genau das Endlos-Gebettel,
+  /// das das Konzept ausschließt.
   Future<List<MessageDraft>> awaitingConfirmation() async {
+    final due = await _history.entriesDueForFollowUp(
+      feature: HistoryFeature.message,
+      limit: 50,
+    );
+    if (due.isEmpty) return const [];
+
+    final dueIds = {for (final entry in due) entry.id};
     final rows = await _db.query(
       DbSchema.tableMessages,
       where: 'state = ?',
       whereArgs: [MessageState.handedOver.name],
       orderBy: 'handed_over_at ASC',
     );
-    return rows.map(MessageDraft.fromRow).toList();
+
+    return rows
+        .map(MessageDraft.fromRow)
+        .where((draft) => dueIds.contains(draft.entryId))
+        .toList();
   }
+
+  /// Vermerkt, dass die App zu dieser Nachricht nachgefragt hat.
+  ///
+  /// Erhöht den Zähler in der Historie. Nach [HistoryEntry.maxFollowUps]
+  /// kommt die Frage nicht wieder; der Vorgang bleibt als offene Aufgabe
+  /// liegen, ohne Schuld und ohne Erinnerung.
+  Future<void> registerAsked(MessageDraft draft) =>
+      _history.registerFollowUp(draft.entryId);
 
   Future<MessageDraft> _require(String id) async {
     final draft = await byId(id);

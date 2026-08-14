@@ -7,8 +7,55 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+
+- **Die Historie ist endlich sichtbar.** Sie war von Anfang an das Rückgrat
+  der App – jedes Feature hat hineingeschrieben, gelesen hat daraus nur der
+  Historie-Check am Anfang. Nachschauen konnte man nirgends. Jetzt gibt es
+  einen eigenen Bereich (Startseite, Hauptmenü und Einstellungen) mit allen
+  Vorgängen quer über Anruf, Termin, Nachricht und Aufgabe: durchsuchbar
+  nach Thema und Ansprechpartner, filterbar je Feature, offen und erledigt
+- **Jeder Vorgang zeigt seinen vollständigen Verlauf.** „Alles wird
+  geloggt" war Designprinzip 9 und stimmte auch – nur konnte niemand es
+  sehen. Angefangen, Schritt erledigt, übergeben, nachgefragt,
+  abgeschlossen: alles mit Zeitpunkt und Notiz. Vorgänge lassen sich von
+  Hand abhaken, wieder öffnen, umbenennen und löschen
+- **Wiederherstellungs-Codes, und zwar zum Herunterladen.** Nach dem
+  Einrichten der Zwei-Faktor-Anmeldung kommt eine Sicherungsdatei mit dem
+  Schlüssel und zehn Codes – über das System-Blatt zu speichern, wo der
+  User will. Auch der Schlüssel allein lässt sich schon vor dem Bestätigen
+  sichern. Jeder Code gilt genau einmal und bringt an der App-Sperre
+  vorbei, wenn PIN und Fingerabdruck nicht mehr gehen. Nachholbar und neu
+  erzeugbar in den Einstellungen unter „App-Sperre"
+- **Termine lassen sich in den Kalender übernehmen.** Der ICS-Export war
+  vollständig gebaut, getestet und an keiner Stelle erreichbar. Er hängt
+  jetzt am Buchen-Bildschirm
+
 ### Fixed
 
+- **Die Nachfrage zu übergebenen Nachrichten hörte nie auf.** Das Konzept
+  erlaubt höchstens drei Nachfragen, ruhig verteilt, danach bleibt der
+  Vorgang still liegen. Tatsächlich kam die Karte bei **jedem** Öffnen
+  wieder: Der Zähler in der Historie wurde nirgends hochgezählt, und
+  „Nicht jetzt" blendete sie nur bis zum nächsten Besuch aus
+- **Angefangene Nachrichten gingen verloren.** Gespeichert wurde erst beim
+  Übergeben an die Mail-App. Wer mittendrin aufhörte, fand nichts wieder –
+  und die Liste „Angefangen und liegengeblieben" konnte gar nichts
+  enthalten, weil es nie eine liegengebliebene Zeile gab
+- **Jede Nachricht hieß in der Historie „Ohne Titel".** Der Vorgang
+  entsteht beim Antippen von „Neue Nachricht", also bevor der Betreff
+  getippt ist. Nachgezogen wurde er nie
+- **Ein sofort abgebrochener Entwurf hinterließ einen leeren Vorgang**, der
+  für immer in der Historie stehen blieb
+- **Ein gelöschter Vorgang konnte sein Protokoll behalten.** Das Aufräumen
+  hing allein an `ON DELETE CASCADE`, und das hängt an einem PRAGMA pro
+  Verbindung. Die Ereignisse werden jetzt ausdrücklich mitgelöscht
+- **Ein Termin, den es nicht mehr gibt, zeigte einen leeren Bildschirm**
+  ohne Erklärung und ohne Ausweg – der Ladezustand wurde in diesem Fall nie
+  beendet
+- **Die Zwei-Faktor-Einrichtung konnte zwei Faktoren anlegen.** Der Schutz
+  gegen den zweiten Aufruf griff während des Ladens nicht, und
+  `didChangeDependencies` läuft auch bei jedem Themen- und Größenwechsel
 - **iOS 15 gilt jetzt auch für `App.framework`.** Xcode-Projekt und Podfile
   standen bereits auf 15.0; das eingebettete Flutter-Framework bekam ohne
   eigenen Eintrag weiterhin das Engine-Minimum 13.0 – und damit ITMS-90068

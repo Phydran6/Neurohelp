@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../../core/calendar/calendar_service.dart';
+import '../../../core/calendar/ics.dart';
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../domain/appointment.dart';
@@ -28,6 +30,7 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
   DateTime? _startsAt;
   final List<String> _checklist = [];
   bool _loading = true;
+  String? _note;
 
   @override
   void didChangeDependencies() {
@@ -47,13 +50,16 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
     final appointment = await AppScope.of(
       context,
     ).appointments.byId(widget.appointmentId);
-    if (!mounted || appointment == null) return;
+    if (!mounted) return;
 
+    // Auch ohne Termin fertig laden: Vorher blieb `_loading` in diesem Fall
+    // für immer stehen und der User sah einen leeren Bildschirm ohne
+    // Erklärung und ohne Ausweg.
     setState(() {
       _appointment = appointment;
-      _startsAt = appointment.startsAt;
-      _location.text = appointment.location ?? '';
-      _checklist.addAll(appointment.checklist);
+      _startsAt = appointment?.startsAt;
+      _location.text = appointment?.location ?? '';
+      if (appointment != null) _checklist.addAll(appointment.checklist);
       _loading = false;
     });
   }
@@ -111,6 +117,52 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
+  /// Den Termin als `.ics` herausgeben (Konzept, Abschnitt 8, Schritt 7).
+  ///
+  /// Der Weg ohne Kalenderzugriff: Die Datei kennt die anderen Termine nicht
+  /// und prüft deshalb nichts auf Kollisionen – dafür funktioniert sie mit
+  /// jedem Kalender, auch mit dem, den die App nicht kennt.
+  Future<void> _exportIcs() async {
+    final startsAt = _startsAt;
+    final appointment = _appointment;
+    if (startsAt == null || appointment == null) return;
+
+    final services = AppScope.of(context);
+    final event = CalendarEvent(
+      title: appointment.title,
+      start: startsAt,
+      end: startsAt.add(const Duration(hours: 1)),
+      location: _location.text.trim().isEmpty ? null : _location.text.trim(),
+      description: _checklist.isEmpty
+          ? null
+          : 'Mitnehmen: ${_checklist.join(', ')}',
+    );
+
+    final box = context.findRenderObject() as RenderBox?;
+    final origin = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
+
+    try {
+      await services.files.save(
+        fileName: 'termin.ics',
+        content: IcsExporter.export(event),
+        mimeType: 'text/calendar',
+        subject: appointment.title,
+        origin: origin,
+      );
+      if (!mounted) return;
+      setState(() => _note = 'Termin ist raus – such dir deinen Kalender aus.');
+    } on Exception {
+      if (!mounted) return;
+      setState(
+        () => _note =
+            'Das Herausgeben hat nicht geklappt. Der Termin ist trotzdem hier '
+            'gespeichert.',
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -121,6 +173,20 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
       body: SafeArea(
         child: _loading
             ? const SizedBox.shrink()
+            : _appointment == null
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
+                  child: Text(
+                    'Diesen Termin gibt es nicht mehr.',
+                    key: const Key('appt_missing'),
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              )
             : Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                 child: Column(
@@ -198,11 +264,29 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                         ],
                       ),
                     ),
+                    if (_note != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _note!,
+                        key: const Key('appt_note'),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: 12),
                     BigActionButton(
                       key: const Key('appt_save'),
                       label: 'Termin steht',
                       onPressed: startsAt == null ? null : _save,
+                    ),
+                    // Der Weg in den eigenen Kalender, ohne der App dafür
+                    // Kalenderzugriff geben zu müssen.
+                    TextButton.icon(
+                      key: const Key('appt_export_ics'),
+                      onPressed: startsAt == null ? null : _exportIcs,
+                      icon: const Icon(Icons.calendar_month_outlined, size: 18),
+                      label: const Text('In den Kalender übernehmen'),
                     ),
                   ],
                 ),

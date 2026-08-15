@@ -5,7 +5,18 @@ import '../../../core/settings/app_settings.dart';
 ///
 /// Reihenfolge steht fest, der Feinschliff der Texte kommt laut Konzept
 /// bewusst nach der ersten Bauphase.
+///
+/// Vorneweg stehen zwei reine Erklärbildschirme. Sie verlangen nichts und
+/// halten deshalb auch niemanden auf – aber sie beantworten die zwei Fragen,
+/// die vor dem Konto-Formular sonst offen bleiben: was kann das hier, und wie
+/// bedient man es.
 enum OnboardingStep {
+  /// Was die App kann. Nur Text, ein Knopf weiter.
+  welcome,
+
+  /// Wie die App funktioniert. Nur Text, ein Knopf weiter.
+  howItWorks,
+
   /// Konto anlegen: Benutzername, E-Mail, Passwort. Pflicht.
   account,
 
@@ -32,7 +43,7 @@ enum OnboardingStep {
 /// Fortschrittsbalken, der Druck macht.
 class OnboardingFlow {
   const OnboardingFlow({
-    this.step = OnboardingStep.account,
+    this.step = OnboardingStep.welcome,
     this.accountCreated = false,
     this.aiEnabled,
     this.lockMethod,
@@ -125,6 +136,9 @@ class OnboardingFlow {
   }
 
   bool _isSatisfied(OnboardingStep value) => switch (value) {
+    // Erklärbildschirme verlangen keine Entscheidung – nur Lesen und Weiter.
+    OnboardingStep.welcome => true,
+    OnboardingStep.howItWorks => true,
     OnboardingStep.account => accountCreated,
     OnboardingStep.aiChoice => aiEnabled != null,
     OnboardingStep.security =>

@@ -60,6 +60,17 @@ void main() {
     );
   }
 
+  /// Die beiden Erklärbildschirme durchtippen.
+  ///
+  /// Sie stehen vor jedem Konto-Formular; ohne diesen Schritt läuft kein
+  /// Test des eigentlichen Onboardings mehr los.
+  Future<void> passIntro(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('onb_intro_next')));
+    await pumpUntil(tester, find.byKey(const Key('onb_intro_start')));
+    await tester.tap(find.byKey(const Key('onb_intro_start')));
+    await pumpUntil(tester, find.byKey(const Key('onb_username')));
+  }
+
   Future<void> createAccount(WidgetTester tester) async {
     await tester.enterText(find.byKey(const Key('onb_username')), 'philipp');
     await tester.enterText(
@@ -72,9 +83,42 @@ void main() {
   }
 
   group('Onboarding', () {
-    testWidgets('beginnt mit dem Konto', (tester) async {
+    testWidgets('erklärt sich selbst, bevor es etwas verlangt', (tester) async {
       await pumpOnboarding(tester);
       await tester.pumpAndSettle();
+
+      // Erster Bildschirm: was die App kann – und noch kein Eingabefeld.
+      expect(find.byKey(const Key('onb_intro_was')), findsOneWidget);
+      expect(find.text('Das nimmt dir Neurohelp ab'), findsOneWidget);
+      expect(find.byKey(const Key('intro_point_anruf')), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+
+      // Zweiter Bildschirm: wie es funktioniert.
+      await tester.tap(find.byKey(const Key('onb_intro_next')));
+      await pumpUntil(tester, find.byKey(const Key('onb_intro_wie')));
+
+      expect(find.text('So läuft das hier'), findsOneWidget);
+      expect(find.byKey(const Key('intro_point_lokal')), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+    });
+
+    testWidgets('lässt zum ersten Erklärbildschirm zurück', (tester) async {
+      await pumpOnboarding(tester);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('onb_intro_next')));
+      await pumpUntil(tester, find.byKey(const Key('onb_intro_back')));
+
+      await tester.tap(find.byKey(const Key('onb_intro_back')));
+      await pumpUntil(tester, find.byKey(const Key('onb_intro_was')));
+
+      expect(find.text('Das nimmt dir Neurohelp ab'), findsOneWidget);
+    });
+
+    testWidgets('nach zwei Bildschirmen kommt das Konto', (tester) async {
+      await pumpOnboarding(tester);
+      await tester.pumpAndSettle();
+      await passIntro(tester);
 
       expect(find.text('Erst ein Konto'), findsOneWidget);
       expect(find.byKey(const Key('onb_username')), findsOneWidget);
@@ -86,6 +130,7 @@ void main() {
       services = AppServices.from(database, lock: lock);
       await pumpOnboarding(tester);
       await tester.pumpAndSettle();
+      await passIntro(tester);
 
       await tester.enterText(find.byKey(const Key('onb_username')), 'philipp');
       await tester.enterText(
@@ -106,6 +151,7 @@ void main() {
     testWidgets('der KI-Toggle ist eine echte Entscheidung', (tester) async {
       await pumpOnboarding(tester);
       await tester.pumpAndSettle();
+      await passIntro(tester);
       await createAccount(tester);
 
       // Zwei gleichwertige Knöpfe, keine Voreinstellung.
@@ -121,6 +167,7 @@ void main() {
       await pumpOnboarding(tester, onDone: () => done = true);
       await tester.pumpAndSettle();
 
+      await passIntro(tester);
       await createAccount(tester);
 
       await tester.tap(find.byKey(const Key('onb_ai_no')));

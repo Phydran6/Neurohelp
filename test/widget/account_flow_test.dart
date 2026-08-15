@@ -53,6 +53,10 @@ void main() {
     fail('Nicht gefunden: $finder');
   }
 
+  /// Startet das Onboarding und tippt die beiden Erklärbildschirme durch.
+  ///
+  /// Hier geht es um die Konto-Wege; die Erklärung davor hat ihre eigenen
+  /// Tests in `onboarding_lock_test.dart`.
   Future<void> pumpOnboarding(WidgetTester tester) async {
     await tester.pumpWidget(
       AppScope(
@@ -61,6 +65,11 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('onb_intro_next')));
+    await pumpUntil(tester, find.byKey(const Key('onb_intro_start')));
+    await tester.tap(find.byKey(const Key('onb_intro_start')));
+    await pumpUntil(tester, find.byKey(const Key('onb_create')));
   }
 
   testWidgets('beide Wege stehen gleich auf dem ersten Bildschirm', (

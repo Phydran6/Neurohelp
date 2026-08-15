@@ -9,7 +9,9 @@ import '../../../core/settings/app_settings.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/error_details.dart';
 import '../../security/presentation/mfa_setup_page.dart';
+import '../domain/intro_slides.dart';
 import '../domain/onboarding_flow.dart';
+import 'intro_slide_view.dart';
 
 /// Was auf dem Konto-Bildschirm gerade dran ist.
 ///
@@ -35,7 +37,11 @@ enum AccountMode {
 
 /// Das Onboarding (Konzept, Abschnitt 16).
 ///
-/// Fünf Schritte, einer pro Bildschirm. KI-Toggle und App-Sperre sind
+/// Zuerst zwei Erklärbildschirme – was die App kann und wie sie funktioniert.
+/// Sie verlangen nichts, kosten zweimal Tippen und ersparen dem User die
+/// Frage, worauf er sich hier gerade einlässt.
+///
+/// Danach fünf Schritte, einer pro Bildschirm. KI-Toggle und App-Sperre sind
 /// **Pflichtentscheidungen** – nur die Zusatzsicherheit ist überspringbar,
 /// und die sagt beim Überspringen einmal ruhig Bescheid.
 class OnboardingPage extends StatefulWidget {
@@ -401,6 +407,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Widget _body() => switch (_flow.step) {
+    OnboardingStep.welcome => const IntroSlideView(
+      key: Key('onb_intro_was'),
+      slide: IntroSlides.whatItDoes,
+    ),
+    OnboardingStep.howItWorks => const IntroSlideView(
+      key: Key('onb_intro_wie'),
+      slide: IntroSlides.howItWorks,
+    ),
     OnboardingStep.account => _accountBody(),
     OnboardingStep.aiChoice => const SizedBox.shrink(),
     OnboardingStep.security => TextField(
@@ -494,6 +508,29 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   Widget _actions() => switch (_flow.step) {
+    OnboardingStep.welcome => BigActionButton(
+      key: const Key('onb_intro_next'),
+      label: IntroSlides.whatItDoes.action,
+      onPressed: _advance,
+    ),
+    OnboardingStep.howItWorks => Column(
+      children: [
+        BigActionButton(
+          key: const Key('onb_intro_start'),
+          label: IntroSlides.howItWorks.action,
+          onPressed: _advance,
+        ),
+        const SizedBox(height: 8),
+        // Zurückblättern muss möglich sein: Wer den ersten Bildschirm zu
+        // schnell weggetippt hat, soll ihn nicht erst nach dem kompletten
+        // Onboarding im Hilfe-Bereich wiederfinden.
+        TextButton(
+          key: const Key('onb_intro_back'),
+          onPressed: () => setState(() => _flow = _flow.back()),
+          child: const Text('Nochmal zurück'),
+        ),
+      ],
+    ),
     OnboardingStep.account => _accountActions(),
     // Pflichtentscheidung: zwei gleichwertige Knöpfe, keine Voreinstellung.
     OnboardingStep.aiChoice => Column(
@@ -663,6 +700,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   String _title() => switch (_flow.step) {
+    OnboardingStep.welcome => IntroSlides.whatItDoes.title,
+    OnboardingStep.howItWorks => IntroSlides.howItWorks.title,
     OnboardingStep.account => switch (_mode) {
       AccountMode.signUp => 'Erst ein Konto',
       AccountMode.confirmSignUp => 'Code aus der Mail',
@@ -677,6 +716,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
   };
 
   String _hint() => switch (_flow.step) {
+    OnboardingStep.welcome => IntroSlides.whatItDoes.lead,
+    OnboardingStep.howItWorks => IntroSlides.howItWorks.lead,
     OnboardingStep.account => switch (_mode) {
       AccountMode.signUp =>
         'Damit du dich wieder anmelden kannst, wenn du das Gerät wechselst. '

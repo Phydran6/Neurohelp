@@ -4,6 +4,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/app_version.dart';
 import '../../../core/di/app_services.dart';
 import '../../../core/logging/app_logger.dart';
+import '../../onboarding/domain/intro_slides.dart';
+import '../../onboarding/presentation/intro_slide_view.dart';
 import '../domain/about_info.dart';
 import '../domain/faq.dart';
 import '../domain/help_service.dart';
@@ -120,6 +122,32 @@ class _HelpPageState extends State<HelpPage> {
                 child: Text(_answer!.text, style: theme.textTheme.bodyLarge),
               ),
             ],
+            const SizedBox(height: 32),
+            // Dieselben zwei Bildschirme wie beim allerersten Start. Wer sie
+            // damals weggetippt hat, findet sie hier wieder – und niemand
+            // muss die App dafür neu installieren.
+            Text('Was die App macht', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            for (final slide in IntroSlides.all)
+              ExpansionTile(
+                key: Key('intro_${slide.id}'),
+                tilePadding: EdgeInsets.zero,
+                childrenPadding: const EdgeInsets.only(bottom: 8),
+                title: Text(slide.title),
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      slide.lead,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  IntroSlideView(slide: slide),
+                ],
+              ),
             const SizedBox(height: 32),
             Text('Häufige Fragen', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),

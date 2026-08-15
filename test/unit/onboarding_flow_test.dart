@@ -5,8 +5,16 @@ import 'package:neurohelp/features/onboarding/domain/onboarding_flow.dart';
 
 void main() {
   group('Ablauf', () {
-    test('startet beim Konto und lässt ohne Konto nicht weiter', () {
+    test('startet mit der Erklärung, die nichts verlangt', () {
       const flow = OnboardingFlow();
+
+      expect(flow.step, OnboardingStep.welcome);
+      expect(flow.canAdvance, isTrue);
+      expect(flow.advance().step, OnboardingStep.howItWorks);
+    });
+
+    test('nach genau zwei Erklärbildschirmen kommt das Konto', () {
+      final flow = const OnboardingFlow().advance().advance();
 
       expect(flow.step, OnboardingStep.account);
       expect(flow.canAdvance, isFalse);
@@ -15,6 +23,8 @@ void main() {
 
     test('läuft die Pflichtschritte der Reihe nach durch', () {
       final flow = const OnboardingFlow()
+          .advance()
+          .advance()
           .withAccountCreated()
           .advance()
           .withAiChoice(enabled: true)
@@ -27,10 +37,14 @@ void main() {
 
     test('back geht zurück, am Anfang passiert nichts', () {
       const start = OnboardingFlow();
-      expect(start.back().step, OnboardingStep.account);
+      expect(start.back().step, OnboardingStep.welcome);
 
-      final second = start.withAccountCreated().advance();
-      expect(second.back().step, OnboardingStep.account);
+      // Vom zweiten Erklärbildschirm zurück zum ersten – wer zu schnell
+      // getippt hat, kommt so wieder hin.
+      expect(start.advance().back().step, OnboardingStep.welcome);
+
+      final account = start.advance().advance();
+      expect(account.back().step, OnboardingStep.howItWorks);
     });
   });
 

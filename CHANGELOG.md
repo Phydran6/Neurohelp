@@ -9,6 +9,16 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Added
 
+- **Die App erklärt sich jetzt selbst.** Beim allerersten Start standen
+  bisher sofort Benutzername, E-Mail und Passwort da – ohne ein Wort
+  darüber, wofür man sich gerade anmeldet. Davor liegen jetzt zwei
+  Bildschirme, mehr nicht: einer, der die vier Features benennt, und einer,
+  der die Bedienidee erklärt – eine Frage nach der anderen, Historie-Check
+  zuerst, Daten bleiben auf dem Gerät, kein Druck. Beide verlangen nichts
+  und sind mit zwei Tipps hinter sich gebracht; vom zweiten kommt man zum
+  ersten zurück. Dieselben zwei Bildschirme stehen dauerhaft unter
+  „Hilfe & Info", damit niemand die App neu installieren muss, um sie
+  wiederzufinden
 - **Die Historie ist endlich sichtbar.** Sie war von Anfang an das Rückgrat
   der App – jedes Feature hat hineingeschrieben, gelesen hat daraus nur der
   Historie-Check am Anfang. Nachschauen konnte man nirgends. Jetzt gibt es

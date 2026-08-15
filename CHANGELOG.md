@@ -7,14 +7,6 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### Fixed
-
-- **Es kam kein Build mehr bei TestFlight an.** Der Upload brach mit einer
-  Meldung über ein fehlendes Zertifikat ab – gemeint war aber eine
-  Einstellung: Auf Projektebene stand noch die Entwickler-Signatur aus der
-  Vorlage, und die schlug beim Bauen fürs Gerät die Verteilungs-Signatur,
-  die für den App Store nötig ist
-
 ## [0.1.0-alpha.7] - 2026-08-15
 
 ### Added

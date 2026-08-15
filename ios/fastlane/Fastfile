@@ -51,10 +51,8 @@ PROFILE_NAME = "match AppStore #{APP_IDENTIFIER}".freeze
 # Bewusst zur Laufzeit statt eingecheckt: `scripts/ensure_platforms.sh` kann
 # das Projekt neu erzeugen, und dann waere die Einstellung wieder weg.
 def use_manual_signing
-  project_path = File.expand_path("../Runner.xcodeproj", __dir__)
-
   update_code_signing_settings(
-    path: project_path,
+    path: File.expand_path("../Runner.xcodeproj", __dir__),
     use_automatic_signing: false,
     team_id: TEAM_ID,
     bundle_identifier: APP_IDENTIFIER,
@@ -62,48 +60,6 @@ def use_manual_signing
     profile_name: PROFILE_NAME,
     targets: ["Runner"],
   )
-
-  pin_distribution_identity(project_path)
-end
-
-# Die SDK-gebundene Schreibweise derselben Einstellung.
-SDK_IDENTITY_KEY = "CODE_SIGN_IDENTITY[sdk=iphoneos*]".freeze
-
-# Den Rest der automatischen Signatur wegraeumen, den `update_code_signing_settings`
-# stehen laesst.
-#
-# `flutter create` schreibt auf **Projekt**-Ebene
-# `CODE_SIGN_IDENTITY[sdk=iphoneos*] = "iPhone Developer"`. Oben wird aber nur
-# das **Ziel** Runner umgestellt, und zwar auf den schlichten
-# `CODE_SIGN_IDENTITY`. Beim Bauen fuer ein Geraet trifft die SDK-Bedingung zu,
-# und die passende Zuweisung gewinnt gegen die unbedingte - Xcode sucht also
-# weiter ein Entwickler-Zertifikat und bricht mit "No signing certificate" ab,
-# obwohl das Verteilungs-Zertifikat von match laengst im Schluesselbund liegt.
-# Die Meldung zeigt auf ein fehlendes Zertifikat und meint eine Einstellung.
-#
-# Deshalb: die Variante ueberall entfernen und auf dem Runner-Ziel selbst
-# setzen. Dort ist sie ziel- **und** SDK-spezifisch und damit eindeutig die
-# staerkste Zuweisung - egal, was auf Projektebene steht.
-def pin_distribution_identity(project_path)
-  require "xcodeproj"
-
-  project = Xcodeproj::Project.open(project_path)
-
-  project.build_configurations.each do |config|
-    config.build_settings.delete(SDK_IDENTITY_KEY)
-  end
-
-  project.targets.each do |target|
-    target.build_configurations.each do |config|
-      if target.name == "Runner"
-        config.build_settings[SDK_IDENTITY_KEY] = "Apple Distribution"
-      else
-        config.build_settings.delete(SDK_IDENTITY_KEY)
-      end
-    end
-  end
-
-  project.save
 end
 
 platform :ios do

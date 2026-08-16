@@ -1,3 +1,3 @@
-Erste Version.
+Jeder Ablauf fängt jetzt mit einer Frage an: Weißt du noch, worum es geht? Wenn nicht, schaut die App zuerst in deiner Historie nach und führt dich anders heran – weitergehen kannst du auch mit leerem Feld.
 
-Vier Wege durch den Alltag: Aufgabe sortieren, Nachricht schreiben, Anruf erledigen, Termin klären. Alles bleibt lokal auf dem Gerät. KI ist freiwillig und lässt sich jederzeit abschalten.
+Außerdem: Beim Schreiben einer Nachricht siehst du wieder, was du tippst, auch während die KI einen Vorschlag zeigt. Text aus der Zwischenablage einfügen geht jetzt mit einem eigenen Knopf. Und „Konto löschen" räumt auch dieses Gerät leer und meldet dich ab.

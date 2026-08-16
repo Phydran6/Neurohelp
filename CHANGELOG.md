@@ -7,6 +7,52 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.8] - 2026-08-16
+
+### Changed
+
+- **„Konto löschen" löscht jetzt wirklich alles.** Bisher verschwand nur das
+  Konto im Backend; die Vorgänge, die Historie, die Einstellungen und die PIN
+  blieben auf dem Gerät liegen, und die App lief weiter, als wäre man
+  angemeldet – ohne Konto ergibt das keinen Sinn. Jetzt ist es ein Weg: Erst
+  räumt das Backend auf, und nur wenn das geklappt hat, räumt die App das
+  Gerät leer. Danach sagt sie in einem Satz, was weg ist, und steht wieder am
+  Anfang – abgemeldet, ohne Daten. Was die App gar nicht in der Hand hat –
+  eine schon übergebene Mail, ein exportierter Termin – bleibt, wo es ist
+- **Kein „Text scannen" mehr im Auswahlmenü der Eingabefelder.** Wer beim
+  Schreiben mehrmals ins Feld tippte, bekam plötzlich die Kamera angeboten
+  und war aus dem Ablauf heraus. Ausschneiden, Kopieren, Einfügen und Alles
+  auswählen bleiben. Einen Brief abfotografieren soll man können – aber an
+  einer eigenen Stelle, nicht als Stolperfalle mitten im Text
+
+### Added
+
+- **Jedes Feature fängt jetzt auch die auf, die es nicht mehr wissen.** Bisher
+  stand am Anfang sofort „Worum geht es?" und ein leeres Feld, und der
+  Weiter-Knopf blieb aus, solange nichts drinstand – wer nur wusste, dass da
+  was war, kam keinen Schritt weit. Jetzt kommt zuerst die Frage, ob man es
+  noch weiß. „Ich weiß es" führt wie bisher ins Feld. „Ich weiß nur, dass da
+  was war" lässt die App zuerst in der Historie graben: Findet sie etwas,
+  steht es als Liste da und ein Antippen übernimmt das Thema. Findet sie
+  nichts, kommen ruhige Gedächtnisstützen – und ein Weiter, das auch mit
+  leerem Feld funktioniert. Was fehlt, ergibt sich unterwegs; bei einer
+  Nachricht wird aus dem geschriebenen Text am Ende ein Betreff. Derselbe
+  Einstieg steht in Nachricht, Anruf, Termin und Aufgabe – gleiche Frage,
+  gleiche zwei Wege (Konzept, Abschnitt 10, Schritt 2)
+- **Ein sichtbarer Knopf „Aus Zwischenablage einfügen"** beim Schreiben einer
+  Nachricht. Wer den Text woanders schon stehen hat, holt ihn damit herüber,
+  ohne im Auswahlmenü danach zu suchen
+
+### Fixed
+
+- **Beim Schreiben einer Nachricht sieht man wieder, was man tippt.** Sobald
+  die KI-Hilfe einen Vorschlag zeigte, drückte der Vorschlagsblock das
+  Textfeld auf wenige Pixel zusammen – eigener Text und Cursor waren nicht
+  mehr zu sehen. Feld und KI-Block liegen jetzt gemeinsam in einem
+  scrollbaren Bereich: Das Feld behält seine Höhe, der Vorschlag steht
+  darunter. Nach „Einsetzen" springt die Ansicht zurück nach oben, damit der
+  übernommene Text sofort im Blick ist
+
 ## [0.1.0-alpha.7] - 2026-08-15
 
 ### Added
@@ -359,7 +405,8 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.7...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.8...HEAD
+[0.1.0-alpha.8]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.8
 [0.1.0-alpha.7]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.7
 [0.1.0-alpha.6]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.6
 [0.1.0-alpha.5]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.5

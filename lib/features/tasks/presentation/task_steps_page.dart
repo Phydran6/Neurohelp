@@ -1,9 +1,15 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/ai/ai_client.dart';
 import '../../../core/di/app_services.dart';
+import '../../../core/history/domain/history_entry.dart';
 import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
+import '../../../shared/widgets/history_check.dart';
+import '../../../shared/widgets/recall_entry.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import 'task_focus_page.dart';
 
 /// Eine neue Aufgabe anlegen und selbst zerlegen (Konzept, Abschnitt 11,
@@ -26,6 +32,42 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
 
   final List<String> _steps = [];
   bool _saving = false;
+
+  /// Der Einstieg ist überall derselbe: erst die Frage, dann das Feld
+  /// (Konzept, Abschnitt 10, Schritt 2 – gilt für alle Features).
+  RecallMode _mode = RecallMode.asking;
+  List<HistoryEntry> _found = const [];
+  HistoryCheckState _check = HistoryCheckState.running;
+
+  /// „Warte mal, ich schau kurz für dich." Erst gräbt die App, dann erst
+  /// wird der User gefragt.
+  Future<void> _digIntoHistory() async {
+    setState(() {
+      _mode = RecallMode.helping;
+      _check = HistoryCheckState.running;
+      _found = const [];
+    });
+
+    final entries = await AppScope.of(
+      context,
+    ).history.recentEntries(feature: HistoryFeature.task, limit: 8);
+    if (!mounted) return;
+
+    setState(() {
+      _found = entries;
+      _check = entries.isEmpty
+          ? HistoryCheckState.empty
+          : HistoryCheckState.found;
+    });
+  }
+
+  /// Ein Fund wird zum Titel der neuen Aufgabe – der alte Vorgang bleibt.
+  void _takeFromHistory(HistoryEntry entry) {
+    setState(() {
+      _mode = RecallMode.typing;
+      _titleController.text = entry.title;
+    });
+  }
 
   @override
   void dispose() {
@@ -57,15 +99,20 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     });
   }
 
+  /// Ohne Schritte gibt es nichts zu sortieren – das bleibt die Bedingung.
+  /// Der Titel dagegen darf offen bleiben, wenn der User ausdrücklich gesagt
+  /// hat, dass er ihn nicht weiß.
   bool get _canStart =>
-      _titleController.text.trim().isNotEmpty && _steps.isNotEmpty;
+      _steps.isNotEmpty &&
+      (_titleController.text.trim().isNotEmpty || _mode == RecallMode.helping);
 
   Future<void> _start() async {
     if (!_canStart || _saving) return;
     setState(() => _saving = true);
 
     final tasks = AppScope.of(context).tasks;
-    final title = _titleController.text.trim();
+    final typed = _titleController.text.trim();
+    final title = typed.isEmpty ? kUnknownTopic : typed;
     final entryId = await tasks.createTask(title);
     await tasks.addSteps(entryId, titles: _steps);
 
@@ -86,82 +133,113 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              TextField(
-                key: const Key('task_title_field'),
-                controller: _titleController,
-                textCapitalization: TextCapitalization.sentences,
-                decoration: const InputDecoration(
-                  labelText: 'Worum geht es?',
-                  hintText: 'Zum Beispiel: Umzug organisieren',
-                ),
-                onChanged: (_) => setState(() {}),
-              ),
-              const SizedBox(height: 28),
-              Text(
-                'Was gehört dazu?',
-                style: theme.textTheme.titleMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                key: const Key('task_step_field'),
-                controller: _stepController,
-                focusNode: _stepFocus,
-                textCapitalization: TextCapitalization.sentences,
-                textInputAction: TextInputAction.next,
-                decoration: InputDecoration(
-                  hintText: 'Ein kleiner Schritt',
-                  suffixIcon: IconButton(
-                    key: const Key('task_step_add'),
-                    icon: const Icon(Icons.add),
-                    onPressed: _addStep,
-                  ),
-                ),
-                onSubmitted: (_) => _addStep(),
-              ),
-              // Der Moment der KI-Hilfe: aus dem Titel werden Mikroschritte,
-              // die als Vorschlag in der Liste landen. Ohne KI fehlt genau
-              // dieser Block, sonst nichts.
-              AiSuggestionBox(
-                task: AiTask.splitTask,
-                inputBuilder: () {
-                  final title = _titleController.text.trim();
-                  return title.isEmpty ? null : title;
-                },
-                onAccept: (suggestion) => _acceptSuggestions([suggestion]),
-                onAcceptAll: _acceptSuggestions,
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: ListView.builder(
-                  itemCount: _steps.length,
-                  itemBuilder: (context, index) => ListTile(
-                    key: Key('task_step_$index'),
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      Icons.circle_outlined,
-                      size: 18,
-                      color: theme.colorScheme.onSurfaceVariant,
+          child: _mode == RecallMode.asking
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 8),
+                    RecallChoice(
+                      prefix: 'task',
+                      onKnow: () => setState(() => _mode = RecallMode.typing),
+                      onHelp: () => unawaited(_digIntoHistory()),
                     ),
-                    title: Text(_steps[index]),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.close),
-                      onPressed: () => setState(() => _steps.removeAt(index)),
+                    const Spacer(),
+                  ],
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    TextField(
+                      key: const Key('task_title_field'),
+                      contextMenuBuilder: noScanContextMenu,
+                      controller: _titleController,
+                      textCapitalization: TextCapitalization.sentences,
+                      decoration: const InputDecoration(
+                        labelText: 'Worum geht es?',
+                        hintText: 'Zum Beispiel: Umzug organisieren',
+                      ),
+                      onChanged: (_) => setState(() {}),
                     ),
-                  ),
+                    const SizedBox(height: 28),
+                    Text(
+                      'Was gehört dazu?',
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      key: const Key('task_step_field'),
+                      contextMenuBuilder: noScanContextMenu,
+                      controller: _stepController,
+                      focusNode: _stepFocus,
+                      textCapitalization: TextCapitalization.sentences,
+                      textInputAction: TextInputAction.next,
+                      decoration: InputDecoration(
+                        hintText: 'Ein kleiner Schritt',
+                        suffixIcon: IconButton(
+                          key: const Key('task_step_add'),
+                          icon: const Icon(Icons.add),
+                          onPressed: _addStep,
+                        ),
+                      ),
+                      onSubmitted: (_) => _addStep(),
+                    ),
+                    // Der Moment der KI-Hilfe: aus dem Titel werden Mikroschritte,
+                    // die als Vorschlag in der Liste landen. Ohne KI fehlt genau
+                    // dieser Block, sonst nichts.
+                    AiSuggestionBox(
+                      task: AiTask.splitTask,
+                      inputBuilder: () {
+                        final title = _titleController.text.trim();
+                        return title.isEmpty ? null : title;
+                      },
+                      onAccept: (suggestion) =>
+                          _acceptSuggestions([suggestion]),
+                      onAcceptAll: _acceptSuggestions,
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: ListView(
+                        children: [
+                          // Was die App gefunden hat, steht über der eigenen Liste –
+                          // antippen genügt, getippt werden muss nichts.
+                          if (_mode == RecallMode.helping) ...[
+                            RecallPanel(
+                              prefix: 'task',
+                              state: _check,
+                              hits: _found,
+                              nudges: RecallNudges.task,
+                              onPick: _takeFromHistory,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
+                          for (var index = 0; index < _steps.length; index++)
+                            ListTile(
+                              key: Key('task_step_$index'),
+                              contentPadding: EdgeInsets.zero,
+                              leading: Icon(
+                                Icons.circle_outlined,
+                                size: 18,
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                              title: Text(_steps[index]),
+                              trailing: IconButton(
+                                icon: const Icon(Icons.close),
+                                onPressed: () =>
+                                    setState(() => _steps.removeAt(index)),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                    BigActionButton(
+                      key: const Key('task_start'),
+                      label: 'Los geht’s',
+                      onPressed: _canStart && !_saving ? _start : null,
+                    ),
+                  ],
                 ),
-              ),
-              BigActionButton(
-                key: const Key('task_start'),
-                label: 'Los geht’s',
-                onPressed: _canStart && !_saving ? _start : null,
-              ),
-            ],
-          ),
         ),
       ),
     );

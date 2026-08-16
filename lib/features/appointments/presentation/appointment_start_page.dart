@@ -3,8 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/di/app_services.dart';
+import '../../../core/history/domain/history_entry.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/history_check.dart';
+import '../../../shared/widgets/recall_entry.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/appointment.dart';
 import 'appointment_book_page.dart';
 import 'appointment_route_page.dart';
@@ -27,6 +30,12 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
   List<Appointment> _unbooked = const [];
   HistoryCheckState _check = HistoryCheckState.running;
   bool _loading = true;
+
+  /// Der Einstieg in einen **neuen** Termin – derselbe wie überall: erst die
+  /// Frage, dann das Feld.
+  RecallMode _mode = RecallMode.asking;
+  List<HistoryEntry> _found = const [];
+  HistoryCheckState _recallCheck = HistoryCheckState.running;
 
   @override
   void didChangeDependencies() {
@@ -91,9 +100,41 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
     if (mounted) unawaited(_load());
   }
 
+  /// „Warte mal, ich schau kurz für dich." Erst gräbt die App.
+  Future<void> _digIntoHistory() async {
+    setState(() {
+      _mode = RecallMode.helping;
+      _recallCheck = HistoryCheckState.running;
+      _found = const [];
+    });
+
+    final entries = await AppScope.of(
+      context,
+    ).history.recentEntries(feature: HistoryFeature.appointment, limit: 8);
+    if (!mounted) return;
+
+    setState(() {
+      _found = entries;
+      _recallCheck = entries.isEmpty
+          ? HistoryCheckState.empty
+          : HistoryCheckState.found;
+    });
+  }
+
+  /// Ein Fund wird zum Thema des neuen Termins – der alte Vorgang bleibt.
+  void _takeFromHistory(HistoryEntry entry) {
+    setState(() {
+      _mode = RecallMode.typing;
+      _title.text = entry.title;
+    });
+  }
+
   Future<void> _startNew() async {
-    final title = _title.text.trim();
-    if (title.isEmpty) return;
+    final typed = _title.text.trim();
+    // Wer ausdrücklich gesagt hat, dass er es nicht weiß, kommt trotzdem
+    // weiter. Das Thema wird beim Klären nachgetragen.
+    if (typed.isEmpty && _mode != RecallMode.helping) return;
+    final title = typed.isEmpty ? kUnknownTopic : typed;
 
     final services = AppScope.of(context);
     final appointment = await services.appointments.create(title);
@@ -167,23 +208,57 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
                     else
                       const Spacer(),
                     const SizedBox(height: 16),
-                    TextField(
-                      key: const Key('appt_title'),
-                      controller: _title,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        labelText: 'Worum geht es?',
-                        hintText: 'Zum Beispiel: Sehtest beim Optiker',
+                    if (_mode == RecallMode.asking)
+                      RecallChoice(
+                        prefix: 'appt',
+                        onKnow: () => setState(() => _mode = RecallMode.typing),
+                        onHelp: () => unawaited(_digIntoHistory()),
+                      )
+                    else ...[
+                      if (_mode == RecallMode.helping) ...[
+                        // Was die App gefunden hat, kommt vor dem Feld.
+                        Flexible(
+                          child: SingleChildScrollView(
+                            child: RecallPanel(
+                              prefix: 'appt',
+                              state: _recallCheck,
+                              hits: _found,
+                              nudges: RecallNudges.appointment,
+                              onPick: _takeFromHistory,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      TextField(
+                        key: const Key('appt_title'),
+                        contextMenuBuilder: noScanContextMenu,
+                        controller: _title,
+                        textCapitalization: TextCapitalization.sentences,
+                        decoration: const InputDecoration(
+                          labelText: 'Worum geht es?',
+                          hintText: 'Zum Beispiel: Sehtest beim Optiker',
+                        ),
+                        onChanged: (_) => setState(() {}),
+                        onSubmitted: (_) => _startNew(),
                       ),
-                      onChanged: (_) => setState(() {}),
-                      onSubmitted: (_) => _startNew(),
-                    ),
-                    const SizedBox(height: 16),
-                    BigActionButton(
-                      key: const Key('appt_new'),
-                      label: 'Weiter',
-                      onPressed: _title.text.trim().isEmpty ? null : _startNew,
-                    ),
+                      const SizedBox(height: 16),
+                      // Im Historie-Weg geht es immer weiter, auch mit leerem
+                      // Feld.
+                      BigActionButton(
+                        key: const Key('appt_new'),
+                        label:
+                            _mode == RecallMode.helping &&
+                                _title.text.trim().isEmpty
+                            ? 'Weiter, ich weiß es noch nicht'
+                            : 'Weiter',
+                        onPressed:
+                            _title.text.trim().isEmpty &&
+                                _mode != RecallMode.helping
+                            ? null
+                            : _startNew,
+                      ),
+                    ],
                     if (!hasSomething) const Spacer(),
                   ],
                 ),

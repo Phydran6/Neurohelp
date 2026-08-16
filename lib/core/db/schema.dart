@@ -17,6 +17,21 @@ abstract final class DbSchema {
   static const String tableCalls = 'calls';
   static const String tableAppointments = 'appointments';
 
+  /// Alle Tabellen mit Nutzerdaten – Kinder vor Eltern.
+  ///
+  /// Grundlage für „alles auf diesem Gerät löschen" beim Löschen des Kontos.
+  /// Die Reihenfolge macht die Löschung unabhängig davon, ob
+  /// `PRAGMA foreign_keys` gerade greift.
+  static const List<String> userTables = [
+    tableEvents,
+    tableTaskNodes,
+    tableMessages,
+    tableCalls,
+    tableAppointments,
+    tableEntries,
+    tableSettings,
+  ];
+
   /// Migration je Zielversion. Index 0 führt von „leer" auf Version 1.
   static const List<List<String>> migrations = [_v1, _v2, _v3, _v4, _v5, _v6];
 

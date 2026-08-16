@@ -8,6 +8,7 @@ import '../../../core/di/app_services.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/error_details.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import '../../security/presentation/mfa_setup_page.dart';
 import '../domain/intro_slides.dart';
 import '../domain/onboarding_flow.dart';
@@ -431,6 +432,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   Widget _accountBody() {
     final email = TextField(
       key: const Key('onb_email'),
+      contextMenuBuilder: noScanContextMenu,
       controller: _email,
       keyboardType: TextInputType.emailAddress,
       autocorrect: false,
@@ -453,6 +455,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         children: [
           TextField(
             key: const Key('onb_username'),
+            contextMenuBuilder: noScanContextMenu,
             controller: _username,
             autocorrect: false,
             decoration: const InputDecoration(labelText: 'Benutzername'),

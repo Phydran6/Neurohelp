@@ -175,7 +175,53 @@ void main() {
 
     expect(account.deleteCalls, 1);
     expect(await account.currentAccount(), isNull);
-    expect(find.textContaining('Postfach'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('settings_deleted_dialog')),
+        matching: find.textContaining('Postfach'),
+      ),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('mit dem Konto geht auch alles auf dem Gerät', (tester) async {
+    await account.signUp(
+      username: 'philipp',
+      email: 'philipp@example.test',
+      password: 'geheim1234',
+    );
+
+    // Ein Vorgang, eine PIN, ein abgeschlossenes Onboarding: der Zustand, in
+    // dem ein echter User auf „Konto löschen" tippt.
+    final draft = await services.messages.create(subject: 'Neue Karte');
+    await services.lock.setPin('4711');
+    await services.settings.setOnboardingCompleted(completed: true);
+
+    await pumpSettings(tester);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('settings_delete_account')),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.byKey(const Key('settings_delete_account')));
+    await pumpUntil(tester, find.byKey(const Key('settings_delete_confirm')));
+    await tester.tap(find.byKey(const Key('settings_delete_confirm')));
+    await pumpUntil(tester, find.byKey(const Key('settings_deleted_dialog')));
+
+    // Die App sagt, was passiert ist – erst danach geht es weiter.
+    expect(find.text('Alles gelöscht'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('settings_deleted_ok')));
+    await tester.pumpAndSettle();
+
+    expect(await services.history.entryById(draft.entryId), isNull);
+    expect(await services.lock.hasPin, isFalse);
+    expect(await services.lock.remainingRecoveryCodes, 0);
+
+    // Kein Konto, also auch nicht mehr angemeldet: Ohne abgeschlossenes
+    // Onboarding steht die App wieder am Anfang.
+    final settings = await services.settings.load();
+    expect(settings.onboardingCompleted, isFalse);
+    expect(settings.isLocked, isFalse);
   });
 
   testWidgets('ohne Backend steht das ehrlich da, statt zu fehlen', (

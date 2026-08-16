@@ -6,6 +6,7 @@ import '../../../core/calendar/calendar_service.dart';
 import '../../../core/calendar/ics.dart';
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/appointment.dart';
 
 /// Den gebuchten Termin eintragen (Konzept, Abschnitt 9).
@@ -213,6 +214,7 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                           const SizedBox(height: 24),
                           TextField(
                             key: const Key('appt_location'),
+                            contextMenuBuilder: noScanContextMenu,
                             controller: _location,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(labelText: 'Wo?'),
@@ -232,6 +234,7 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                           const SizedBox(height: 12),
                           TextField(
                             key: const Key('appt_item_field'),
+                            contextMenuBuilder: noScanContextMenu,
                             controller: _item,
                             focusNode: _itemFocus,
                             textCapitalization: TextCapitalization.sentences,

@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../core/di/app_services.dart';
 import '../../../core/history/domain/history_entry.dart';
 import '../../../core/history/domain/history_event.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import 'history_labels.dart';
 
 /// Ein einzelner Vorgang mit seinem vollständigen Protokoll.
@@ -60,6 +61,7 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
         title: const Text('Wie soll das heißen?'),
         content: TextField(
           key: const Key('history_rename_field'),
+          contextMenuBuilder: noScanContextMenu,
           controller: controller,
           autofocus: true,
           textCapitalization: TextCapitalization.sentences,

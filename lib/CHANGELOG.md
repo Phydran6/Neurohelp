@@ -5,6 +5,19 @@ Nur was den App-Code betrifft. Verbindlich fürs Release ist die
 
 ## [Unreleased]
 
+## [0.1.0-alpha.8] - 2026-08-16
+
+- `shared/widgets/recall_entry.dart`: der gemeinsame Einstieg „Weißt du es
+  noch? / Hilf mir" samt Historie-Panel und Gedächtnisstützen; benutzt von
+  Nachricht, Anruf, Termin und Aufgabe
+- `shared/widgets/text_context_menu.dart`: Auswahlmenü der Textfelder ohne
+  „Text scannen"
+- `features/messages/`: Textfeld und KI-Block teilen sich einen scrollbaren
+  Bereich, Einfügen aus der Zwischenablage, Betreff darf offen bleiben
+  (`MessageFlow.subjectDeferred`)
+- `core/di/app_services.dart`: `wipeLocalData()` räumt beim Löschen des Kontos
+  das Gerät leer; `core/db/schema.dart` kennt dafür `userTables`
+
 ## [0.1.0-alpha.2] - 2026-08-09
 
 - `README.md` für diesen Bereich angelegt

@@ -110,6 +110,10 @@ void main() {
         child: const MaterialApp(home: TaskStepsPage()),
       ),
     );
+    // Der Einstieg fragt zuerst, ob man es noch weiß. Hier geht es um die
+    // KI-Hilfe danach.
+    await pumpUntil(tester, find.byKey(const Key('task_know')));
+    await tester.tap(find.byKey(const Key('task_know')));
     await pumpUntil(tester, find.byKey(const Key('task_title_field')));
   }
 

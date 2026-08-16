@@ -30,16 +30,29 @@ enum MessageStep {
 
 /// Zustand des Nachrichten-Ablaufs. Reine Logik, ohne UI und ohne Speicher.
 class MessageFlow {
-  const MessageFlow({required this.draft, this.step = MessageStep.subject});
+  const MessageFlow({
+    required this.draft,
+    this.step = MessageStep.subject,
+    this.subjectDeferred = false,
+  });
 
   final MessageStep step;
   final MessageDraft draft;
+
+  /// „Ich weiß nur, dass da was war." – der User kommt am Betreff nicht
+  /// weiter und hat das ausdrücklich gesagt (Konzept, Abschnitt 10,
+  /// Schritt 2).
+  ///
+  /// Ohne das blieb der Ablauf am ersten Feld stehen: kein Text, kein Weiter.
+  /// Genau die Situation, für die es die App gibt. Der Betreff ergibt sich
+  /// dann später aus dem, was geschrieben wird.
+  final bool subjectDeferred;
 
   static const List<MessageStep> _order = MessageStep.values;
 
   /// Ob der aktuelle Schritt erledigt ist.
   bool get canAdvance => switch (step) {
-    MessageStep.subject => draft.subject.trim().isNotEmpty,
+    MessageStep.subject => draft.subject.trim().isNotEmpty || subjectDeferred,
     // Der Historie-Check ist Arbeit der App, nicht des Users – er blockiert
     // nie.
     MessageStep.historyCheck => true,
@@ -62,22 +75,33 @@ class MessageFlow {
       throw StateError('Schritt $step ist noch nicht abgeschlossen.');
     }
     final next = nextStep;
-    return next == null ? this : MessageFlow(draft: draft, step: next);
+    return next == null ? this : _copyWith(step: next);
   }
 
   /// Zurück – ohne Datenverlust, der Entwurf bleibt wie er ist.
   MessageFlow back() {
     final index = _order.indexOf(step);
     if (index == 0) return this;
-    return MessageFlow(draft: draft, step: _order[index - 1]);
+    return _copyWith(step: _order[index - 1]);
   }
 
-  MessageFlow withDraft(MessageDraft value) =>
-      MessageFlow(draft: value, step: step);
+  MessageFlow withDraft(MessageDraft value) => _copyWith(draft: value);
+
+  /// „Weiß ich noch nicht" – der Ablauf geht trotzdem weiter.
+  MessageFlow deferSubject() => _copyWith(subjectDeferred: true);
 
   /// Springt direkt zum Bearbeiten zurück – der Ausweg aus der Vorschau.
-  MessageFlow editAgain() =>
-      MessageFlow(draft: draft, step: MessageStep.compose);
+  MessageFlow editAgain() => _copyWith(step: MessageStep.compose);
+
+  MessageFlow _copyWith({
+    MessageDraft? draft,
+    MessageStep? step,
+    bool? subjectDeferred,
+  }) => MessageFlow(
+    draft: draft ?? this.draft,
+    step: step ?? this.step,
+    subjectDeferred: subjectDeferred ?? this.subjectDeferred,
+  );
 
   static bool _isFilled(String? value) =>
       value != null && value.trim().isNotEmpty;

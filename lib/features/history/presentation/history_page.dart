@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/di/app_services.dart';
 import '../../../core/history/domain/history_entry.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import 'history_detail_page.dart';
 import 'history_labels.dart';
 
@@ -100,6 +101,7 @@ class _HistoryPageState extends State<HistoryPage> {
               padding: const EdgeInsets.fromLTRB(24, 8, 24, 0),
               child: TextField(
                 key: const Key('history_search'),
+                contextMenuBuilder: noScanContextMenu,
                 controller: _search,
                 textInputAction: TextInputAction.search,
                 decoration: InputDecoration(

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/call_plan.dart';
 
 /// Der Anruf selbst und die Nachbereitung (Konzept, Abschnitt 8).
@@ -134,6 +135,7 @@ class _CallActivePageState extends State<CallActivePage> {
                       const SizedBox(height: 8),
                       TextField(
                         key: const Key('call_note'),
+                        contextMenuBuilder: noScanContextMenu,
                         controller: _note,
                         maxLines: 3,
                         textCapitalization: TextCapitalization.sentences,

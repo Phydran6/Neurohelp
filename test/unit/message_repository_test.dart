@@ -142,6 +142,23 @@ void main() {
       expect(flow.canAdvance, isFalse);
     });
 
+    test('„weiß ich noch nicht" bringt den Ablauf trotzdem weiter', () async {
+      final draft = await messages.create(subject: '');
+      var flow = MessageFlow(draft: draft);
+
+      // Ohne ausdrückliches „weiß ich nicht" bleibt der Schritt zu.
+      expect(flow.canAdvance, isFalse);
+
+      flow = flow.deferSubject();
+      expect(flow.canAdvance, isTrue);
+
+      // Und der Vermerk überlebt die nächsten Schritte, statt beim ersten
+      // Weiter verlorenzugehen.
+      flow = flow.advance().advance();
+      expect(flow.step, MessageStep.recipientType);
+      expect(flow.subjectDeferred, isTrue);
+    });
+
     test('editAgain führt aus der Vorschau zurück zum Text', () async {
       final draft = await readyDraft();
       final flow = MessageFlow(draft: draft, step: MessageStep.review);

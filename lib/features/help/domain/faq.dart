@@ -162,10 +162,13 @@ abstract final class FaqCatalog {
       id: 'daten-loeschen',
       question: 'Wie werde ich alles wieder los?',
       answer:
-          'Zwei Schritte, beide von dir auslösbar: In den Einstellungen unter '
-          '„Konto löschen" verschwindet alles, was serverseitig zu dir '
-          'gehört – du bekommst darüber eine Mail. Und beim Deinstallieren '
-          'der App gehen die Daten auf dem Gerät mit.',
+          'Ein Weg, ein Tipp: In den Einstellungen unter „Konto löschen". '
+          'Erst verschwindet alles, was serverseitig zu dir gehört – du '
+          'bekommst darüber eine Mail. Klappt das, räumt die App direkt '
+          'danach dieses Gerät leer: Vorgänge, Historie, Einstellungen, PIN. '
+          'Danach bist du abgemeldet und die App fängt wieder von vorn an. '
+          'Was schon aus der App heraus ist – eine übergebene Mail, ein '
+          'Termin im Kalender – bleibt, wo es ist.',
       keywords: ['löschen', 'deinstallieren', 'konto'],
     ),
   ];

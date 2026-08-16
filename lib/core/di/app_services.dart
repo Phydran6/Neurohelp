@@ -13,6 +13,7 @@ import '../account/account_repository.dart';
 import '../account/data/unconfigured_account_repository.dart';
 import '../ai/ai_client.dart';
 import '../db/app_database.dart';
+import '../db/schema.dart';
 import '../history/data/sqlite_history_repository.dart';
 import '../security/app_lock.dart';
 import '../security/data/device_app_lock.dart';
@@ -121,6 +122,31 @@ class AppServices {
   /// Gibt Dateien aus der App heraus – die Sicherung des Zugangs, den
   /// ICS-Export eines Termins. In Tests bewusst wirkungslos.
   final FileSaver files;
+
+  /// Räumt alles weg, was auf diesem Gerät liegt.
+  ///
+  /// Gehört zum Löschen des Kontos: Erst räumt das Backend auf, dann das
+  /// Gerät. Danach ist die App wie frisch installiert – Historie, Vorgänge,
+  /// Einstellungen, PIN und Wiederherstellungs-Codes sind weg, und weil damit
+  /// auch das Onboarding wieder offen ist, steht der User nicht mehr in einer
+  /// angemeldeten App ohne Konto.
+  ///
+  /// Was die App nicht selbst geschrieben hat, kann sie auch nicht
+  /// zurückholen: Bereits übergebene Mails liegen in der Mail-App, exportierte
+  /// Termine im Kalender. Deshalb „so gut es geht", nicht „restlos".
+  Future<void> wipeLocalData() async {
+    await database.raw.transaction((txn) async {
+      for (final table in DbSchema.userTables) {
+        await txn.delete(table);
+      }
+    });
+
+    await lock.clearPin();
+    await lock.clearRecoveryCodes();
+
+    // Neu lesen heißt: Standardwerte, und jede horchende Seite erfährt davon.
+    await settings.load();
+  }
 
   Future<void> dispose() {
     settings.dispose();

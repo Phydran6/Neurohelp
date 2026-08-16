@@ -64,6 +64,9 @@ void main() {
 
   Future<void> prepare(WidgetTester tester) async {
     await tester.tap(find.byKey(const Key('call_category_Arzt')));
+    // Erst die Eingangsfrage: Ich weiß, was ich erreichen will.
+    await pumpUntil(tester, find.byKey(const Key('call_know')));
+    await tester.tap(find.byKey(const Key('call_know')));
     await pumpUntil(tester, find.byKey(const Key('call_number')));
 
     await tester.enterText(
@@ -98,6 +101,8 @@ void main() {
   ) async {
     await pumpApp(tester);
     await tester.tap(find.byKey(const Key('call_category_Arzt')));
+    await pumpUntil(tester, find.byKey(const Key('call_know')));
+    await tester.tap(find.byKey(const Key('call_know')));
     await pumpUntil(tester, find.byKey(const Key('call_ready')));
 
     final button = tester.widget<FilledButton>(

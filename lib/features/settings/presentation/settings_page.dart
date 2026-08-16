@@ -245,10 +245,12 @@ class _SettingsPageState extends State<SettingsPage> {
         title: const Text('Konto wirklich löschen?'),
         content: const Text(
           'Dein Konto und alles, was serverseitig dazugehört, wird '
-          'gelöscht – Profil, Zwei-Faktor, Wiederherstellungs-Codes. Das '
-          'lässt sich nicht rückgängig machen.\n\n'
-          'Deine Vorgänge auf diesem Gerät bleiben erhalten. Die wirst du '
-          'los, indem du die App deinstallierst.',
+          'gelöscht – Profil, Zwei-Faktor, Wiederherstellungs-Codes.\n\n'
+          'Danach räumt die App auch dieses Gerät leer: alle Vorgänge, die '
+          'Historie, deine Einstellungen und die PIN. Übrig bleibt nur, was '
+          'die App gar nicht in der Hand hat – etwa eine Mail, die schon in '
+          'deiner Mail-App liegt.\n\n'
+          'Das lässt sich nicht rückgängig machen.',
         ),
         actions: [
           TextButton(
@@ -268,17 +270,63 @@ class _SettingsPageState extends State<SettingsPage> {
     if (confirmed != true || !mounted) return;
 
     await _run(() async {
-      final emailed = await AppScope.of(context).account.deleteAccount();
+      final services = AppScope.of(context);
+      final emailed = await services.account.deleteAccount();
+
+      // Erst wenn das Backend wirklich gelöscht hat, wird das Gerät geräumt.
+      // Andersherum stünde man ohne seine Sachen da, während das Konto noch
+      // existiert.
+      await services.wipeLocalData();
       if (!mounted) return;
+
       setState(() {
         _account = null;
         _hasMfa = false;
+        _recoveryLeft = 0;
+        _settings = services.settings.current;
         _message = emailed
-            ? 'Konto gelöscht. Die Bestätigung liegt gleich in deinem '
-                  'Postfach.'
-            : 'Konto gelöscht.';
+            ? 'Konto gelöscht, dieses Gerät ist leergeräumt. Die Bestätigung '
+                  'liegt gleich in deinem Postfach.'
+            : 'Konto gelöscht, dieses Gerät ist leergeräumt.';
       });
+
+      await _confirmDeleted(emailed: emailed);
     });
+  }
+
+  /// Sagt in einem Satz, was passiert ist, und geht dann aus der App heraus.
+  ///
+  /// Ohne Konto und ohne Daten weiter in der angemeldeten Ansicht zu stehen,
+  /// ergibt keinen Sinn: Nach dem Hinweis liegt die App wieder am Anfang.
+  Future<void> _confirmDeleted({required bool emailed}) async {
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        key: const Key('settings_deleted_dialog'),
+        title: const Text('Alles gelöscht'),
+        content: Text(
+          'Dein Konto ist weg, und auf diesem Gerät ist nichts mehr von dir '
+          'gespeichert – keine Vorgänge, keine Historie, keine '
+          'Einstellungen.'
+          '${emailed ? '\n\nEine Bestätigung liegt gleich in deinem Postfach.' : ''}'
+          '\n\nDu bist damit auch abgemeldet. Die App fängt wieder von vorn '
+          'an – du kannst sie einfach weiter benutzen oder liegen lassen.',
+        ),
+        actions: [
+          FilledButton(
+            key: const Key('settings_deleted_ok'),
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Verstanden'),
+          ),
+        ],
+      ),
+    );
+
+    if (!mounted) return;
+    // Zurück an den Anfang: Dort entscheidet die App neu, was zu sehen ist –
+    // ohne abgeschlossenes Onboarding ist das der Einstieg.
+    Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
   /// Führt eine Konto-Aktion aus und übersetzt Fehler in ruhige Sätze.

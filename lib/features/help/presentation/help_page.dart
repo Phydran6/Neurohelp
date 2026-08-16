@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/app_version.dart';
 import '../../../core/di/app_services.dart';
 import '../../../core/logging/app_logger.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import '../../onboarding/domain/intro_slides.dart';
 import '../../onboarding/presentation/intro_slide_view.dart';
 import '../domain/about_info.dart';
@@ -97,6 +98,7 @@ class _HelpPageState extends State<HelpPage> {
           children: [
             TextField(
               key: const Key('help_field'),
+              contextMenuBuilder: noScanContextMenu,
               controller: _controller,
               decoration: InputDecoration(
                 hintText: 'Frag mich etwas',

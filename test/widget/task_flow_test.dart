@@ -62,6 +62,9 @@ void main() {
     await pumpApp(tester);
 
     await tester.tap(find.byKey(const Key('task_new')));
+    // Erst die Eingangsfrage: Ich weiß es.
+    await pumpUntil(tester, find.byKey(const Key('task_know')));
+    await tester.tap(find.byKey(const Key('task_know')));
     await pumpUntil(tester, find.byKey(const Key('task_title_field')));
 
     await tester.enterText(
@@ -140,6 +143,8 @@ void main() {
   testWidgets('ohne Titel oder Schritte bleibt der Knopf aus', (tester) async {
     await pumpApp(tester);
     await tester.tap(find.byKey(const Key('task_new')));
+    await pumpUntil(tester, find.byKey(const Key('task_know')));
+    await tester.tap(find.byKey(const Key('task_know')));
     await pumpUntil(tester, find.byKey(const Key('task_start')));
 
     final button = tester.widget<FilledButton>(

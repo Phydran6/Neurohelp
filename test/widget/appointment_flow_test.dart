@@ -52,6 +52,13 @@ void main() {
         child: const MaterialApp(home: AppointmentStartPage()),
       ),
     );
+    // Der Einstieg fragt zuerst, ob man es noch weiß – das Feld kommt danach.
+    await pumpUntil(tester, find.byKey(const Key('appt_know')));
+  }
+
+  /// „Ich weiß es" antippen, damit das Titelfeld dasteht.
+  Future<void> knowIt(WidgetTester tester) async {
+    await tester.tap(find.byKey(const Key('appt_know')));
     await pumpUntil(tester, find.byKey(const Key('appt_title')));
   }
 
@@ -187,6 +194,7 @@ void main() {
   group('Anlegen', () {
     testWidgets('ohne Thema bleibt der Knopf aus', (tester) async {
       await pumpApp(tester);
+      await knowIt(tester);
 
       final button = tester.widget<FilledButton>(
         find.descendant(
@@ -197,8 +205,21 @@ void main() {
       expect(button.onPressed, isNull);
     });
 
+    testWidgets('wer es nicht mehr weiß, kommt trotzdem weiter', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      await tester.tap(find.byKey(const Key('appt_recall')));
+      await pumpUntil(tester, find.byKey(const Key('appt_nudges')));
+
+      // Ohne Fund führt die App anders heran – und der Weg bleibt offen.
+      await tester.tap(find.byKey(const Key('appt_new')));
+      await pumpUntil(tester, find.byKey(const Key('appt_route_title')));
+    });
+
     testWidgets('führt vom Thema zur Wahl des Buchungswegs', (tester) async {
       await pumpApp(tester);
+      await knowIt(tester);
 
       await tester.enterText(
         find.byKey(const Key('appt_title')),

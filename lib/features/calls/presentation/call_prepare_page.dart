@@ -4,8 +4,12 @@ import 'package:flutter/material.dart';
 
 import '../../../core/ai/ai_client.dart';
 import '../../../core/di/app_services.dart';
+import '../../../core/history/domain/history_entry.dart';
 import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
+import '../../../shared/widgets/history_check.dart';
+import '../../../shared/widgets/recall_entry.dart';
+import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/call_plan.dart';
 import 'call_active_page.dart';
 
@@ -32,6 +36,48 @@ class _CallPreparePageState extends State<CallPreparePage> {
   CallPlan? _plan;
   List<String> _points = [];
   bool _loading = true;
+
+  /// Der Einstieg ist überall derselbe: erst die Frage, dann die Felder.
+  /// Ein Anruf, der schon ein Ziel hat, fängt nicht wieder bei der Frage an.
+  RecallMode _mode = RecallMode.asking;
+  List<HistoryEntry> _found = const [];
+  HistoryCheckState _check = HistoryCheckState.running;
+
+  /// „Warte mal, ich schau kurz für dich." Erst gräbt die App.
+  Future<void> _digIntoHistory() async {
+    setState(() {
+      _mode = RecallMode.helping;
+      _check = HistoryCheckState.running;
+      _found = const [];
+    });
+
+    final entries = await AppScope.of(
+      context,
+    ).history.recentEntries(feature: HistoryFeature.call, limit: 8);
+    if (!mounted) return;
+
+    final others = entries
+        .where((entry) => entry.id != _plan?.entryId)
+        .toList();
+
+    setState(() {
+      _found = others;
+      _check = others.isEmpty
+          ? HistoryCheckState.empty
+          : HistoryCheckState.found;
+    });
+  }
+
+  /// Ein Fund wird zum Ziel des Anrufs – der alte Vorgang bleibt.
+  void _takeFromHistory(HistoryEntry entry) {
+    setState(() {
+      _mode = RecallMode.typing;
+      _goal.text = entry.title;
+      if (_contact.text.trim().isEmpty && entry.contact != null) {
+        _contact.text = entry.contact!;
+      }
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -60,6 +106,10 @@ class _CallPreparePageState extends State<CallPreparePage> {
       _number.text = plan.contactNumber ?? '';
       _points = List.of(plan.talkingPoints);
       _loading = false;
+      // Ein angefangener Anruf wird fortgesetzt, nicht neu erfragt.
+      if (_goal.text.trim().isNotEmpty || _points.isNotEmpty) {
+        _mode = RecallMode.typing;
+      }
     });
   }
 
@@ -146,6 +196,22 @@ class _CallPreparePageState extends State<CallPreparePage> {
       body: SafeArea(
         child: _loading
             ? const SizedBox.shrink()
+            : _mode == RecallMode.asking
+            ? Padding(
+                padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    RecallChoice(
+                      prefix: 'call',
+                      question: 'Weißt du noch, was du erreichen willst?',
+                      onKnow: () => setState(() => _mode = RecallMode.typing),
+                      onHelp: () => unawaited(_digIntoHistory()),
+                    ),
+                    const Spacer(),
+                  ],
+                ),
+              )
             : Padding(
                 padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
                 child: Column(
@@ -154,8 +220,19 @@ class _CallPreparePageState extends State<CallPreparePage> {
                     Expanded(
                       child: ListView(
                         children: [
+                          if (_mode == RecallMode.helping) ...[
+                            RecallPanel(
+                              prefix: 'call',
+                              state: _check,
+                              hits: _found,
+                              nudges: RecallNudges.call,
+                              onPick: _takeFromHistory,
+                            ),
+                            const SizedBox(height: 16),
+                          ],
                           TextField(
                             key: const Key('call_goal'),
+                            contextMenuBuilder: noScanContextMenu,
                             controller: _goal,
                             textCapitalization: TextCapitalization.sentences,
                             decoration: const InputDecoration(
@@ -167,6 +244,7 @@ class _CallPreparePageState extends State<CallPreparePage> {
                           const SizedBox(height: 20),
                           TextField(
                             key: const Key('call_contact'),
+                            contextMenuBuilder: noScanContextMenu,
                             controller: _contact,
                             textCapitalization: TextCapitalization.words,
                             decoration: const InputDecoration(
@@ -176,6 +254,7 @@ class _CallPreparePageState extends State<CallPreparePage> {
                           const SizedBox(height: 20),
                           TextField(
                             key: const Key('call_number'),
+                            contextMenuBuilder: noScanContextMenu,
                             controller: _number,
                             keyboardType: TextInputType.phone,
                             decoration: const InputDecoration(
@@ -198,6 +277,7 @@ class _CallPreparePageState extends State<CallPreparePage> {
                           const SizedBox(height: 12),
                           TextField(
                             key: const Key('call_point_field'),
+                            contextMenuBuilder: noScanContextMenu,
                             controller: _point,
                             focusNode: _pointFocus,
                             textCapitalization: TextCapitalization.sentences,

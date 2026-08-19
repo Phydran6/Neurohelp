@@ -7,6 +7,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.9] - 2026-08-19
+
 ### Fixed
 
 - **KI-Vorschläge lassen sich wieder übernehmen.** Auf kleinen Bildschirmen

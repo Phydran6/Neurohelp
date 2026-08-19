@@ -88,6 +88,8 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
               'Da kam nichts Brauchbares zurück. Mach ruhig selbst weiter.';
         }
       });
+
+      if (_suggestions.isNotEmpty) _revealSuggestions();
     } on AiUnavailableException catch (error) {
       if (!mounted) return;
       setState(() {
@@ -97,6 +99,28 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
         _error = error.reason;
       });
     }
+  }
+
+  /// Holt die frischen Vorschläge zuverlässig in den sichtbaren Bereich.
+  ///
+  /// Ohne das lag der eigentliche Fehler: Auf kleinen Screens erscheinen die
+  /// Vorschläge unter dem Textfeld – und weil beim Fragen oft noch die Tastatur
+  /// oben steht, rutschten die Kacheln darunter oder unter den Blattrand. Ein
+  /// Tipp auf „Übernehmen" landete dann im Nichts; für den User „passiert
+  /// nichts". Also erst die Tastatur schließen, dann den Block ans untere Ende
+  /// des Sichtbaren scrollen. Gibt es keinen Scrollbereich (Aufgaben-Seite),
+  /// bleibt es folgenlos.
+  void _revealSuggestions() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || Scrollable.maybeOf(context) == null) return;
+      Scrollable.ensureVisible(
+        context,
+        alignment: 1,
+        duration: const Duration(milliseconds: 200),
+        curve: Curves.easeOut,
+      );
+    });
   }
 
   @override

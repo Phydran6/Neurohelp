@@ -7,6 +7,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **KI-Vorschläge lassen sich wieder übernehmen.** Auf kleinen Bildschirmen
+  erschienen die Vorschläge unter dem Textfeld – und weil beim Fragen oft noch
+  die Tastatur oben stand, rutschten die Kacheln darunter oder unter den unteren
+  Rand. Ein Tipp auf „Übernehmen" bzw. „Einsetzen" landete dann im Nichts, für
+  den User „passierte nichts". Jetzt schließt sich beim Erscheinen der
+  Vorschläge zuerst die Tastatur, und der Block wird in den sichtbaren Bereich
+  geholt – der Tipp kommt wieder an. Betrifft Nachricht, Anruf und Aufgabe
+  gleichermaßen
+
 ## [0.1.0-alpha.8] - 2026-08-16
 
 ### Changed

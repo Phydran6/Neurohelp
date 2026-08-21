@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 
 import '../../../core/account/account_repository.dart';
 import '../../../core/ai/ai_client.dart';
+import '../../../core/ai/openrouter/openrouter_account.dart';
+import '../../../core/ai/openrouter/openrouter_exception.dart';
+import '../../../core/ai/openrouter/openrouter_key.dart';
 import '../../../core/di/app_services.dart';
 import '../../../core/settings/app_settings.dart';
 import '../../../shared/widgets/error_details.dart';
@@ -110,6 +113,113 @@ class _SettingsPageState extends State<SettingsPage> {
         _aiStatus =
             'KI ist an, aber sie antwortet gerade nicht: ${error.reason} '
             'Die Abläufe funktionieren weiter ohne sie.';
+      });
+    }
+  }
+
+  // ------------------------------------------------- Eigener KI-Zugang (17a)
+
+  /// Ein Tap – mehr soll es für den User nicht sein.
+  ///
+  /// Er meldet sich im Browser an und ist zurück. Einen Schlüssel bekommt er
+  /// nie zu sehen; genau das unterscheidet diesen Weg vom Selbst-eintragen
+  /// und hält das DAU-Prinzip (Konzept, Abschnitt 4).
+  Future<void> _connectOpenRouter() async {
+    if (_aiChecking) return;
+    setState(() {
+      _aiChecking = true;
+      _aiStatus = null;
+    });
+
+    final services = AppScope.of(context);
+
+    try {
+      final result = await services.openRouter.connect();
+      if (!mounted) return;
+
+      setState(() {
+        _aiChecking = false;
+        // Abbrechen ist eine gültige Antwort und keine Meldung wert.
+        _aiStatus = result == OpenRouterConnectResult.connected
+            ? 'Verbunden. Ab jetzt antwortet dein eigener Zugang.'
+            : null;
+      });
+    } on OpenRouterException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _aiChecking = false;
+        _aiStatus =
+            '${error.reason} Es läuft weiter wie bisher – es fällt nichts aus.';
+        _technical = error.technical;
+      });
+    }
+  }
+
+  Future<void> _disconnectOpenRouter() async {
+    await AppScope.of(context).openRouter.disconnect();
+    if (!mounted) return;
+    setState(
+      () => _aiStatus =
+          'Getrennt. Die KI läuft wieder über den Standardweg der App.',
+    );
+  }
+
+  /// Die versteckte Option für die drei Bastler: eigener Schlüssel.
+  Future<void> _enterOwnKey() async {
+    // Bewusst ohne TextEditingController: Der müsste weggeräumt werden, und
+    // der Dialog baut sich während des Ausblendens noch einmal auf – ein
+    // schon weggeräumter Controller fliegt einem dann um die Ohren.
+    var typed = '';
+
+    final raw = await showDialog<String>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Eigener Schlüssel'),
+        content: TextField(
+          key: const Key('settings_openrouter_byok_field'),
+          autofocus: true,
+          decoration: const InputDecoration(
+            labelText: 'OpenRouter-API-Schlüssel',
+            helperText: 'Beginnt mit sk-or-',
+          ),
+          onChanged: (value) => typed = value,
+          onSubmitted: (value) => Navigator.of(dialogContext).pop(value),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Abbrechen'),
+          ),
+          FilledButton(
+            key: const Key('settings_openrouter_byok_save'),
+            onPressed: () => Navigator.of(dialogContext).pop(typed),
+            child: const Text('Speichern'),
+          ),
+        ],
+      ),
+    );
+
+    if (raw == null || !mounted) return;
+
+    setState(() {
+      _aiChecking = true;
+      _aiStatus = null;
+    });
+
+    try {
+      await AppScope.of(context).openRouter.connectWithKey(raw);
+      if (!mounted) return;
+      setState(() {
+        _aiChecking = false;
+        _aiStatus = 'Schlüssel übernommen. Er bleibt auf diesem Gerät.';
+        _technical = null;
+      });
+    } on OpenRouterException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _aiChecking = false;
+        _aiStatus = error.reason;
+        _technical = error.technical;
       });
     }
   }
@@ -471,10 +581,9 @@ class _SettingsPageState extends State<SettingsPage> {
     const SizedBox(height: 8),
     Text(
       _settings.aiEnabled
-          ? 'Texte, die die KI verarbeiten soll, gehen über unser Backend an '
-                'den Anbieter. Alles andere bleibt auf deinem Gerät. In den '
-                'Abläufen taucht dann ein Knopf für Vorschläge auf – '
-                'übernommen wird nur, was du antippst.'
+          ? 'Texte, die die KI verarbeiten soll, verlassen dein Gerät – '
+                'sonst nichts. In den Abläufen taucht dann ein Knopf für '
+                'Vorschläge auf; übernommen wird nur, was du antippst.'
           : 'Die App läuft vollständig auf deinem Gerät. Es fällt weg, dass '
                 'ich Texte für dich formuliere oder Aufgaben selbst zerlege – '
                 'alles andere bleibt.',
@@ -487,14 +596,154 @@ class _SettingsPageState extends State<SettingsPage> {
       const SizedBox(height: 12),
       Text(
         // Kein Ladekringel: Der flackert nur und hängt in Widget-Tests.
-        _aiChecking ? 'Ich frage kurz beim Backend nach …' : _aiStatus!,
+        _aiChecking ? 'Ich frage kurz nach …' : _aiStatus!,
         key: const Key('settings_ai_status'),
         style: theme.textTheme.bodyMedium?.copyWith(
           color: theme.colorScheme.primary,
         ),
       ),
     ],
+    // Das Angebot aus Abschnitt 17a. Es kommt erst hier, nie im Onboarding:
+    // Die Standard-KI läuft sofort, ein eigener Zugang ist ein späteres
+    // Angebot und kein Einstiegshindernis.
+    if (_settings.aiEnabled) ...[
+      const SizedBox(height: 24),
+      ListenableBuilder(
+        listenable: AppScope.of(context).openRouter,
+        builder: (context, _) => _openRouterCard(theme),
+      ),
+    ],
   ];
+
+  Widget _openRouterCard(ThemeData theme) {
+    final account = AppScope.of(context).openRouter;
+
+    // Material, nicht Container: Die aufklappbare Zeile darunter malt ihren
+    // Tipp-Effekt auf das nächste Material. Läge dazwischen nur eine
+    // eingefärbte Box, verschluckt sie ihn – Flutter meldet das im Test.
+    return Material(
+      key: const Key('settings_openrouter'),
+      color: theme.colorScheme.surfaceContainerHighest,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: account.isConnected
+              ? _openRouterConnected(theme, account)
+              : _openRouterOffer(theme),
+        ),
+      ),
+    );
+  }
+
+  List<Widget> _openRouterOffer(ThemeData theme) => [
+    Text('Bessere Antworten?', style: theme.textTheme.titleSmall),
+    const SizedBox(height: 8),
+    Text(
+      'Verbinde ein eigenes KI-Konto – kostenlos möglich. Ein Tap, du musst '
+      'nichts kopieren und nichts einrichten. Danach ist es nie wieder ein '
+      'Thema.',
+      key: const Key('settings_openrouter_offer'),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    ),
+    const SizedBox(height: 12),
+    FilledButton(
+      key: const Key('settings_openrouter_connect'),
+      onPressed: _aiChecking ? null : _connectOpenRouter,
+      child: const Text('Konto verbinden'),
+    ),
+    const SizedBox(height: 12),
+    _openRouterPrivacyNote(theme),
+    _openRouterExpertOption(theme),
+  ];
+
+  List<Widget> _openRouterConnected(
+    ThemeData theme,
+    OpenRouterAccount account,
+  ) => [
+    Text(
+      account.needsReconnect ? 'Zugang abgelaufen' : 'Eigenes KI-Konto',
+      style: theme.textTheme.titleSmall,
+    ),
+    const SizedBox(height: 8),
+    Text(
+      account.needsReconnect
+          // Kein Drama daraus machen: Es fällt nichts aus, es wird nur
+          // wieder einfacher.
+          ? 'Dein Zugang wird nicht mehr angenommen – abgelaufen oder '
+                'zurückgezogen. Solange läuft alles über den Standardweg '
+                'weiter, es fehlt dir nichts.'
+          : 'Verbunden${account.key!.origin == OpenRouterKeyOrigin.manual ? ' (eigener Schlüssel ${account.key!.hint})' : ''}. '
+                'Deine Anfragen gehen direkt von diesem Gerät zum Anbieter – '
+                'ohne Umweg über uns.',
+      key: const Key('settings_openrouter_status'),
+      style: theme.textTheme.bodyMedium?.copyWith(
+        color: theme.colorScheme.onSurfaceVariant,
+      ),
+    ),
+    const SizedBox(height: 12),
+    Wrap(
+      spacing: 8,
+      children: [
+        if (account.needsReconnect)
+          FilledButton(
+            key: const Key('settings_openrouter_reconnect'),
+            onPressed: _aiChecking ? null : _connectOpenRouter,
+            child: const Text('Neu verbinden'),
+          ),
+        OutlinedButton(
+          key: const Key('settings_openrouter_disconnect'),
+          onPressed: _aiChecking ? null : _disconnectOpenRouter,
+          child: const Text('Trennen'),
+        ),
+      ],
+    ),
+    const SizedBox(height: 12),
+    _openRouterPrivacyNote(theme),
+  ];
+
+  /// Der ehrliche Teil. Er gehört hierher, nicht ins Kleingedruckte:
+  /// In Neurohelp geht es oft um Arzt- und Kassenthemen.
+  Widget _openRouterPrivacyNote(ThemeData theme) => Text(
+    'Was die KI verarbeitet, läuft dann über OpenRouter und den Anbieter des '
+    'Modells. Bei kostenlosen Modellen darf mit diesen Texten häufig '
+    'trainiert werden. Alles andere – Historie, Vorgänge, Kontakte – bleibt '
+    'wie immer auf deinem Gerät.',
+    key: const Key('settings_openrouter_privacy'),
+    style: theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    ),
+  );
+
+  /// BYOK liegt bewusst darunter, aufklappbar – für die drei Bastler, die
+  /// das wollen. Im Standardweg taucht kein Schlüssel auf.
+  Widget _openRouterExpertOption(ThemeData theme) => Theme(
+    // Ohne das zieht die Aufklapp-Zeile die Trennlinien des Standardthemas
+    // mit und der ruhige Block bekommt Kanten, die er nicht braucht.
+    data: theme.copyWith(dividerColor: Colors.transparent),
+    child: ExpansionTile(
+      key: const Key('settings_openrouter_byok'),
+      tilePadding: EdgeInsets.zero,
+      childrenPadding: EdgeInsets.zero,
+      title: Text(
+        'Ich habe schon einen eigenen Schlüssel',
+        style: theme.textTheme.bodySmall,
+      ),
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            key: const Key('settings_openrouter_byok_open'),
+            onPressed: _aiChecking ? null : _enterOwnKey,
+            child: const Text('Schlüssel eintragen'),
+          ),
+        ),
+      ],
+    ),
+  );
 
   List<Widget> _lockSection(ThemeData theme) => [
     Text('App-Sperre', style: theme.textTheme.titleMedium),

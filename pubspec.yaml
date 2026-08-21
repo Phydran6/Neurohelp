@@ -8,7 +8,7 @@ publish_to: "none"
 # Der Zusatz `-alpha.N` ist Absicht und bleibt so lange stehen, bis die App
 # wirklich für fremde Geräte taugt. Er landet im Namen der App-Version und ist
 # damit auf dem Gerät sichtbar.
-version: 0.1.0-alpha.9+1
+version: 0.1.0-alpha.10+1
 
 environment:
   # Ab 3.8 formatiert `dart format` im neuen ("tall") Stil. Die Untergrenze
@@ -22,6 +22,13 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_secure_storage: ^9.2.0
+  # Öffnet den OpenRouter-Login im Browser und fängt den Rücksprung über das
+  # Schema `neurohelp` wieder ein (Konzept, Abschnitt 17a).
+  flutter_web_auth_2: ^5.1.0
+  # Nur für den nutzereigenen KI-Zugang: Der geht laut Konzept direkt vom
+  # Gerät raus, nicht über das Backend. Die eigene gehostete KI läuft
+  # weiterhin ausschließlich über Supabase.
+  http: ^1.2.0
   local_auth: ^2.3.0
   path: ^1.9.0
   path_provider: ^2.1.0

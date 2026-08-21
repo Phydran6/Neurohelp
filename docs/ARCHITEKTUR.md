@@ -69,23 +69,39 @@ Status. Feature-spezifische Details liegen in eigenen Tabellen und verweisen dar
 
 ## KI-Schicht
 
-**Regel: Die App ruft nie einen KI-Anbieter direkt auf.** Jeder Aufruf geht über die
-Backend-Schicht (Supabase Edge Function).
+Details in [KI-ZUGANG.md](KI-ZUGANG.md), Begründung in Abschnitt 17a des
+[Konzepts](KONZEPT.md).
 
 ```
 App ──▶ AiClient (Interface)
-          └─▶ Supabase Edge Function „ai-proxy"
-                 ├─▶ Claude API
-                 └─▶ OpenAI API
+          └─▶ LayeredAiClient
+                 ├─▶ OpenRouterAiClient   direkt vom Gerät   [wenn verbunden]
+                 │      └─▶ Modell, zur Laufzeit gewählt
+                 └─▶ SupabaseAiClient     über das Backend   [Standard]
+                        └─▶ Edge Function „ai-proxy" ─▶ Claude / OpenAI
 ```
 
-- Die App schickt Aufgabentyp + Kontext, nicht Anbieter oder Modellnamen
-- Ein Anbieterwechsel ist eine Backend-Änderung, **nie** eine App-Änderung
-- Der API-Schlüssel liegt ausschließlich im Backend
+- Die App schickt Aufgabentyp + Kontext, nie Anbieter oder Modellnamen. Sie kennt
+  **keinen Anbieter**, nur „die KI"
+- **Kein Modell ist fest verdrahtet.** Das Verzeichnis wird zur Laufzeit abgefragt, weil es
+  rotiert
 - Der KI-Toggle aus dem Onboarding schaltet die gesamte Schicht ab – ohne KI läuft die App
   vollständig lokal
+- Fällt eine Stufe aus, geht es **stillschweigend** eine Stufe tiefer. Nie eine technische
+  Fehlermeldung
 
-Jeder KI-abhängige Ablauf braucht daher einen lokalen Weg ohne KI.
+### Die Proxy-Regel – bewusst differenziert
+
+| Zugang | Weg | Warum |
+|---|---|---|
+| Eigene gehostete KI | über das Backend | Schutz der eigenen Infrastruktur und des dort liegenden Schlüssels |
+| Nutzereigener Zugang | direkt vom Gerät | Ein Proxy hätte keinen Zweck und wäre nur eine weitere Station, auf der fremde Daten landen |
+
+Der nutzereigene Schlüssel liegt verschlüsselt im Keystore bzw. der Keychain – nie im
+Backend, nie in der SQLite-Datenbank.
+
+Jeder KI-abhängige Ablauf braucht trotzdem einen lokalen Weg ohne KI: Es kann sein, dass
+gar keine Stufe trägt.
 
 ---
 

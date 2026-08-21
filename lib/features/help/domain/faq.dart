@@ -70,6 +70,30 @@ abstract final class FaqCatalog {
       keywords: ['ki', 'einstellungen', 'abschalten'],
     ),
     FaqEntry(
+      id: 'eigenes-ki-konto',
+      question: 'Was bringt es, ein eigenes KI-Konto zu verbinden?',
+      answer:
+          'Bessere Antworten, und es ist kostenlos möglich. Du meldest dich '
+          'einmal an – ein Tap, du musst nichts kopieren und nichts '
+          'einrichten. Danach gehen die Texte, die die KI verarbeitet, '
+          'direkt von deinem Gerät zum Anbieter, statt über unseren Server. '
+          'Das Angebot steht in den Einstellungen unter „KI". Ohne das '
+          'funktioniert alles genauso, nur eine Stufe einfacher.',
+      keywords: ['ki', 'konto', 'openrouter', 'verbinden', 'besser'],
+    ),
+    FaqEntry(
+      id: 'eigenes-ki-konto-daten',
+      question: 'Was passiert mit meinen Texten beim eigenen KI-Konto?',
+      answer:
+          'Sie gehen direkt von deinem Gerät an OpenRouter und von dort an '
+          'den Anbieter des Modells, das gerade antwortet. Bei kostenlosen '
+          'Modellen darf mit diesen Texten häufig trainiert werden – bei '
+          'Arzt- und Kassenthemen ist das einen Gedanken wert. Dein Zugang '
+          'liegt verschlüsselt auf deinem Gerät und geht nie an uns. Über '
+          '„Trennen" in den Einstellungen ist er sofort weg.',
+      keywords: ['ki', 'datenschutz', 'openrouter', 'training', 'schlüssel'],
+    ),
+    FaqEntry(
       id: 'app-sperre',
       question: 'Warum fragt die App beim Öffnen nach Fingerabdruck oder PIN?',
       answer:

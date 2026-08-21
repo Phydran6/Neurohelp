@@ -51,6 +51,30 @@
                     android:host="login-callback"/>
             </intent-filter>
         </activity>
+
+        <!--
+            Rueckweg aus dem OpenRouter-Login (Konzept, Abschnitt 17a).
+
+            Der User meldet sich im Browser an, nicht in der App - die App
+            sieht dadurch nie Zugangsdaten. Zurueck kommt er ueber
+            `neurohelp://openrouter?code=...`. Ohne diese Activity landet der
+            Code nirgends, und der Login endet in einer leeren Browserseite.
+
+            Das Schema muss zu OpenRouterApi.callbackScheme passen und zur
+            Info.plist auf iOS.
+        -->
+        <activity
+            android:name="com.linusu.flutter_web_auth_2.CallbackActivity"
+            android:exported="true"
+            android:taskAffinity="">
+            <intent-filter android:label="flutter_web_auth_2">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="neurohelp"/>
+            </intent-filter>
+        </activity>
+
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <meta-data

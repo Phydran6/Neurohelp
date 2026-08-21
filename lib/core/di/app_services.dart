@@ -12,6 +12,9 @@ import '../../features/tasks/domain/task_repository.dart';
 import '../account/account_repository.dart';
 import '../account/data/unconfigured_account_repository.dart';
 import '../ai/ai_client.dart';
+import '../ai/openrouter/openrouter_account.dart';
+import '../ai/openrouter/openrouter_api.dart';
+import '../ai/openrouter/openrouter_key_store.dart';
 import '../db/app_database.dart';
 import '../db/schema.dart';
 import '../history/data/sqlite_history_repository.dart';
@@ -37,6 +40,7 @@ class AppServices {
     required this.calls,
     required this.dialer,
     required this.ai,
+    required this.openRouter,
     required this.help,
     required this.account,
     required this.lock,
@@ -55,6 +59,7 @@ class AppServices {
     AccountRepository? account,
     AppLock? lock,
     FileSaver files = const NoFileSaver(),
+    OpenRouterAccount? openRouter,
   }) {
     final history = SqliteHistoryRepository(database.raw, clock: clock);
     final aiClient = ai ?? const DisabledAiClient();
@@ -85,6 +90,15 @@ class AppServices {
       // Ohne KI-Anbindung läuft die App vollständig lokal. Der echte
       // Client kommt, sobald das Onboarding den Toggle setzt.
       ai: aiClient,
+      // Ohne eigenen Zugang bleibt das ein leeres Konto – die KI läuft dann
+      // über die Standardstufe, und in den Einstellungen steht das Angebot,
+      // eins zu verbinden.
+      openRouter:
+          openRouter ??
+          OpenRouterAccount(
+            store: InMemoryOpenRouterKeyStore(),
+            api: OpenRouterApi(),
+          ),
       // Ohne eingerichtetes Backend kann kein Konto angelegt werden - die
       // App sagt das, statt eines vorzutaeuschen.
       account: account ?? const UnconfiguredAccountRepository(),
@@ -112,6 +126,11 @@ class AppServices {
   final CallLauncher dialer;
 
   final AiClient ai;
+
+  /// Der eigene KI-Zugang des Users, falls er einen verbunden hat
+  /// (Konzept, Abschnitt 17a). Die Abläufe fragen ihn nie – sie kennen nur
+  /// [ai]. Sichtbar ist er allein in den Einstellungen.
+  final OpenRouterAccount openRouter;
 
   /// Fragen im Hilfe-Bereich – Katalog zuerst, KI nur wenn nötig.
   final HelpService help;
@@ -144,12 +163,19 @@ class AppServices {
     await lock.clearPin();
     await lock.clearRecoveryCodes();
 
+    // Der eigene KI-Zugang gehört dem User und liegt auf diesem Gerät –
+    // also gehört er zu dem, was hier weggeräumt wird. Sein Konto bei
+    // OpenRouter bleibt davon unberührt; das können wir nicht anfassen und
+    // sollen es auch nicht.
+    await openRouter.disconnect();
+
     // Neu lesen heißt: Standardwerte, und jede horchende Seite erfährt davon.
     await settings.load();
   }
 
   Future<void> dispose() {
     settings.dispose();
+    openRouter.dispose();
     return database.close();
   }
 }

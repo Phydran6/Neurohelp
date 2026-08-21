@@ -29,6 +29,20 @@
 				<string>will.neurohelp.help</string>
 			</array>
 		</dict>
+		<!-- Rueckweg aus dem OpenRouter-Login (Konzept, Abschnitt 17a). Der
+		     User meldet sich im Browser an und kommt ueber
+		     `neurohelp://openrouter?code=...` zurueck. Muss zu
+		     OpenRouterApi.callbackScheme passen und zum Android-Manifest. -->
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>neurohelp.openrouter</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>neurohelp</string>
+			</array>
+		</dict>
 	</array>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>

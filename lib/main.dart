@@ -5,7 +5,12 @@ import 'app/app.dart';
 import 'core/account/data/supabase_account_repository.dart';
 import 'core/account/data/unconfigured_account_repository.dart';
 import 'core/ai/ai_client.dart';
+import 'core/ai/data/layered_ai_client.dart';
+import 'core/ai/data/openrouter_ai_client.dart';
 import 'core/ai/data/supabase_ai_client.dart';
+import 'core/ai/openrouter/openrouter_account.dart';
+import 'core/ai/openrouter/openrouter_api.dart';
+import 'core/ai/openrouter/openrouter_key_store.dart';
 import 'core/config/app_config.dart';
 import 'core/db/app_database.dart';
 import 'core/di/app_services.dart';
@@ -24,6 +29,16 @@ Future<void> main() async {
   final database = await AppDatabase.open();
   final client = await _connectBackend();
 
+  // Der eigene KI-Zugang des Users, falls einer auf dem Gerät liegt
+  // (Konzept, Abschnitt 17a). Er wird gleich gelesen – vor dem ersten Bild,
+  // damit die Einstellungen nicht kurz „nicht verbunden" behaupten.
+  final openRouterApi = OpenRouterApi();
+  final openRouter = OpenRouterAccount(
+    store: const SecureOpenRouterKeyStore(),
+    api: openRouterApi,
+  );
+  await openRouter.load();
+
   final services = AppServices.from(
     database,
     sender: const UrlLauncherMessageSender(),
@@ -33,10 +48,13 @@ Future<void> main() async {
     account: client == null
         ? const UnconfiguredAccountRepository()
         : SupabaseAccountRepository(client),
+    openRouter: openRouter,
     // Der Schalter kommt gleich aus den Einstellungen. Bis dahin gilt: aus.
-    ai: client == null
-        ? const DisabledAiClient()
-        : SupabaseAiClient(client, enabled: false),
+    ai: _buildAi(
+      backend: client,
+      openRouter: openRouter,
+      openRouterApi: openRouterApi,
+    ),
   );
 
   // Einmal lesen, bevor das erste Bild steht: Danach kennen Startseite,
@@ -44,6 +62,27 @@ Future<void> main() async {
   await services.settings.load();
 
   runApp(AppScope(services: services, child: const NeurohelpApp()));
+}
+
+/// Stellt die KI-Schicht mit ihren Stufen zusammen (Konzept, Abschnitt 17a).
+///
+/// Reihenfolge: erst der eigene Zugang des Users, dann die eigene gehostete
+/// KI. Fällt oben etwas aus, geht es stillschweigend eine Stufe tiefer.
+/// Bleibt nichts übrig, geht jeder Ablauf seinen lokalen Weg.
+///
+/// Der Schalter steht überall zunächst auf „aus" – er kommt gleich aus den
+/// Einstellungen.
+AiClient _buildAi({
+  required SupabaseClient? backend,
+  required OpenRouterAccount openRouter,
+  required OpenRouterApi openRouterApi,
+}) {
+  final stages = <AiClient>[
+    OpenRouterAiClient(account: openRouter, api: openRouterApi, enabled: false),
+    if (backend != null) SupabaseAiClient(backend, enabled: false),
+  ];
+
+  return LayeredAiClient(stages);
 }
 
 /// Baut die Verbindung zum Backend auf, oder liefert `null`.

@@ -1,6 +1,6 @@
 # Datenschutzerklärung
 
-**Neurohelp** · Stand: 9. August 2026
+**Neurohelp** · Stand: 21. August 2026
 
 Diese Erklärung beschreibt, welche Daten die App verarbeitet. Sie ist absichtlich
 kurz, weil die App absichtlich wenig überträgt.
@@ -11,7 +11,9 @@ kurz, weil die App absichtlich wenig überträgt.
 
 Alles, was du in Neurohelp einträgst, bleibt auf deinem Gerät. Zum Server gehen
 nur drei Dinge: deine Kontoanmeldung, die Passwort-Reset-Mail und – **nur wenn du
-KI eingeschaltet hast** – der Text, den die KI formulieren soll.
+KI eingeschaltet hast** – der Text, den die KI formulieren soll. Hast du ein
+eigenes KI-Konto verbunden, geht dieser Text stattdessen direkt von deinem Gerät
+zum Anbieter, an unserem Server vorbei.
 
 Es gibt keine Werbung, kein Tracking, keine Analyse-Werkzeuge und keine
 Weitergabe an Dritte zu Werbezwecken.
@@ -87,6 +89,33 @@ Entscheidung in den Einstellungen jederzeit ändern.
 **Ein Hinweis in eigener Sache:** Schreib in KI-Felder nichts, was niemand außer
 dir lesen soll. Der Text verlässt dabei dein Gerät. Bei ausgeschalteter KI
 passiert das nie.
+
+### 4. Eigenes KI-Konto – nur wenn du eins verbindest
+
+In den Einstellungen kannst du ein eigenes KI-Konto bei
+[OpenRouter](https://openrouter.ai) verbinden. Das ist ein Angebot, keine
+Voraussetzung – ohne dieses Konto ändert sich für dich nichts.
+
+**Verarbeitet:** dieselben Texte wie unter Punkt 3, und die Art der Aufgabe.
+
+**Wohin:** Solange ein eigenes Konto verbunden ist, geht die Anfrage **direkt von
+deinem Gerät** an OpenRouter und von dort an den Anbieter des Modells, das
+antwortet. **Unser Server sieht diese Anfragen nicht.** Welcher Anbieter das ist,
+wechselt: Die App wählt zur Laufzeit aus den gerade verfügbaren Modellen.
+
+**Wichtig:** Bei kostenlosen Modellen ist es häufig erlaubt, mit diesen Texten
+Modelle zu trainieren. Das ist der Unterschied zu Punkt 3 und der Grund, warum
+der Hinweis auch in der App direkt am Angebot steht. Gerade bei Arzt- und
+Kassenthemen ist das einen Gedanken wert.
+
+**Dein Zugang:** Der Schlüssel, den die App bei der Anmeldung bekommt, liegt
+verschlüsselt im sicheren Speicher deines Geräts (Android Keystore, iOS
+Keychain). Er geht **nie** an unseren Server. Über „Trennen" in den Einstellungen
+ist er sofort weg; danach läuft die KI wieder über Punkt 3.
+
+**Wie lange:** Wir speichern nichts davon – wir bekommen nichts davon zu sehen.
+Was OpenRouter und der jeweilige Modellanbieter speichern, steht in deren eigenen
+Erklärungen; für dieses Konto bist du deren Vertragspartner, nicht wir.
 
 ---
 

@@ -7,6 +7,46 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.10] - 2026-08-21
+
+### Added
+
+- **Du kannst jetzt ein eigenes KI-Konto verbinden – kostenlos möglich.** In den
+  Einstellungen unter „KI" steht ein Knopf „Konto verbinden". Ein Tap: Du meldest
+  dich im Browser bei OpenRouter an und bist zurück. Du bekommst nie einen
+  Schlüssel zu sehen und musst nichts kopieren, nichts eintragen, nirgends ein
+  Dashboard öffnen. Danach antwortet dein eigener Zugang, und die Antworten
+  werden besser. Ohne das ändert sich für dich nichts – die KI der App läuft
+  weiter wie bisher (Konzept, Abschnitt 17a)
+- **Der ehrliche Hinweis steht direkt daneben, nicht im Kleingedruckten.** Was
+  die KI verarbeitet, läuft dann über OpenRouter und den Anbieter des Modells,
+  und bei kostenlosen Modellen darf mit diesen Texten häufig trainiert werden.
+  Bei Arzt- und Kassenthemen ist das einen Gedanken wert – also steht es dort,
+  wo die Entscheidung fällt
+- **Wer schon einen eigenen Schlüssel hat**, findet ihn unter „Ich habe schon
+  einen eigenen Schlüssel" – aufklappbar, bewusst unauffällig. Für den
+  Standardweg taucht nirgends ein Schlüsselfeld auf
+- **Zwei neue Antworten im Hilfe-Bereich** zum eigenen KI-Konto: was es bringt
+  und was dabei mit den Texten passiert
+
+### Changed
+
+- **Fällt die KI aus, fällt sie weich.** Bisher gab es einen Weg; ging der nicht,
+  war die KI weg. Jetzt gibt es Stufen: erst dein eigener Zugang, dann die KI der
+  App. Hängt ein Modell am Limit oder ist über Nacht verschwunden, wird still das
+  nächste genommen; trägt keins mehr, geht es eine Stufe tiefer weiter. Du siehst
+  davon nichts – höchstens, dass es gerade etwas einfacher zugeht
+- **Kein Modell ist fest eingebaut.** Welche kostenlosen Modelle es gibt, ändert
+  sich ständig. Die App schaut deshalb zur Laufzeit nach und wählt selbst. Du
+  sollst nie ein Modell aussuchen müssen und erfährst auch nicht, welches
+  geantwortet hat
+- **Läuft dein Zugang ab oder wird zurückgezogen**, sagt die App das in einem
+  ruhigen Satz und bietet „Neu verbinden" an. Es fällt nichts aus: Solange läuft
+  alles über den Standardweg weiter
+- **„Konto löschen" nimmt jetzt auch den eigenen KI-Zugang mit.** Er liegt auf
+  deinem Gerät, also gehört er zu dem, was dabei weggeräumt wird. Dein Konto bei
+  OpenRouter bleibt davon unberührt
+
 ## [0.1.0-alpha.9] - 2026-08-19
 
 ### Fixed

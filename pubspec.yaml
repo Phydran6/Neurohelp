@@ -29,7 +29,7 @@ dependencies:
   # Gerät raus, nicht über das Backend. Die eigene gehostete KI läuft
   # weiterhin ausschließlich über Supabase.
   http: ^1.2.0
-  local_auth: ^2.3.0
+  local_auth: ^3.0.2
   path: ^1.9.0
   path_provider: ^2.1.0
   # Für „Sicherungsdatei speichern": Das System-Blatt lässt den User selbst

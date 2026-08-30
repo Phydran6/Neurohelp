@@ -17,6 +17,12 @@ import 'appointment_book_page.dart';
 ///
 /// Telefon übergibt an das Anruf-Feature, Mail und Formular an das
 /// Nachricht-Feature – die Abläufe werden nicht doppelt gebaut.
+///
+/// Auch beim Weitermachen führt der Weg hier vorbei. Wer mitten im Anruf
+/// abbricht, hat den Weg zwar schon gewählt, aber noch nichts erledigt:
+/// Vorher landete er direkt im Eintragen und kam an das Telefonat nicht mehr
+/// heran. Jetzt steht der zuletzt gewählte Weg markiert da und lässt sich
+/// noch einmal gehen – oder gegen einen anderen tauschen.
 class AppointmentRoutePage extends StatefulWidget {
   const AppointmentRoutePage({required this.appointmentId, super.key});
 
@@ -109,6 +115,11 @@ class _AppointmentRoutePageState extends State<AppointmentRoutePage> {
     }
   }
 
+  /// Die Beschriftung eines Weges, wie sie auch in der Liste steht.
+  static String _labelOf(BookingRoute route) => AppointmentRoutePage.options
+      .firstWhere((option) => option.route == route)
+      .label;
+
   /// Der Backend-Prompt antwortet mit einem der vier Wörter. Alles andere
   /// gilt als „kein Vorschlag" – geraten wird nicht.
   static BookingRoute? _routeOf(String line) {
@@ -118,6 +129,19 @@ class _AppointmentRoutePageState extends State<AppointmentRoutePage> {
     if (value.contains('FORMULAR')) return BookingRoute.webForm;
     if (value.contains('MAIL')) return BookingRoute.mail;
     return null;
+  }
+
+  /// Wer den Termin schon in der Hand hat, überspringt den Weg.
+  ///
+  /// Der Knopf steht bewusst unter der Liste und nicht darüber: Er ist der
+  /// Ausweg, nicht der Vorschlag.
+  Future<void> _bookDirectly() async {
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) =>
+            AppointmentBookPage(appointmentId: widget.appointmentId),
+      ),
+    );
   }
 
   Future<void> _choose(BookingRoute route) async {
@@ -157,6 +181,10 @@ class _AppointmentRoutePageState extends State<AppointmentRoutePage> {
     final services = AppScope.of(context);
     final texts = ToneTexts(services.settings.current.tone);
 
+    // Beim Weitermachen ist der Weg schon einmal gewählt worden. Das ist
+    // keine erledigte Buchung – nur ein Anhaltspunkt.
+    final chosen = _appointment?.route ?? BookingRoute.undecided;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Termin klären')),
       body: SafeArea(
@@ -168,6 +196,18 @@ class _AppointmentRoutePageState extends State<AppointmentRoutePage> {
               key: const Key('appt_route_title'),
               style: theme.textTheme.headlineSmall,
             ),
+            if (chosen != BookingRoute.undecided) ...[
+              const SizedBox(height: 12),
+              Text(
+                'Zuletzt wolltest du das hier: ${_labelOf(chosen)}. '
+                'Du kannst es noch einmal versuchen oder etwas anderes '
+                'nehmen.',
+                key: const Key('appt_route_again'),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             if (services.ai.isEnabled) ...[
               if (_asking)
@@ -205,11 +245,20 @@ class _AppointmentRoutePageState extends State<AppointmentRoutePage> {
                 option: option,
                 // Vorschlag heißt Vorschlag: markiert, nicht vorausgewählt.
                 isSuggested: option.route == _suggested,
+                // Genauso der zuletzt gewählte Weg: Er steht da, damit man
+                // ihn wiederfindet – angeklickt wird er von Hand.
+                wasChosen: option.route == chosen,
                 reason: option.route == _suggested ? _reason : null,
                 onTap: () => _choose(option.route),
               ),
               const SizedBox(height: 12),
             ],
+            const SizedBox(height: 8),
+            TextButton(
+              key: const Key('appt_route_skip'),
+              onPressed: _bookDirectly,
+              child: const Text('Der Termin steht schon – eintragen'),
+            ),
           ],
         ),
       ),
@@ -221,12 +270,18 @@ class _RouteTile extends StatelessWidget {
   const _RouteTile({
     required this.option,
     required this.isSuggested,
+    required this.wasChosen,
     required this.reason,
     required this.onTap,
   });
 
   final ({BookingRoute route, String label, String hint}) option;
   final bool isSuggested;
+
+  /// Dieser Weg war beim letzten Mal schon gewählt – der Ablauf wurde nur
+  /// nicht zu Ende gegangen.
+  final bool wasChosen;
+
   final String? reason;
   final VoidCallback onTap;
 
@@ -242,7 +297,7 @@ class _RouteTile extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Container(
-          decoration: isSuggested
+          decoration: isSuggested || wasChosen
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(16),
                   border: Border.all(color: theme.colorScheme.primary),
@@ -260,9 +315,9 @@ class _RouteTile extends StatelessWidget {
                       style: theme.textTheme.titleMedium,
                     ),
                   ),
-                  if (isSuggested)
+                  if (isSuggested || wasChosen)
                     Text(
-                      'Vorschlag',
+                      isSuggested ? 'Vorschlag' : 'Zuletzt gewählt',
                       key: Key('appt_route_badge_${option.route.name}'),
                       style: theme.textTheme.labelMedium?.copyWith(
                         color: theme.colorScheme.primary,

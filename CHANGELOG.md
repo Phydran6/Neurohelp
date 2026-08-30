@@ -7,6 +7,45 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.11] - 2026-08-30
+
+### Fixed
+
+- **Ein abgebrochener Termin lässt sich wieder aufnehmen – auch der Anruf.**
+  Wer „Anrufen" gewählt und das Telefonat abgebrochen hat, landete beim
+  Weitermachen sofort im Eintragen: Die App ging davon aus, der Anruf sei
+  gelaufen, und bot ihn nicht mehr an. Jetzt führt der Weg wieder über die
+  Wahl. Der zuletzt gewählte Weg steht markiert da – du kannst ihn noch
+  einmal gehen oder einen anderen nehmen. Wer den Termin inzwischen schon
+  hat, überspringt das mit „Der Termin steht schon – eintragen"
+- **Der Kalender fängt bei Montag an.** Datums- und Uhrzeitwähler liefen auf
+  Englisch und mit der amerikanischen Woche: Sonntag zuerst, Montag daneben.
+  Genau daneben greift man dann auch. Alles, was Flutter an Texten
+  beisteuert, spricht jetzt Deutsch, und die Woche beginnt, wo sie im
+  Deutschen beginnt
+- **Der Wochentag steht beim Termin dabei.** Nach dem Wählen liest du
+  „Mo, 31.08.2026, 10:00 Uhr" statt nur des Datums. Ein Griff daneben fällt
+  damit sofort auf und nicht erst am falschen Tag
+- **„Punkt hinzufügen" ist ein Knopf mit Beschriftung.** Vorher war es ein
+  kleines Plus im Eingabefeld – es war da, aber es las sich nicht als
+  „hinzufügen", und auf kleinen Bildschirmen war es kaum zu treffen. Der
+  neue Punkt wird außerdem ins Bild geschoben, damit man sieht, dass er
+  angekommen ist
+
+### Added
+
+- **Ein Termin, der steht, bleibt erreichbar.** Bisher war er mit „Termin
+  steht" abgeschlossen und verschwand; was du danach noch wusstest –
+  Unterlagen, Überweisung, wo es genau hingeht –, konntest du nirgends mehr
+  eintragen. Jetzt stehen deine gebuchten Termine unter „Termine, die
+  stehen" und lassen sich öffnen. Uhrzeit, Ort und die Mitnehm-Liste
+  kannst du jederzeit nachtragen
+- **Auch aus der Erinnerung heraus.** Fragt die App am Vortag, was du
+  mitnehmen musst, steht daneben „Etwas nachtragen" – da fällt es einem ja
+  ein. Das ist **kein Umbuchen**: Beim Arzt ändert sich davon nichts, das
+  bleibt außen vor (Konzept, Abschnitt 9). Verschiebst du den Termin selbst
+  auf einen anderen Tag, gilt die Erinnerung am Vortag neu
+
 ## [0.1.0-alpha.10] - 2026-08-21
 
 ### Added
@@ -458,7 +497,10 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.8...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.11...HEAD
+[0.1.0-alpha.11]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.11
+[0.1.0-alpha.10]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.10
+[0.1.0-alpha.9]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.9
 [0.1.0-alpha.8]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.8
 [0.1.0-alpha.7]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.7
 [0.1.0-alpha.6]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.6

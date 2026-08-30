@@ -4,6 +4,7 @@ import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/di/app_services.dart';
 import 'package:neurohelp/core/history/domain/history_entry.dart';
 import 'package:neurohelp/features/appointments/domain/appointment.dart';
+import 'package:neurohelp/features/appointments/presentation/appointment_book_page.dart';
 import 'package:neurohelp/features/appointments/presentation/appointment_route_page.dart';
 import 'package:neurohelp/features/appointments/presentation/appointment_start_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -188,6 +189,140 @@ void main() {
       final entry = await services.history.entryById(appointment.entryId);
       expect(entry!.status, HistoryStatus.open);
       expect(entry.isOpen, isTrue);
+    });
+  });
+
+  group('Weitermachen', () {
+    testWidgets('ein abgebrochener Anruf lässt sich wieder aufnehmen', (
+      tester,
+    ) async {
+      final appointment = await services.appointments.create('Sehtest');
+      // Weg gewählt, Telefonat abgebrochen – gebucht ist nichts.
+      await services.appointments.chooseRoute(
+        appointment.id,
+        BookingRoute.phone,
+      );
+
+      await pumpApp(tester);
+      await tester.tap(find.byKey(Key('appt_unbooked_${appointment.id}')));
+      await pumpUntil(tester, find.byKey(const Key('appt_route_title')));
+
+      // Vorher ging es von hier direkt ins Eintragen und der Anruf war
+      // nicht mehr erreichbar.
+      expect(find.byKey(const Key('appt_route_again')), findsOneWidget);
+      expect(find.byKey(const Key('appt_route_phone')), findsOneWidget);
+
+      final badge = tester.widget<Text>(
+        find.byKey(const Key('appt_route_badge_phone')),
+      );
+      expect(badge.data, 'Zuletzt gewählt');
+    });
+
+    testWidgets('wer den Termin schon hat, überspringt den Weg', (
+      tester,
+    ) async {
+      final appointment = await services.appointments.create('Sehtest');
+
+      await tester.pumpWidget(
+        AppScope(
+          services: services,
+          child: MaterialApp(
+            home: AppointmentRoutePage(appointmentId: appointment.id),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('appt_route_skip')));
+      await pumpUntil(tester, find.byKey(const Key('appt_pick_time')));
+    });
+  });
+
+  group('Nachbessern', () {
+    testWidgets('ein Termin, der steht, bleibt in der Liste', (tester) async {
+      final appointment = await booked(startsAt: termin);
+      // Die Bestätigung ist zur Kenntnis genommen – jetzt zählt die Liste.
+      await services.appointments.markPhaseNotified(
+        appointment.id,
+        FollowUpPhase.booked,
+      );
+
+      await pumpApp(tester);
+
+      expect(find.byKey(const Key('appt_upcoming_title')), findsOneWidget);
+      expect(
+        find.byKey(Key('appt_upcoming_${appointment.id}')),
+        findsOneWidget,
+      );
+      expect(find.text('Do, 20.08.2026, 10:00 Uhr'), findsOneWidget);
+    });
+
+    testWidgets('aus der Erinnerung heraus etwas nachtragen', (tester) async {
+      final appointment = await booked(startsAt: termin);
+
+      await pumpApp(tester);
+
+      // Die Karte fragt nach dem Termin – genau hier fällt einem ein, was
+      // noch fehlt.
+      await tester.tap(find.byKey(Key('appt_edit_${appointment.id}')));
+      await pumpUntil(tester, find.byKey(const Key('appt_edit_hint')));
+
+      expect(find.text('Änderungen speichern'), findsOneWidget);
+
+      await tester.enterText(
+        find.byKey(const Key('appt_item_field')),
+        'Überweisung',
+      );
+      await tester.pump();
+
+      // Der Knopf steht unter dem Feld und kann aus dem Bild gerutscht
+      // sein – auf dem Testschirm wie auf einem kleinen Telefon.
+      await tester.ensureVisible(find.byKey(const Key('appt_item_add')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('appt_item_add')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Überweisung'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('appt_save')));
+      await tester.pumpAndSettle();
+
+      final gespeichert = await services.appointments.byId(appointment.id);
+      expect(gespeichert!.checklist, contains('Überweisung'));
+      // Nachtragen ist kein neuer Termin: Er bleibt gebucht.
+      expect(gespeichert.bookedAt, appointment.bookedAt);
+    });
+
+    testWidgets('ohne Text bleibt der Knopf zum Hinzufügen aus', (
+      tester,
+    ) async {
+      final appointment = await booked(startsAt: termin);
+
+      await tester.pumpWidget(
+        AppScope(
+          services: services,
+          child: MaterialApp(
+            home: AppointmentBookPage(appointmentId: appointment.id),
+          ),
+        ),
+      );
+      await pumpUntil(tester, find.byKey(const Key('appt_item_field')));
+
+      final aus = tester.widget<TextButton>(
+        find.byKey(const Key('appt_item_add')),
+      );
+      expect(aus.onPressed, isNull);
+
+      await tester.enterText(
+        find.byKey(const Key('appt_item_field')),
+        'Versichertenkarte',
+      );
+      await tester.pump();
+
+      final an = tester.widget<TextButton>(
+        find.byKey(const Key('appt_item_add')),
+      );
+      expect(an.onPressed, isNotNull);
     });
   });
 

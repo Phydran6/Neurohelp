@@ -3,16 +3,23 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../../core/calendar/calendar_service.dart';
+import '../../../core/calendar/date_text.dart';
 import '../../../core/calendar/ics.dart';
 import '../../../core/di/app_services.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/appointment.dart';
 
-/// Den gebuchten Termin eintragen (Konzept, Abschnitt 9).
+/// Den gebuchten Termin eintragen – und später nachbessern (Konzept,
+/// Abschnitt 9).
 ///
 /// Erst wenn er steht, beginnt die Nachverfolgung. Die Checkliste ist das,
 /// was in der Erinnerung am Vortag auftaucht.
+///
+/// Dieselbe Seite öffnet sich auch für einen Termin, der schon steht. Was
+/// man mitnehmen muss, weiß man selten beim Eintragen – vorher war der
+/// Eintrag danach zu; wer es später wusste, kam nicht mehr heran. Ein
+/// Umbuchen ist das nicht: Beim Arzt ändert sich davon nichts.
 class AppointmentBookPage extends StatefulWidget {
   const AppointmentBookPage({required this.appointmentId, super.key});
 
@@ -26,12 +33,17 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
   final _location = TextEditingController();
   final _item = TextEditingController();
   final _itemFocus = FocusNode();
+  final _scroll = ScrollController();
 
   Appointment? _appointment;
   DateTime? _startsAt;
   final List<String> _checklist = [];
   bool _loading = true;
   String? _note;
+
+  /// Ob der Termin schon steht. Dann heißt Speichern „ändern", nicht
+  /// „buchen".
+  bool get _isEditing => _appointment?.isBooked ?? false;
 
   @override
   void didChangeDependencies() {
@@ -44,6 +56,7 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
     _location.dispose();
     _item.dispose();
     _itemFocus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -67,17 +80,27 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
 
   Future<void> _pickDateTime() async {
     final now = DateTime.now();
+    final start = _startsAt;
+
+    // Der Wähler verträgt kein Datum vor seiner eigenen Untergrenze. Bei
+    // einem Termin, der schon vorbei ist, muss die Grenze also mitgehen –
+    // sonst bricht das Nachtragen ab, statt sich zu öffnen.
+    var firstDate = now.subtract(const Duration(days: 1));
+    if (start != null && start.isBefore(firstDate)) firstDate = start;
+
     final date = await showDatePicker(
       context: context,
-      initialDate: _startsAt ?? now,
-      firstDate: now.subtract(const Duration(days: 1)),
+      initialDate: start ?? now,
+      firstDate: firstDate,
       lastDate: now.add(const Duration(days: 365 * 2)),
+      helpText: 'An welchem Tag?',
     );
     if (date == null || !mounted) return;
 
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_startsAt ?? now),
+      initialTime: TimeOfDay.fromDateTime(start ?? now),
+      helpText: 'Um wie viel Uhr?',
     );
     if (time == null || !mounted) return;
 
@@ -101,18 +124,48 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
       _item.clear();
     });
     _itemFocus.requestFocus();
+
+    // Ans Ende scrollen, sonst landet der frisch eingetragene Punkt hinter
+    // der Tastatur und es sieht aus, als wäre nichts passiert.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!_scroll.hasClients) return;
+      unawaited(
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        ),
+      );
+    });
   }
 
   Future<void> _save() async {
     final startsAt = _startsAt;
     if (startsAt == null) return;
 
-    await AppScope.of(context).appointments.markBooked(
-      widget.appointmentId,
-      startsAt: startsAt,
-      location: _location.text.trim().isEmpty ? null : _location.text.trim(),
-      checklist: List.of(_checklist),
-    );
+    final appointments = AppScope.of(context).appointments;
+    final location = _location.text.trim().isEmpty
+        ? null
+        : _location.text.trim();
+
+    // Ein Termin wird nur einmal gebucht. Danach ist Speichern ein
+    // Nachtragen – die Nachverfolgung läuft weiter, statt von vorn zu
+    // beginnen.
+    if (_isEditing) {
+      await appointments.updateBooking(
+        widget.appointmentId,
+        startsAt: startsAt,
+        location: location,
+        checklist: List.of(_checklist),
+      );
+    } else {
+      await appointments.markBooked(
+        widget.appointmentId,
+        startsAt: startsAt,
+        location: location,
+        checklist: List.of(_checklist),
+      );
+    }
 
     if (!mounted) return;
     Navigator.of(context).popUntil((route) => route.isFirst);
@@ -195,7 +248,19 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                   children: [
                     Expanded(
                       child: ListView(
+                        controller: _scroll,
                         children: [
+                          if (_isEditing) ...[
+                            Text(
+                              'Der Termin steht. Hier kannst du nachtragen, '
+                              'was du inzwischen weißt.',
+                              key: const Key('appt_edit_hint'),
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
                           Text(
                             'Wann ist der Termin?',
                             style: theme.textTheme.titleMedium,
@@ -208,7 +273,11 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                             label: Text(
                               startsAt == null
                                   ? 'Datum und Uhrzeit wählen'
-                                  : _format(startsAt),
+                                  // Mit Wochentag: Im Kalenderblatt liegt
+                                  // der Sonntag neben dem Montag, und ein
+                                  // Griff daneben fällt sonst erst am
+                                  // falschen Tag auf.
+                                  : DateText.dateTime(startsAt),
                             ),
                           ),
                           const SizedBox(height: 24),
@@ -238,15 +307,26 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                             controller: _item,
                             focusNode: _itemFocus,
                             textCapitalization: TextCapitalization.sentences,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Zum Beispiel: Versichertenkarte',
-                              suffixIcon: IconButton(
-                                key: const Key('appt_item_add'),
-                                icon: const Icon(Icons.add),
-                                onPressed: _addItem,
-                              ),
                             ),
+                            onChanged: (_) => setState(() {}),
                             onSubmitted: (_) => _addItem(),
+                          ),
+                          const SizedBox(height: 8),
+                          // Beschrifteter Knopf statt eines kleinen Pluses
+                          // im Feld: Das Plus war da, aber niemand hat es
+                          // als „hinzufügen" gelesen.
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              key: const Key('appt_item_add'),
+                              onPressed: _item.text.trim().isEmpty
+                                  ? null
+                                  : _addItem,
+                              icon: const Icon(Icons.add, size: 20),
+                              label: const Text('Punkt hinzufügen'),
+                            ),
                           ),
                           for (var i = 0; i < _checklist.length; i++)
                             ListTile(
@@ -280,7 +360,9 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
                     const SizedBox(height: 12),
                     BigActionButton(
                       key: const Key('appt_save'),
-                      label: 'Termin steht',
+                      label: _isEditing
+                          ? 'Änderungen speichern'
+                          : 'Termin steht',
                       onPressed: startsAt == null ? null : _save,
                     ),
                     // Der Weg in den eigenen Kalender, ohne der App dafür
@@ -296,11 +378,5 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
               ),
       ),
     );
-  }
-
-  static String _format(DateTime value) {
-    String two(int n) => n.toString().padLeft(2, '0');
-    return '${two(value.day)}.${two(value.month)}.${value.year}, '
-        '${two(value.hour)}:${two(value.minute)} Uhr';
   }
 }

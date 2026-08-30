@@ -21,6 +21,12 @@ dependencies:
   cupertino_icons: ^1.0.8
   flutter:
     sdk: flutter
+  # Die Texte, die Flutter selbst mitbringt – Datums- und Zeitwähler,
+  # Auswahlmenüs, Vorlesehilfe. Ohne das laufen sie auf Englisch mit
+  # US-Woche: Der Kalender beginnt bei Sonntag, und wer den Montag will,
+  # greift eine Spalte daneben.
+  flutter_localizations:
+    sdk: flutter
   flutter_secure_storage: ^9.2.0
   # Öffnet den OpenRouter-Login im Browser und fängt den Rücksprung über das
   # Schema `neurohelp` wieder ein (Konzept, Abschnitt 17a).

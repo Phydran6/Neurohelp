@@ -9,10 +9,13 @@ import '../../../core/history/domain/history_repository.dart';
 import '../domain/appointment.dart';
 import '../domain/follow_up_schedule.dart';
 
-/// Termine anlegen, buchen und nachverfolgen.
+/// Termine anlegen, buchen, nachbessern und nachverfolgen.
 ///
-/// **V1-Scope:** nur Neuorganisation. Umbuchen und Verschieben sind bewusst
-/// nicht dabei (Konzept, Abschnitt 9).
+/// **V1-Scope:** nur Neuorganisation. Umbuchen und Verschieben – also das
+/// Aushandeln eines neuen Termins mit der Praxis – sind bewusst nicht dabei
+/// (Konzept, Abschnitt 9). Den eigenen Eintrag nachbessern ist etwas
+/// anderes und muss gehen: Was man mitnehmen muss, weiß man selten schon
+/// beim Eintragen.
 class SqliteAppointmentRepository {
   SqliteAppointmentRepository(
     this._db,
@@ -117,6 +120,50 @@ class SqliteAppointmentRepository {
     return updated;
   }
 
+  /// Ändert einen Termin, der schon steht.
+  ///
+  /// Das ist **kein Umbuchen** (das bleibt laut Konzept, Abschnitt 9, außen
+  /// vor): Hier wird nur nachgetragen, was man beim Eintragen noch nicht
+  /// wusste – was mitzunehmen ist, wo es hingeht, die korrigierte Uhrzeit.
+  /// Beim Termin selbst ändert das nichts; dort muss weiterhin angerufen
+  /// werden.
+  Future<Appointment> updateBooking(
+    String id, {
+    required DateTime startsAt,
+    DateTime? endsAt,
+    String? location,
+    List<String> checklist = const [],
+  }) async {
+    final appointment = await _require(id);
+    final moved = appointment.startsAt != startsAt;
+
+    final updated = await save(
+      appointment.copyWith(
+        startsAt: startsAt,
+        endsAt: endsAt ?? startsAt.add(const Duration(hours: 1)),
+        location: location,
+        clearLocation: location == null,
+        checklist: checklist,
+        // Liegt der Termin jetzt woanders, gelten die Erinnerungen davor
+        // neu. Sonst käme die Checkliste zum alten Datum – oder gar nicht
+        // mehr, weil sie als „schon gemeldet" abgehakt ist.
+        notifiedPhases: moved
+            ? appointment.notifiedPhases
+                  .where((phase) => phase == FollowUpPhase.booked)
+                  .toSet()
+            : appointment.notifiedPhases,
+      ),
+    );
+
+    await _history.logEvent(
+      appointment.entryId,
+      HistoryEventKind.noteAdded,
+      note: 'Termin geändert.',
+    );
+
+    return updated;
+  }
+
   /// Die Phase, die für diesen Termin jetzt fällig ist – oder `null`.
   Future<FollowUpPhase?> duePhase(String id) async {
     final appointment = await _require(id);
@@ -175,6 +222,28 @@ class SqliteAppointmentRepository {
       DbSchema.tableAppointments,
       where: 'booked_at IS NULL',
       orderBy: 'created_at DESC',
+      limit: limit,
+    );
+    return rows.map(Appointment.fromRow).toList();
+  }
+
+  /// Gebuchte Termine, die noch bevorstehen.
+  ///
+  /// Damit steht auch ein fertiger Termin weiterhin da und lässt sich
+  /// nachbessern. Vorher verschwand er mit dem Speichern aus der App: Wer
+  /// hinterher noch wusste, was er mitnehmen muss, kam nicht mehr heran.
+  ///
+  /// Der Tag zählt, nicht die Uhrzeit – ein Termin von heute Morgen gehört
+  /// noch zu heute.
+  Future<List<Appointment>> upcoming({int limit = 20}) async {
+    final now = _now();
+    final today = DateTime(now.year, now.month, now.day);
+
+    final rows = await _db.query(
+      DbSchema.tableAppointments,
+      where: 'booked_at IS NOT NULL AND starts_at >= ?',
+      whereArgs: [today.millisecondsSinceEpoch],
+      orderBy: 'starts_at ASC',
       limit: limit,
     );
     return rows.map(Appointment.fromRow).toList();

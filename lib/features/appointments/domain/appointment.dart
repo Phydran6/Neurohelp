@@ -73,6 +73,10 @@ class Appointment {
   bool get delegatesToMessage =>
       route == BookingRoute.mail || route == BookingRoute.webForm;
 
+  /// [clearLocation] leert den Ort, statt ihn zu behalten.
+  ///
+  /// Ohne den Schalter kann man einen einmal eingetragenen Ort nie wieder
+  /// loswerden: `null` heißt hier sonst „unverändert", nicht „weg".
   Appointment copyWith({
     String? title,
     BookingRoute? route,
@@ -80,6 +84,7 @@ class Appointment {
     DateTime? startsAt,
     DateTime? endsAt,
     String? location,
+    bool clearLocation = false,
     List<String>? checklist,
     Set<FollowUpPhase>? notifiedPhases,
     DateTime? bookedAt,
@@ -92,7 +97,7 @@ class Appointment {
       routeSuggestedByAi: routeSuggestedByAi ?? this.routeSuggestedByAi,
       startsAt: startsAt ?? this.startsAt,
       endsAt: endsAt ?? this.endsAt,
-      location: location ?? this.location,
+      location: clearLocation ? null : (location ?? this.location),
       checklist: checklist ?? this.checklist,
       notifiedPhases: notifiedPhases ?? this.notifiedPhases,
       createdAt: createdAt,

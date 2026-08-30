@@ -27,7 +27,7 @@ dependencies:
   # greift eine Spalte daneben.
   flutter_localizations:
     sdk: flutter
-  flutter_secure_storage: ^9.2.0
+  flutter_secure_storage: ^10.3.1
   # Öffnet den OpenRouter-Login im Browser und fängt den Rücksprung über das
   # Schema `neurohelp` wieder ein (Konzept, Abschnitt 17a).
   flutter_web_auth_2: ^5.1.0

@@ -7,6 +7,42 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.12] - 2026-08-31
+
+### Fixed
+
+- **KI-Vorschläge lassen sich wieder übernehmen.** Beim Anlegen einer Aufgabe
+  tat ein Tipp auf „Übernehmen" scheinbar nichts. Der Schritt kam sehr wohl
+  an – nur landete er in einer Liste, die auf dem Telefon gar nicht mehr aufs
+  Blatt passte: Ab drei Vorschlägen drückte der KI-Block sie auf null Höhe.
+  Jetzt rollt die Seite als Ganzes, der übernommene Schritt wird ins Bild
+  geholt, und die Kachel sagt selbst „Übernommen"
+- **Die Vorschlagsliste lässt sich durchscrollen.** Bei sechs Vorschlägen
+  waren zwei zu sehen und der Rest unerreichbar. Die Seite hatte schlicht
+  keinen Scrollbereich
+- **„Alle übernehmen" ist ganz zu sehen.** Die Knopfreihe unter den
+  Vorschlägen lief auf Telefonbreite fast 300 Pixel aus dem Bild – in allen
+  Bereichen, nicht nur bei den Aufgaben. Sie bricht jetzt um
+- **„Was gehört dazu?" ist freiwillig.** Wer nur wusste, worum es geht, kam
+  nicht weiter: „Los geht's" blieb grau, ohne zu sagen warum. Ein Thema
+  genügt jetzt. Ohne eigene Schritte ist die Aufgabe selbst der eine Schritt,
+  statt sofort „alles erledigt" zu melden
+- **Ein getippter Eintrag geht nicht mehr verloren.** Wer den letzten Schritt
+  tippt und gleich weiterdrückt, hatte „hinzufügen" nie gedrückt – der
+  Eintrag war weg. Gilt für Aufgaben, Anrufe und Termine
+- **„Schritt hinzufügen" und „Stichpunkt hinzufügen" sind Knöpfe mit
+  Beschriftung.** Das kleine Plus im Feld war da, wurde aber nicht als
+  „hinzufügen" gelesen – bei den Terminen war das schon geändert, hier nicht
+- **Der KI-Block sagt nicht mehr zweimal dasselbe.** „Soll ich was
+  vorschlagen?" stand als Überschrift da und gleich darunter nochmal auf dem
+  Knopf
+- **Frische Vorschläge werden am Anfang gezeigt, nicht am Ende.** Bei einer
+  langen Liste stand vorher ihre Mitte da, und ihr Anfang lag oben außerhalb
+  des Bildes
+- **Große Schrift bricht keine Seite mehr.** Bei doppelter Systemschrift
+  verlor „Termin klären" über 700 Pixel nach unten und das Onboarding 152 –
+  mitsamt dem großen Knopf. Beide rollen jetzt
+
 ## [0.1.0-alpha.11] - 2026-08-30
 
 ### Fixed

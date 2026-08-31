@@ -363,41 +363,57 @@ class _OnboardingPageState extends State<OnboardingPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(
-                _title(),
-                key: const Key('onb_title'),
-                style: theme.textTheme.headlineSmall,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _hint(),
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              ),
-              const SizedBox(height: 24),
-              if (_info != null) ...[
-                Text(
-                  _info!,
-                  key: const Key('onb_info'),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.primary,
+              // Überschrift, Hinweis und Meldungen rollen mit. Vorher standen
+              // sie fest über dem rollbaren Teil: Bei doppelter Schriftgröße
+              // – für diese App keine Ausnahme, sondern ein üblicher Wert –
+              // nahmen allein sie mehr Platz, als das Blatt hoch war, und der
+              // Inhalt lief unten heraus. Nur die Knöpfe bleiben stehen,
+              // damit der Weg nach vorn immer erreichbar ist.
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Text(
+                        _title(),
+                        key: const Key('onb_title'),
+                        style: theme.textTheme.headlineSmall,
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        _hint(),
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      if (_info != null) ...[
+                        Text(
+                          _info!,
+                          key: const Key('onb_info'),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
+                      if (_error != null) ...[
+                        Text(
+                          _error!,
+                          key: const Key('onb_error'),
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: theme.colorScheme.error,
+                          ),
+                        ),
+                        if (_technical != null)
+                          ErrorDetails(technical: _technical!),
+                        const SizedBox(height: 16),
+                      ],
+                      _body(),
+                    ],
                   ),
                 ),
-                const SizedBox(height: 16),
-              ],
-              if (_error != null) ...[
-                Text(
-                  _error!,
-                  key: const Key('onb_error'),
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.error,
-                  ),
-                ),
-                if (_technical != null) ErrorDetails(technical: _technical!),
-                const SizedBox(height: 16),
-              ],
-              Expanded(child: SingleChildScrollView(child: _body())),
+              ),
               const SizedBox(height: 16),
               _actions(),
             ],

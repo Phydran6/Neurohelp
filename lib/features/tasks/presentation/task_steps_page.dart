@@ -29,6 +29,7 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
   final _titleController = TextEditingController();
   final _stepController = TextEditingController();
   final _stepFocus = FocusNode();
+  final _scroll = ScrollController();
 
   final List<String> _steps = [];
   bool _saving = false;
@@ -74,6 +75,7 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     _titleController.dispose();
     _stepController.dispose();
     _stepFocus.dispose();
+    _scroll.dispose();
     super.dispose();
   }
 
@@ -97,14 +99,52 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
         if (!_steps.contains(suggestion)) _steps.add(suggestion);
       }
     });
+    // Die eigene Liste steht unter dem KI-Block. Ohne diesen Sprung landet
+    // der übernommene Schritt außerhalb des Sichtbaren – und der Tipp sieht
+    // wieder folgenlos aus.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_scroll.hasClients) return;
+      unawaited(
+        _scroll.animateTo(
+          _scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOut,
+        ),
+      );
+    });
   }
 
-  /// Ohne Schritte gibt es nichts zu sortieren – das bleibt die Bedingung.
-  /// Der Titel dagegen darf offen bleiben, wenn der User ausdrücklich gesagt
-  /// hat, dass er ihn nicht weiß.
+  /// Die Zerlegung ist freiwillig.
+  ///
+  /// Vorher hing der Knopf an `_steps.isNotEmpty`: Wer nur wusste, worum es
+  /// geht, kam nicht weiter – der Knopf blieb grau, ohne zu sagen warum. Genau
+  /// das war die Rückmeldung aus dem Test. Es genügt jetzt, dass das Thema
+  /// dasteht, oder dass der User ausdrücklich gesagt hat, dass er es nicht
+  /// weiß.
   bool get _canStart =>
-      _steps.isNotEmpty &&
-      (_titleController.text.trim().isNotEmpty || _mode == RecallMode.helping);
+      _titleController.text.trim().isNotEmpty || _mode == RecallMode.helping;
+
+  /// Was am Ende wirklich als Schritte in die Datenbank geht.
+  ///
+  /// Zwei Fallen, beide aus dem Test gemeldet. Erstens: Wer den letzten
+  /// Schritt tippt und direkt auf „Los geht's" drückt, verlor ihn – das
+  /// Hinzufügen war ja nie gedrückt. Zweitens: Ohne jeden Schritt stünde im
+  /// Fokus-Modus sofort „alles erledigt", weil es nichts zu tun gäbe. Dann
+  /// ist die Aufgabe selbst der eine Schritt.
+  ///
+  /// Steht nicht einmal ein Thema fest, taugt der Platzhalter aus der
+  /// Historie nicht als Schritt („Noch ohne Thema" kann niemand tun). Dann
+  /// ist Herausfinden, worum es geht, der erste Schritt – und das ist er für
+  /// jemanden, der gerade feststeckt, ohnehin.
+  List<String> _stepsToSave(String title) {
+    final steps = [..._steps];
+
+    final pending = _stepController.text.trim();
+    if (pending.isNotEmpty && !steps.contains(pending)) steps.add(pending);
+
+    if (steps.isNotEmpty) return steps;
+    return [title == kUnknownTopic ? 'Herausfinden, worum es geht' : title];
+  }
 
   Future<void> _start() async {
     if (!_canStart || _saving) return;
@@ -114,7 +154,7 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     final typed = _titleController.text.trim();
     final title = typed.isEmpty ? kUnknownTopic : typed;
     final entryId = await tasks.createTask(title);
-    await tasks.addSteps(entryId, titles: _steps);
+    await tasks.addSteps(entryId, titles: _stepsToSave(title));
 
     if (!mounted) return;
     await Navigator.of(context).pushReplacement(
@@ -146,64 +186,99 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
                     const Spacer(),
                   ],
                 )
+              // Alles auf einer Liste, die scrollt; nur der große Knopf
+              // bleibt stehen. Vorher stand der KI-Block starr über einem
+              // `Expanded`: Sobald die KI mehr als zwei Vorschläge lieferte,
+              // drückte er die Schritt-Liste auf null Höhe. Der übernommene
+              // Schritt wurde dann gar nicht mehr gebaut – für den User
+              // „passiert beim Übernehmen nichts", und scrollen ging auch
+              // nicht, weil es nichts zu scrollen gab.
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    TextField(
-                      key: const Key('task_title_field'),
-                      contextMenuBuilder: noScanContextMenu,
-                      controller: _titleController,
-                      textCapitalization: TextCapitalization.sentences,
-                      decoration: const InputDecoration(
-                        labelText: 'Worum geht es?',
-                        hintText: 'Zum Beispiel: Umzug organisieren',
-                      ),
-                      onChanged: (_) => setState(() {}),
-                    ),
-                    const SizedBox(height: 28),
-                    Text(
-                      'Was gehört dazu?',
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      key: const Key('task_step_field'),
-                      contextMenuBuilder: noScanContextMenu,
-                      controller: _stepController,
-                      focusNode: _stepFocus,
-                      textCapitalization: TextCapitalization.sentences,
-                      textInputAction: TextInputAction.next,
-                      decoration: InputDecoration(
-                        hintText: 'Ein kleiner Schritt',
-                        suffixIcon: IconButton(
-                          key: const Key('task_step_add'),
-                          icon: const Icon(Icons.add),
-                          onPressed: _addStep,
-                        ),
-                      ),
-                      onSubmitted: (_) => _addStep(),
-                    ),
-                    // Der Moment der KI-Hilfe: aus dem Titel werden Mikroschritte,
-                    // die als Vorschlag in der Liste landen. Ohne KI fehlt genau
-                    // dieser Block, sonst nichts.
-                    AiSuggestionBox(
-                      task: AiTask.splitTask,
-                      inputBuilder: () {
-                        final title = _titleController.text.trim();
-                        return title.isEmpty ? null : title;
-                      },
-                      onAccept: (suggestion) =>
-                          _acceptSuggestions([suggestion]),
-                      onAcceptAll: _acceptSuggestions,
-                    ),
-                    const SizedBox(height: 8),
                     Expanded(
                       child: ListView(
+                        controller: _scroll,
                         children: [
-                          // Was die App gefunden hat, steht über der eigenen Liste –
-                          // antippen genügt, getippt werden muss nichts.
+                          TextField(
+                            key: const Key('task_title_field'),
+                            contextMenuBuilder: noScanContextMenu,
+                            controller: _titleController,
+                            textCapitalization: TextCapitalization.sentences,
+                            decoration: const InputDecoration(
+                              labelText: 'Worum geht es?',
+                              hintText: 'Zum Beispiel: Umzug organisieren',
+                            ),
+                            onChanged: (_) => setState(() {}),
+                          ),
+                          const SizedBox(height: 28),
+                          Text(
+                            'Was gehört dazu?',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          // Ausdrücklich freiwillig. Wer die Zerlegung nicht
+                          // will oder gerade nicht kann, soll nicht vor einem
+                          // grauen Knopf sitzen und raten, was fehlt.
+                          Text(
+                            'Musst du nicht. Du kannst auch einfach anfangen.',
+                            key: const Key('task_steps_optional'),
+                            style: theme.textTheme.bodyMedium?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          TextField(
+                            key: const Key('task_step_field'),
+                            contextMenuBuilder: noScanContextMenu,
+                            controller: _stepController,
+                            focusNode: _stepFocus,
+                            textCapitalization: TextCapitalization.sentences,
+                            textInputAction: TextInputAction.next,
+                            decoration: const InputDecoration(
+                              hintText: 'Ein kleiner Schritt',
+                            ),
+                            onChanged: (_) => setState(() {}),
+                            onSubmitted: (_) => _addStep(),
+                          ),
+                          const SizedBox(height: 8),
+                          // Beschrifteter Knopf statt eines kleinen Pluses im
+                          // Feld – bei den Terminen hat sich das schon
+                          // bewährt. Das Plus war da, aber es wurde nicht als
+                          // „hinzufügen" gelesen: Der Test meldete „kann dort
+                          // nichts hinzufügen, aber was selber reinschreiben
+                          // geht".
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              key: const Key('task_step_add'),
+                              onPressed: _stepController.text.trim().isEmpty
+                                  ? null
+                                  : _addStep,
+                              icon: const Icon(Icons.add, size: 20),
+                              label: const Text('Schritt hinzufügen'),
+                            ),
+                          ),
+                          // Der Moment der KI-Hilfe: aus dem Titel werden
+                          // Mikroschritte, die als Vorschlag in der Liste
+                          // landen. Ohne KI fehlt genau dieser Block, sonst
+                          // nichts.
+                          AiSuggestionBox(
+                            task: AiTask.splitTask,
+                            inputBuilder: () {
+                              final title = _titleController.text.trim();
+                              return title.isEmpty ? null : title;
+                            },
+                            onAccept: (suggestion) =>
+                                _acceptSuggestions([suggestion]),
+                            onAcceptAll: _acceptSuggestions,
+                          ),
+                          const SizedBox(height: 8),
+                          // Was die App gefunden hat, steht über der eigenen
+                          // Liste – antippen genügt, getippt werden muss
+                          // nichts.
                           if (_mode == RecallMode.helping) ...[
                             RecallPanel(
                               prefix: 'task',
@@ -233,6 +308,7 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
                         ],
                       ),
                     ),
+                    const SizedBox(height: 12),
                     BigActionButton(
                       key: const Key('task_start'),
                       label: 'Los geht’s',

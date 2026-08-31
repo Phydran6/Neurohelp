@@ -139,6 +139,17 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
     });
   }
 
+  /// Was am Ende wirklich auf der Liste steht.
+  ///
+  /// Wer den letzten Punkt tippt und gleich auf „Speichern" drückt, hat
+  /// „Punkt hinzufügen" nie gedrückt – ohne das wäre er weg.
+  List<String> get _checklistToSave {
+    final items = [..._checklist];
+    final pending = _item.text.trim();
+    if (pending.isNotEmpty && !items.contains(pending)) items.add(pending);
+    return items;
+  }
+
   Future<void> _save() async {
     final startsAt = _startsAt;
     if (startsAt == null) return;
@@ -156,14 +167,14 @@ class _AppointmentBookPageState extends State<AppointmentBookPage> {
         widget.appointmentId,
         startsAt: startsAt,
         location: location,
-        checklist: List.of(_checklist),
+        checklist: _checklistToSave,
       );
     } else {
       await appointments.markBooked(
         widget.appointmentId,
         startsAt: startsAt,
         location: location,
-        checklist: List.of(_checklist),
+        checklist: _checklistToSave,
       );
     }
 

@@ -165,7 +165,22 @@ class _CallPreparePageState extends State<CallPreparePage> {
     _addPoints(lines.skip(lines.length > 1 ? 2 : 1));
   }
 
-  bool get _ready => _number.text.trim().isNotEmpty && _points.isNotEmpty;
+  /// Was am Ende wirklich als Stichpunkte gespeichert wird.
+  ///
+  /// Dieselbe Falle wie bei den Aufgaben: Wer den letzten Stichpunkt tippt
+  /// und gleich auf „Bereit" drückt, hat das „+" nie gedrückt – der Punkt
+  /// wäre weg gewesen.
+  List<String> get _pointsToSave {
+    final points = [..._points];
+    final pending = _point.text.trim();
+    if (pending.isNotEmpty && !points.contains(pending)) points.add(pending);
+    return points;
+  }
+
+  /// Ohne Nummer lässt sich nicht anrufen – das bleibt die Bedingung. Die
+  /// Stichpunkte dagegen sind eine Hilfe, kein Pflichtfeld: Wer weiß, was er
+  /// sagen will, soll nicht erst etwas eintippen müssen.
+  bool get _ready => _number.text.trim().isNotEmpty;
 
   Future<void> _start() async {
     final plan = _plan;
@@ -177,7 +192,7 @@ class _CallPreparePageState extends State<CallPreparePage> {
         goal: _goal.text.trim(),
         contactName: _contact.text.trim(),
         contactNumber: _number.text.trim(),
-        talkingPoints: _points,
+        talkingPoints: _pointsToSave,
       ),
     );
 
@@ -281,15 +296,25 @@ class _CallPreparePageState extends State<CallPreparePage> {
                             controller: _point,
                             focusNode: _pointFocus,
                             textCapitalization: TextCapitalization.sentences,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Ein Stichpunkt',
-                              suffixIcon: IconButton(
-                                key: const Key('call_point_add'),
-                                icon: const Icon(Icons.add),
-                                onPressed: _addPoint,
-                              ),
                             ),
+                            onChanged: (_) => setState(() {}),
                             onSubmitted: (_) => _addPoint(),
+                          ),
+                          const SizedBox(height: 8),
+                          // Beschrifteter Knopf statt eines kleinen Pluses im
+                          // Feld – siehe Termine und Aufgaben.
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: TextButton.icon(
+                              key: const Key('call_point_add'),
+                              onPressed: _point.text.trim().isEmpty
+                                  ? null
+                                  : _addPoint,
+                              icon: const Icon(Icons.add, size: 20),
+                              label: const Text('Stichpunkt hinzufügen'),
+                            ),
                           ),
                           // Der Moment der KI-Hilfe (Konzept, Abschnitt 8,
                           // Schritte 3 bis 5): Ziel, Ansprechpartner und ein

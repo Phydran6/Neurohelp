@@ -48,8 +48,24 @@ class AiSuggestionBox extends StatefulWidget {
 
 class _AiSuggestionBoxState extends State<AiSuggestionBox> {
   List<String> _suggestions = const [];
+
+  /// Was der User schon angetippt hat.
+  ///
+  /// Der Tipp landete bisher stumm in einer Liste weiter unten – auf dem
+  /// Telefon oft außerhalb des Sichtbaren. Für den User „passiert nichts".
+  /// Der übernommene Vorschlag sagt es jetzt selbst.
+  final Set<String> _taken = {};
+
   bool _busy = false;
   String? _error;
+
+  /// Ein Vorschlag geht an die Seite – und bleibt sichtbar als übernommen
+  /// stehen. Nichts verschwindet unter der Hand; wer zweimal tippt, richtet
+  /// keinen Schaden an (die Seiten filtern Doppelte weg).
+  void _accept(String suggestion) {
+    setState(() => _taken.add(suggestion));
+    widget.onAccept(suggestion);
+  }
 
   Future<void> _ask() async {
     if (_busy) return;
@@ -66,6 +82,7 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
     setState(() {
       _busy = true;
       _error = null;
+      _taken.clear();
     });
 
     final services = AppScope.of(context);
@@ -107,16 +124,20 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
   /// Vorschläge unter dem Textfeld – und weil beim Fragen oft noch die Tastatur
   /// oben steht, rutschten die Kacheln darunter oder unter den Blattrand. Ein
   /// Tipp auf „Übernehmen" landete dann im Nichts; für den User „passiert
-  /// nichts". Also erst die Tastatur schließen, dann den Block ans untere Ende
-  /// des Sichtbaren scrollen. Gibt es keinen Scrollbereich (Aufgaben-Seite),
-  /// bleibt es folgenlos.
+  /// nichts". Also erst die Tastatur schließen, dann den Block in den Blick
+  /// scrollen.
+  ///
+  /// Angefasst wird der **Anfang** des Blocks, nicht sein Ende. Vorher zog
+  /// `alignment: 1` die Unterkante an den Blattrand – bei sechs Vorschlägen
+  /// ist der Block höher als das Sichtfeld, und dann standen genau die ersten
+  /// Kacheln oben außerhalb. Der User sah die Mitte einer Liste, deren Anfang
+  /// er nie zu Gesicht bekam.
   void _revealSuggestions() {
     FocusManager.instance.primaryFocus?.unfocus();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || Scrollable.maybeOf(context) == null) return;
       Scrollable.ensureVisible(
         context,
-        alignment: 1,
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
       );
@@ -152,7 +173,7 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  _suggestions.isEmpty ? texts.askAi : texts.aiResultTitle,
+                  _suggestions.isEmpty ? texts.aiOffer : texts.aiResultTitle,
                   style: theme.textTheme.titleSmall,
                 ),
               ),
@@ -184,13 +205,21 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
                   index: i,
                   text: _suggestions[i],
                   label: widget.acceptLabel,
-                  onTap: () => widget.onAccept(_suggestions[i]),
+                  taken: _taken.contains(_suggestions[i]),
+                  onTap: () => _accept(_suggestions[i]),
                 ),
               ),
             const SizedBox(height: 4),
-            Row(
+            // Umbruch statt starrer Reihe: Nebeneinander passten die drei
+            // Knöpfe nur auf dem Tablet. Auf dem Telefon lief die Reihe
+            // rechts aus dem Bild – „Alle übernehmen" war da, aber halb
+            // abgeschnitten und in keinem Fall vollständig zu treffen.
+            Wrap(
+              spacing: 8,
+              runSpacing: 4,
+              crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                if (widget.onAcceptAll != null && _suggestions.length > 1) ...[
+                if (widget.onAcceptAll != null && _suggestions.length > 1)
                   FilledButton(
                     key: const Key('ai_accept_all'),
                     // Alles übernommen heißt: hier ist nichts mehr zu holen.
@@ -198,22 +227,25 @@ class _AiSuggestionBoxState extends State<AiSuggestionBox> {
                     // Vorschläge jetzt stehen.
                     onPressed: () {
                       final all = _suggestions;
-                      setState(() => _suggestions = const []);
+                      setState(() {
+                        _suggestions = const [];
+                        _taken.clear();
+                      });
                       widget.onAcceptAll!(all);
                     },
                     child: const Text('Alle übernehmen'),
                   ),
-                  const SizedBox(width: 8),
-                ],
                 TextButton(
                   key: const Key('ai_again'),
                   onPressed: _ask,
                   child: const Text('Nochmal'),
                 ),
-                const Spacer(),
                 TextButton(
                   key: const Key('ai_dismiss'),
-                  onPressed: () => setState(() => _suggestions = const []),
+                  onPressed: () => setState(() {
+                    _suggestions = const [];
+                    _taken.clear();
+                  }),
                   child: const Text('Danke, reicht'),
                 ),
               ],
@@ -240,12 +272,18 @@ class _SuggestionTile extends StatelessWidget {
     required this.index,
     required this.text,
     required this.label,
+    required this.taken,
     required this.onTap,
   });
 
   final int index;
   final String text;
   final String label;
+
+  /// Schon angetippt. Die Kachel bleibt trotzdem bedienbar – wer sie noch
+  /// einmal braucht, kommt heran, und doppelt wird nichts.
+  final bool taken;
+
   final VoidCallback onTap;
 
   @override
@@ -266,12 +304,32 @@ class _SuggestionTile extends StatelessWidget {
             children: [
               Expanded(child: Text(text, style: theme.textTheme.bodyLarge)),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: theme.textTheme.labelLarge?.copyWith(
-                  color: theme.colorScheme.primary,
+              if (taken)
+                Row(
+                  key: Key('ai_suggestion_taken_$index'),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.check,
+                      size: 18,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      'Übernommen',
+                      style: theme.textTheme.labelLarge?.copyWith(
+                        color: theme.colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
+                )
+              else
+                Text(
+                  label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
-              ),
             ],
           ),
         ),

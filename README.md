@@ -16,7 +16,7 @@ die für andere selbstverständlich sind.
      einkommentieren, den APK-Knopf entfernen und die zwei URLs setzen.
      Checkliste dazu: docs/STORE.md -->
 
-[![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.11/Neurohelp-0.1.0-alpha.11-android.apk)
+[![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.12/Neurohelp-0.1.0-alpha.12-android.apk)
 [![Version](https://img.shields.io/badge/Alpha-0.1.0-FF9800?style=for-the-badge)](https://github.com/Phydran6/Neurohelp/releases)
 
 <!--
@@ -167,9 +167,9 @@ steht in der App direkt am Angebot und in [docs/KI-ZUGANG.md](docs/KI-ZUGANG.md)
 
 | | Datei | Hinweis |
 |:--|:--|:--|
-| **Android** | [**APK herunterladen**](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.11/Neurohelp-0.1.0-alpha.11-android.apk) | Antippen, installieren, fertig |
+| **Android** | [**APK herunterladen**](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.12/Neurohelp-0.1.0-alpha.12-android.apk) | Antippen, installieren, fertig |
 | **iOS** | über **TestFlight** – Einladung auf Anfrage | Das IPA im Release ist ein App-Store-Build und lässt sich nicht sideloaden |
-| **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.11/Neurohelp-0.1.0-alpha.11-android-playstore.aab) | Nur zum Hochladen in die Play Console |
+| **Play Store** | [AAB](https://github.com/Phydran6/Neurohelp/releases/download/v0.1.0-alpha.12/Neurohelp-0.1.0-alpha.12-android-playstore.aab) | Nur zum Hochladen in die Play Console |
 | **Alle Versionen** | [Release-Übersicht](https://github.com/Phydran6/Neurohelp/releases) | Ältere Stände |
 | **Was ist neu** | [CHANGELOG.md](CHANGELOG.md) | Jede Änderung, nachvollziehbar |
 

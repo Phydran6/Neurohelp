@@ -9,6 +9,8 @@ import 'package:neurohelp/features/appointments/presentation/appointment_book_pa
 import 'package:neurohelp/features/appointments/presentation/appointment_route_page.dart';
 import 'package:neurohelp/features/calls/presentation/call_active_page.dart';
 import 'package:neurohelp/features/history/presentation/history_detail_page.dart';
+import 'package:neurohelp/features/security/presentation/mfa_setup_page.dart';
+import 'package:neurohelp/features/security/presentation/recovery_codes_page.dart';
 import 'package:neurohelp/features/tasks/presentation/task_focus_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -121,6 +123,16 @@ void main() {
       );
 
       await show(tester, CallActivePage(planId: plan.id), scale);
+    });
+
+    testWidgets('Zwei-Faktor einrichten bei $scale', (tester) async {
+      useAPhone(tester);
+      await show(tester, const MfaSetupPage(), scale);
+    });
+
+    testWidgets('Wiederherstellungs-Codes bei $scale', (tester) async {
+      useAPhone(tester);
+      await show(tester, const RecoveryCodesPage(remaining: 10), scale);
     });
 
     testWidgets('Historie-Eintrag bei $scale', (tester) async {

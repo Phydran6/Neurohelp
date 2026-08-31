@@ -17,10 +17,17 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Changed
 
-- **Abhängigkeiten auf den aktuellen Stand gezogen.** `flutter_secure_storage`
-  9 → 11, `local_auth` 2 → 3, `share_plus` 10 → 13, `supabase_flutter`
-  2.17.2, `flutter_lints` 6, dazu die GitHub-Actions in der Pipeline. Damit
-  sind alle offenen Dependabot-Meldungen abgearbeitet
+- **Abhängigkeiten auf den aktuellen Stand gezogen.** `local_auth` 2 → 3,
+  `share_plus` 10 → 12, `supabase_flutter` 2.17.2, `flutter_lints` 6, dazu
+  die GitHub-Actions in der Pipeline.
+  **Ausgenommen: `flutter_secure_storage`** – die bleibt bei 9.2. Sie ist das
+  letzte Plugin, das nur CocoaPods mitbringt und keine Swift-Package-Variante.
+  Solange sie so ist, benutzt Flutter für iOS CocoaPods; ab Version 10 bringt
+  auch sie ein Swift Package mit, und dann stellt Flutter das iOS-Projekt auf
+  Swift Package Manager um – die CocoaPods-Einbindung im Xcode-Projekt passt
+  danach nicht mehr, der Build bricht ab. Version 11 verlangt zusätzlich
+  `compileSdk 37`, wofür erst das Android-Gradle-Plugin nachziehen müsste.
+  Beides ist eine eigene Runde mit einem Mac zum Nachprüfen, kein Nebenbei
 - **Biometrie schickt niemanden mehr in die Systemeinstellungen.** Wenn keine
   Biometrie eingerichtet oder sie gesperrt ist, zeigte das System bisher
   einen eigenen Dialog. Jetzt führt der Weg still zur PIN – so war es immer

@@ -22,7 +22,7 @@ jobs:
     name: Auf dem Simulator aufnehmen
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: subosito/flutter-action@v2
         with:
@@ -105,7 +105,7 @@ jobs:
             echo "::warning::Mindestens ein Bild hat die falsche Groesse. Anderes Gerät waehlen – 6,9-Zoll-iPhone."
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: store-screenshots
           path: build/screenshots/*.png

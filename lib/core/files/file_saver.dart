@@ -42,10 +42,14 @@ class ShareFileSaver implements FileSaver {
 
     await file.writeAsString(content, flush: true);
 
-    await Share.shareXFiles(
-      [XFile(file.path, mimeType: mimeType, name: fileName)],
-      subject: subject,
-      sharePositionOrigin: origin,
+    // share_plus 13: ein Parameterobjekt statt vieler Argumente.
+    // `Share.shareXFiles` gibt es noch, ist aber abgekündigt.
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: mimeType, name: fileName)],
+        subject: subject,
+        sharePositionOrigin: origin,
+      ),
     );
   }
 }

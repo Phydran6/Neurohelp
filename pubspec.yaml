@@ -27,7 +27,7 @@ dependencies:
   # greift eine Spalte daneben.
   flutter_localizations:
     sdk: flutter
-  flutter_secure_storage: ^9.2.0
+  flutter_secure_storage: ^11.0.0
   # Öffnet den OpenRouter-Login im Browser und fängt den Rücksprung über das
   # Schema `neurohelp` wieder ein (Konzept, Abschnitt 17a).
   flutter_web_auth_2: ^5.1.0
@@ -35,21 +35,21 @@ dependencies:
   # Gerät raus, nicht über das Backend. Die eigene gehostete KI läuft
   # weiterhin ausschließlich über Supabase.
   http: ^1.2.0
-  local_auth: ^2.3.0
+  local_auth: ^3.0.2
   path: ^1.9.0
   path_provider: ^2.1.0
   # Für „Sicherungsdatei speichern": Das System-Blatt lässt den User selbst
   # entscheiden, wohin – Dateien, Passwort-Manager, Cloud. Ein eigener
   # Speicherort wäre auf Android app-privat und damit unauffindbar.
-  share_plus: ^10.1.4
+  share_plus: ^13.3.0
   sqflite: ^2.3.0
-  supabase_flutter: ^2.17.1
+  supabase_flutter: ^2.17.2
   url_launcher: ^6.3.0
   uuid: ^4.0.0
 
 dev_dependencies:
   flutter_launcher_icons: ^0.14.4
-  flutter_lints: ^5.0.0
+  flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
   image: ^4.9.1

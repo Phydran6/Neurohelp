@@ -7,6 +7,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Der Fokus-Modus hält auch lange Schritte.** Genau die Schritte, die die
+  KI schreibt („Einen Satz notieren, mit dem du starten willst, zum
+  Beispiel: …"), liefen bei großer Schrift unten aus dem Bild – und nahmen
+  den Erledigt-Knopf mit. Das ist der eine Bildschirm, um den es im
+  Fokus-Modus geht; er rollt jetzt
+
 ### Changed
 
 - **Abhängigkeiten auf den aktuellen Stand gezogen.** `flutter_secure_storage`

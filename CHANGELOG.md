@@ -7,6 +7,18 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Abhängigkeiten auf den aktuellen Stand gezogen.** `flutter_secure_storage`
+  9 → 11, `local_auth` 2 → 3, `share_plus` 10 → 13, `supabase_flutter`
+  2.17.2, `flutter_lints` 6, dazu die GitHub-Actions in der Pipeline. Damit
+  sind alle offenen Dependabot-Meldungen abgearbeitet
+- **Biometrie schickt niemanden mehr in die Systemeinstellungen.** Wenn keine
+  Biometrie eingerichtet oder sie gesperrt ist, zeigte das System bisher
+  einen eigenen Dialog. Jetzt führt der Weg still zur PIN – so war es immer
+  gedacht
+
+
 ## [0.1.0-alpha.12] - 2026-08-31
 
 ### Fixed

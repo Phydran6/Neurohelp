@@ -42,12 +42,16 @@ class DeviceAppLock implements AppLock {
     if (!await isBiometricAvailable) return UnlockResult.unavailable;
 
     try {
+      // local_auth 3 nimmt die Optionen direkt entgegen; `stickyAuth` heißt
+      // jetzt `persistAcrossBackgrounding`. Die Systemdialoge bei Fehlern
+      // („keine Biometrie eingerichtet") gibt es dort nicht mehr – die
+      // Anfrage kommt stattdessen mit einem Fehler zurück. Für uns ist das
+      // der bessere Weg: Er führt still auf die PIN, statt den User in die
+      // Systemeinstellungen zu schicken.
       final ok = await _auth.authenticate(
         localizedReason: 'Entsperre Neurohelp',
-        options: const AuthenticationOptions(
-          biometricOnly: true,
-          stickyAuth: true,
-        ),
+        biometricOnly: true,
+        persistAcrossBackgrounding: true,
       );
       return ok ? UnlockResult.success : UnlockResult.failed;
     } on Exception catch (error) {

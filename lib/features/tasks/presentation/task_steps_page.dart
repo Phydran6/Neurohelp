@@ -127,17 +127,23 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
   /// Was am Ende wirklich als Schritte in die Datenbank geht.
   ///
   /// Zwei Fallen, beide aus dem Test gemeldet. Erstens: Wer den letzten
-  /// Schritt tippt und direkt auf „Los geht's" drückt, verlor ihn – das „+"
-  /// war ja nie gedrückt. Zweitens: Ohne jeden Schritt stünde im Fokus-Modus
-  /// sofort „alles erledigt", weil es nichts zu tun gäbe. Dann ist die
-  /// Aufgabe selbst der eine Schritt.
+  /// Schritt tippt und direkt auf „Los geht's" drückt, verlor ihn – das
+  /// Hinzufügen war ja nie gedrückt. Zweitens: Ohne jeden Schritt stünde im
+  /// Fokus-Modus sofort „alles erledigt", weil es nichts zu tun gäbe. Dann
+  /// ist die Aufgabe selbst der eine Schritt.
+  ///
+  /// Steht nicht einmal ein Thema fest, taugt der Platzhalter aus der
+  /// Historie nicht als Schritt („Noch ohne Thema" kann niemand tun). Dann
+  /// ist Herausfinden, worum es geht, der erste Schritt – und das ist er für
+  /// jemanden, der gerade feststeckt, ohnehin.
   List<String> _stepsToSave(String title) {
     final steps = [..._steps];
 
     final pending = _stepController.text.trim();
     if (pending.isNotEmpty && !steps.contains(pending)) steps.add(pending);
 
-    return steps.isEmpty ? [title] : steps;
+    if (steps.isNotEmpty) return steps;
+    return [title == kUnknownTopic ? 'Herausfinden, worum es geht' : title];
   }
 
   Future<void> _start() async {

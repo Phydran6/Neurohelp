@@ -237,6 +237,36 @@ void main() {
       );
     });
 
+    testWidgets('ohne Thema und ohne Schritt: Herausfinden ist der Schritt', (
+      tester,
+    ) async {
+      useAPhone(tester);
+      final services = AppServices.from(database);
+
+      await tester.pumpWidget(
+        AppScope(
+          services: services,
+          child: const MaterialApp(home: TaskStartPage()),
+        ),
+      );
+      await pumpUntil(tester, find.byKey(const Key('task_new')));
+      await tester.tap(find.byKey(const Key('task_new')));
+      // Der andere Weg: „Ich weiß es nicht mehr."
+      await pumpUntil(tester, find.byKey(const Key('task_recall')));
+      await tester.tap(find.byKey(const Key('task_recall')));
+      await pumpUntil(tester, find.byKey(const Key('task_start')));
+
+      await tester.tap(find.byKey(const Key('task_start')));
+      await pumpUntil(tester, find.byKey(const Key('focus_step')));
+
+      // „Noch ohne Thema" ist ein Platzhalter für die Historie, keine
+      // Sache, die jemand tun kann.
+      expect(
+        tester.widget<Text>(find.byKey(const Key('focus_step'))).data,
+        'Herausfinden, worum es geht',
+      );
+    });
+
     testWidgets('ein getippter Schritt geht ohne „+" nicht verloren', (
       tester,
     ) async {

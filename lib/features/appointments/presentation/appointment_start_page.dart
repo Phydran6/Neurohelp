@@ -175,6 +175,60 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
     if (mounted) unawaited(_load());
   }
 
+  /// Der Einstieg: entweder die Frage „Weißt du es noch?" oder das Feld mit
+  /// dem großen Knopf. Steht an zwei Stellen – unten unter der Liste, oder
+  /// mittig, wenn es nichts zu listen gibt.
+  Widget _entry(ThemeData theme) {
+    if (_mode == RecallMode.asking) {
+      return RecallChoice(
+        prefix: 'appt',
+        onKnow: () => setState(() => _mode = RecallMode.typing),
+        onHelp: () => unawaited(_digIntoHistory()),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (_mode == RecallMode.helping) ...[
+          // Was die App gefunden hat, kommt vor dem Feld.
+          RecallPanel(
+            prefix: 'appt',
+            state: _recallCheck,
+            hits: _found,
+            nudges: RecallNudges.appointment,
+            onPick: _takeFromHistory,
+          ),
+          const SizedBox(height: 16),
+        ],
+        TextField(
+          key: const Key('appt_title'),
+          contextMenuBuilder: noScanContextMenu,
+          controller: _title,
+          textCapitalization: TextCapitalization.sentences,
+          decoration: const InputDecoration(
+            labelText: 'Worum geht es?',
+            hintText: 'Zum Beispiel: Sehtest beim Optiker',
+          ),
+          onChanged: (_) => setState(() {}),
+          onSubmitted: (_) => _startNew(),
+        ),
+        const SizedBox(height: 16),
+        // Im Historie-Weg geht es immer weiter, auch mit leerem Feld.
+        BigActionButton(
+          key: const Key('appt_new'),
+          label: _mode == RecallMode.helping && _title.text.trim().isEmpty
+              ? 'Weiter, ich weiß es noch nicht'
+              : 'Weiter',
+          onPressed: _title.text.trim().isEmpty && _mode != RecallMode.helping
+              ? null
+              : _startNew,
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -258,62 +312,32 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
                             ],
                           ],
                         ),
-                      )
-                    else
-                      const Spacer(),
-                    const SizedBox(height: 16),
-                    if (_mode == RecallMode.asking)
-                      RecallChoice(
-                        prefix: 'appt',
-                        onKnow: () => setState(() => _mode = RecallMode.typing),
-                        onHelp: () => unawaited(_digIntoHistory()),
-                      )
-                    else ...[
-                      if (_mode == RecallMode.helping) ...[
-                        // Was die App gefunden hat, kommt vor dem Feld.
-                        Flexible(
-                          child: SingleChildScrollView(
-                            child: RecallPanel(
-                              prefix: 'appt',
-                              state: _recallCheck,
-                              hits: _found,
-                              nudges: RecallNudges.appointment,
-                              onPick: _takeFromHistory,
+                      ),
+                    if (hasSomething) ...[
+                      const SizedBox(height: 16),
+                      _entry(theme),
+                    ] else
+                      // Nichts zu zeigen: Der Einstieg steht mittig. Wenn er
+                      // bei großer Schrift nicht mehr aufs Blatt passt, rollt
+                      // er – vorher lief er unten aus dem Bild, und der Knopf
+                      // „Weiter" war nicht mehr zu erreichen. Bei doppelter
+                      // Schriftgröße fehlten über 700 Pixel.
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, viewport) => SingleChildScrollView(
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                minHeight: viewport.maxHeight,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [_entry(theme)],
+                              ),
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
-                      ],
-                      TextField(
-                        key: const Key('appt_title'),
-                        contextMenuBuilder: noScanContextMenu,
-                        controller: _title,
-                        textCapitalization: TextCapitalization.sentences,
-                        decoration: const InputDecoration(
-                          labelText: 'Worum geht es?',
-                          hintText: 'Zum Beispiel: Sehtest beim Optiker',
-                        ),
-                        onChanged: (_) => setState(() {}),
-                        onSubmitted: (_) => _startNew(),
                       ),
-                      const SizedBox(height: 16),
-                      // Im Historie-Weg geht es immer weiter, auch mit leerem
-                      // Feld.
-                      BigActionButton(
-                        key: const Key('appt_new'),
-                        label:
-                            _mode == RecallMode.helping &&
-                                _title.text.trim().isEmpty
-                            ? 'Weiter, ich weiß es noch nicht'
-                            : 'Weiter',
-                        onPressed:
-                            _title.text.trim().isEmpty &&
-                                _mode != RecallMode.helping
-                            ? null
-                            : _startNew,
-                      ),
-                    ],
-                    if (!hasSomething) const Spacer(),
                   ],
                 ),
               ),

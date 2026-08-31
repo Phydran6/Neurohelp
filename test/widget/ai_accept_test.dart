@@ -143,8 +143,14 @@ void main() {
     await tester.tap(find.byKey(const Key('call_know')));
     await pumpUntil(tester, find.byKey(const Key('call_number')));
 
+    // Wie ein echter Nutzer: erst hinscrollen, dann tippen. Ohne das landet
+    // der Tipp neben dem Knopf, sobald die Seite länger wird als das Blatt.
+    await tester.ensureVisible(find.byKey(const Key('ai_ask')));
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('ai_ask')));
-    await pumpUntil(tester, find.byKey(const Key('ai_accept_all')));
+    await pumpUntil(tester, find.byKey(const Key('ai_suggestion_0')));
+    await tester.ensureVisible(find.byKey(const Key('ai_accept_all')));
+    await tester.pumpAndSettle();
 
     // Das Widget scrollt die Vorschläge selbst in den Blick; der Tipp kommt an.
     await tester.tap(find.byKey(const Key('ai_accept_all')));

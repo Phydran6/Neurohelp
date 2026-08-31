@@ -80,6 +80,9 @@ void main() {
       find.byKey(const Key('call_point_field')),
       'Nachmittags passt besser',
     );
+    // Der Knopf richtet sich nach dem Feldinhalt – ohne Pump kennt er ihn
+    // noch nicht und ist aus.
+    await tester.pump();
     await tester.tap(find.byKey(const Key('call_point_add')));
     await pumpUntil(tester, find.byKey(const Key('call_point_0')));
   }

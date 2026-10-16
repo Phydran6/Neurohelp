@@ -7,6 +7,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.13] - 2026-10-16
+
 ### Fixed
 
 - **Der Fokus-Modus hält auch lange Schritte.** Genau die Schritte, die die
@@ -17,6 +19,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Changed
 
+- **Android-Releases gehen automatisch an Google Play.** Jedes GitHub-Release
+  landet neben TestFlight jetzt auch im Play-Test-Track. Track und Status
+  sind über die Repository-Variablen `PLAY_TRACK` und `PLAY_RELEASE_STATUS`
+  steuerbar
 - **Abhängigkeiten auf den aktuellen Stand gezogen.** `local_auth` 2 → 3,
   `share_plus` 10 → 12, `supabase_flutter` 2.17.2, `flutter_lints` 6, dazu
   die GitHub-Actions in der Pipeline.
@@ -560,7 +566,9 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.11...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.13...HEAD
+[0.1.0-alpha.13]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.13
+[0.1.0-alpha.12]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.12
 [0.1.0-alpha.11]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.11
 [0.1.0-alpha.10]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.10
 [0.1.0-alpha.9]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.9

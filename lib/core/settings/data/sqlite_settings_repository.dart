@@ -20,6 +20,11 @@ class SqliteSettingsRepository implements SettingsRepository {
   static const _keyLockMethod = 'lock_method';
   static const _keyCompanionStyle = 'companion_style';
   static const _keyMfaHintShown = 'mfa_hint_shown';
+  static const _keyThemeChoice = 'theme_choice';
+  static const _keySettingsMode = 'settings_mode';
+  static const _keyAutoBackup = 'auto_backup';
+  static const _keyLastBackupAt = 'last_backup_at';
+  static const _keyRestoreOffered = 'restore_offered';
 
   @override
   Future<AppSettings> load() async {
@@ -44,6 +49,16 @@ class SqliteSettingsRepository implements SettingsRepository {
           defaults.companionStyle,
       mfaHintShown:
           _readBool(values[_keyMfaHintShown]) ?? defaults.mfaHintShown,
+      themeChoice:
+          _readEnum(AppThemeChoice.values, values[_keyThemeChoice]) ??
+          defaults.themeChoice,
+      settingsMode:
+          _readEnum(SettingsMode.values, values[_keySettingsMode]) ??
+          defaults.settingsMode,
+      autoBackup: _readBool(values[_keyAutoBackup]) ?? defaults.autoBackup,
+      lastBackupAt: _readDate(values[_keyLastBackupAt]),
+      restoreOffered:
+          _readBool(values[_keyRestoreOffered]) ?? defaults.restoreOffered,
     );
   }
 
@@ -70,6 +85,26 @@ class SqliteSettingsRepository implements SettingsRepository {
   Future<AppSettings> setMfaHintShown({required bool shown}) =>
       _write(_keyMfaHintShown, shown ? '1' : '0');
 
+  @override
+  Future<AppSettings> setThemeChoice(AppThemeChoice choice) =>
+      _write(_keyThemeChoice, choice.name);
+
+  @override
+  Future<AppSettings> setSettingsMode(SettingsMode mode) =>
+      _write(_keySettingsMode, mode.name);
+
+  @override
+  Future<AppSettings> setAutoBackup({required bool enabled}) =>
+      _write(_keyAutoBackup, enabled ? '1' : '0');
+
+  @override
+  Future<AppSettings> setLastBackupAt(DateTime moment) =>
+      _write(_keyLastBackupAt, moment.millisecondsSinceEpoch.toString());
+
+  @override
+  Future<AppSettings> setRestoreOffered({required bool offered}) =>
+      _write(_keyRestoreOffered, offered ? '1' : '0');
+
   Future<AppSettings> _write(String key, String value) async {
     await _db.insert(DbSchema.tableSettings, {
       'key': key,
@@ -81,6 +116,14 @@ class SqliteSettingsRepository implements SettingsRepository {
   }
 
   static bool? _readBool(String? raw) => raw == null ? null : raw == '1';
+
+  /// Ein unlesbarer Zeitstempel ist kein Grund, die Einstellungen
+  /// hinzuwerfen – er kann aus einer eingespielten Sicherung stammen.
+  static DateTime? _readDate(String? raw) {
+    if (raw == null) return null;
+    final millis = int.tryParse(raw);
+    return millis == null ? null : DateTime.fromMillisecondsSinceEpoch(millis);
+  }
 
   static T? _readEnum<T extends Enum>(List<T> values, String? raw) {
     if (raw == null) return null;

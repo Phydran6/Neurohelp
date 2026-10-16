@@ -7,6 +7,7 @@ import '../../../core/history/domain/history_entry.dart';
 import '../../../core/history/domain/history_event.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import 'history_labels.dart';
+import 'resume_entry.dart';
 
 /// Ein einzelner Vorgang mit seinem vollständigen Protokoll.
 ///
@@ -26,6 +27,10 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
   HistoryEntry? _entry;
   List<HistoryEvent> _events = const [];
   bool _loaded = false;
+  bool _busy = false;
+
+  /// Warum das Weitermachen nicht ging. `null` heißt: nichts zu melden.
+  ResumeBlock? _blocked;
 
   @override
   void didChangeDependencies() {
@@ -48,6 +53,30 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
       _events = events.reversed.toList();
       _loaded = true;
     });
+  }
+
+  /// Zurück in den Ablauf, aus dem dieser Vorgang stammt.
+  ///
+  /// Nach der Rückkehr wird neu gelesen: Wer unterwegs Schritte abgehakt
+  /// hat, soll das Protokoll aktuell vorfinden und nicht den Stand von
+  /// vorhin.
+  Future<void> _resume() async {
+    final entry = _entry;
+    if (entry == null || _busy) return;
+
+    setState(() {
+      _busy = true;
+      _blocked = null;
+    });
+
+    final blocked = await ResumeEntry.open(context, entry);
+    if (!mounted) return;
+
+    setState(() {
+      _busy = false;
+      _blocked = blocked;
+    });
+    await _load();
   }
 
   Future<void> _rename() async {
@@ -211,6 +240,32 @@ class _HistoryDetailPageState extends State<HistoryDetailPage> {
               ),
             ),
             const SizedBox(height: 24),
+            // Der Knopf, der bis hierher gefehlt hat: aus der Historie
+            // zurück in den Ablauf. Vorher konnte man hier nur nachlesen und
+            // den Zustand ändern – wer seine angefangene Aufgabe wiederfand,
+            // musste den Weg dorthin selbst noch einmal finden.
+            if (ResumeEntry.isPossible(entry)) ...[
+              FilledButton.icon(
+                key: const Key('history_resume'),
+                onPressed: _busy ? null : _resume,
+                icon: const Icon(Icons.play_arrow),
+                label: Text(ResumeEntry.labelFor(entry.feature)),
+                style: FilledButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (_blocked != null) ...[
+              Text(
+                ResumeEntry.describe(_blocked!),
+                key: const Key('history_resume_blocked'),
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
             OutlinedButton.icon(
               key: const Key('history_toggle_status'),
               onPressed: _toggleStatus,

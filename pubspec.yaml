@@ -19,6 +19,9 @@ environment:
 dependencies:
   crypto: ^3.0.0
   cupertino_icons: ^1.0.8
+  # Nur fuer "Sicherung einspielen": Der User waehlt seine Datei selbst aus.
+  # Ohne das koennte die App eine Sicherung schreiben, aber nie wieder lesen.
+  file_picker: ^8.1.0
   flutter:
     sdk: flutter
   flutter_secure_storage: ^9.2.0

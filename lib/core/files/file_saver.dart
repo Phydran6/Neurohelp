@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:path/path.dart' as p;
@@ -11,6 +12,11 @@ import 'package:share_plus/share_plus.dart';
 /// liegt der Ordner der App app-privat, dort findet der User die Datei nie
 /// wieder. Über das Blatt entscheidet er selbst – Dateien-App,
 /// Passwort-Manager, Kalender, Cloud, an sich selbst schicken.
+///
+/// Damit ist auch die Frage „Sicherung in die Cloud?" beantwortet, ohne dass
+/// die App einen einzigen Cloud-Dienst kennen muss: Im Blatt stehen iCloud
+/// Drive, Google Drive, Dropbox und alles andere, was auf dem Gerät
+/// installiert ist. Der User wählt.
 abstract interface class FileSaver {
   /// Bietet [content] unter [fileName] zum Speichern an.
   ///
@@ -20,6 +26,15 @@ abstract interface class FileSaver {
     required String fileName,
     required String content,
     String mimeType = 'text/plain',
+    String? subject,
+    Rect? origin,
+  });
+
+  /// Dasselbe für Binärdaten – die gepackte Sicherungsdatei.
+  Future<void> saveBytes({
+    required String fileName,
+    required Uint8List bytes,
+    String mimeType = 'application/octet-stream',
     String? subject,
     Rect? origin,
   });
@@ -37,12 +52,39 @@ class ShareFileSaver implements FileSaver {
     String? subject,
     Rect? origin,
   }) async {
+    final file = await _write(fileName, (file) => file.writeAsString(content));
+    await _share(file, fileName, mimeType, subject, origin);
+  }
+
+  @override
+  Future<void> saveBytes({
+    required String fileName,
+    required Uint8List bytes,
+    String mimeType = 'application/octet-stream',
+    String? subject,
+    Rect? origin,
+  }) async {
+    final file = await _write(fileName, (file) => file.writeAsBytes(bytes));
+    await _share(file, fileName, mimeType, subject, origin);
+  }
+
+  static Future<File> _write(
+    String fileName,
+    Future<File> Function(File file) writer,
+  ) async {
     final directory = await getTemporaryDirectory();
     final file = File(p.join(directory.path, fileName));
+    return writer(file);
+  }
 
-    await file.writeAsString(content, flush: true);
-
-    await Share.shareXFiles(
+  static Future<void> _share(
+    File file,
+    String fileName,
+    String mimeType,
+    String? subject,
+    Rect? origin,
+  ) {
+    return Share.shareXFiles(
       [XFile(file.path, mimeType: mimeType, name: fileName)],
       subject: subject,
       sharePositionOrigin: origin,
@@ -59,6 +101,15 @@ class NoFileSaver implements FileSaver {
     required String fileName,
     required String content,
     String mimeType = 'text/plain',
+    String? subject,
+    Rect? origin,
+  }) async {}
+
+  @override
+  Future<void> saveBytes({
+    required String fileName,
+    required Uint8List bytes,
+    String mimeType = 'application/octet-stream',
     String? subject,
     Rect? origin,
   }) async {}

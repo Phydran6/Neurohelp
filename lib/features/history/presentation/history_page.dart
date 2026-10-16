@@ -7,6 +7,7 @@ import '../../../core/history/domain/history_entry.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import 'history_detail_page.dart';
 import 'history_labels.dart';
+import 'resume_entry.dart';
 
 /// Der Historie-Bereich (Konzept, Abschnitt 12).
 ///
@@ -79,6 +80,22 @@ class _HistoryPageState extends State<HistoryPage> {
       ),
     );
     if (mounted) unawaited(_load());
+  }
+
+  /// Direkt in den Ablauf, ohne Umweg über das Protokoll.
+  ///
+  /// Der kurze Weg für den häufigsten Fall: Wer in der Historie nachschaut,
+  /// sucht meistens nicht das Protokoll, sondern die Sache, an der er dran
+  /// war. Klappt es nicht, führt der Weg ins Detail – dort steht der Grund.
+  Future<void> _resume(HistoryEntry entry) async {
+    final blocked = await ResumeEntry.open(context, entry);
+    if (!mounted) return;
+
+    if (blocked != null) {
+      await _open(entry);
+      return;
+    }
+    unawaited(_load());
   }
 
   void _setFeature(HistoryFeature? feature) {
@@ -194,6 +211,7 @@ class _HistoryPageState extends State<HistoryPage> {
                         return _EntryTile(
                           entry: entry,
                           onTap: () => _open(entry),
+                          onResume: () => _resume(entry),
                         );
                       },
                     ),
@@ -241,10 +259,17 @@ class _Chip extends StatelessWidget {
 
 /// Ein Vorgang in der Liste.
 class _EntryTile extends StatelessWidget {
-  const _EntryTile({required this.entry, required this.onTap});
+  const _EntryTile({
+    required this.entry,
+    required this.onTap,
+    required this.onResume,
+  });
 
   final HistoryEntry entry;
   final VoidCallback onTap;
+
+  /// Direkt in den Ablauf springen. Nur bei offenen Vorgängen zu sehen.
+  final VoidCallback onResume;
 
   @override
   Widget build(BuildContext context) {
@@ -311,10 +336,21 @@ class _EntryTile extends StatelessWidget {
                   ],
                 ),
               ),
-              Icon(
-                Icons.chevron_right,
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
+              // Bei offenen Vorgängen steht hier der kurze Weg: Antippen
+              // führt ins Protokoll, dieser Knopf zurück in den Ablauf.
+              // Erledigtes hat nichts fortzusetzen und bekommt nur den Pfeil.
+              if (ResumeEntry.isPossible(entry))
+                IconButton(
+                  key: Key('history_resume_${entry.id}'),
+                  icon: const Icon(Icons.play_arrow),
+                  tooltip: ResumeEntry.labelFor(entry.feature),
+                  onPressed: onResume,
+                )
+              else
+                Icon(
+                  Icons.chevron_right,
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
             ],
           ),
         ),

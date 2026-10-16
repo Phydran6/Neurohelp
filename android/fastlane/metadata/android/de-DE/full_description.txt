@@ -1,0 +1,59 @@
+Manche Dinge sind objektiv klein und fühlen sich trotzdem unmöglich an. Beim Amt anrufen. Eine Mail schreiben, die seit drei Wochen offen ist. Eine Aufgabe anfangen, die eigentlich aus zwölf kleinen Aufgaben besteht.
+
+Neurohelp nimmt einem das nicht ab. Es zerlegt es in Schritte, die einzeln machbar sind – und bleibt dabei ruhig.
+
+
+WAS DIE APP KANN
+
+Aufgabe sortieren
+Ein großer Berg wird zu einer Liste kleiner Schritte. Im Fokus-Modus siehst du immer nur den nächsten. Der Rest bleibt unsichtbar, bis er dran ist.
+
+Nachricht schreiben
+Du sagst, worum es geht. Die App formuliert daraus eine Nachricht, die man so abschicken kann. Der höfliche Rahmen kommt automatisch – kein Grübeln über Formulierungen.
+
+Anruf erledigen
+Vorher klärt die App: Was ist das Ziel, wen erreiche ich, was muss gesagt werden. Während des Gesprächs stehen die Stichpunkte groß auf dem Bildschirm.
+
+Termin klären
+Telefon, Mail oder Formular – die App schlägt den Weg vor und führt hindurch. Danach erinnert sie an Bestätigung, Vorbereitung und Anfahrt. Jede Erinnerung kommt genau einmal.
+
+Weitermachen, wo du aufgehört hast
+Jeder Ablauf fängt damit an, dass die App in deiner Historie nachschaut. Findet sie etwas Offenes, kommst du mit einem Tap direkt dorthin zurück – du musst dich an nichts erinnern.
+
+
+WIE SIE SICH ANFÜHLT
+
+Das ist hier wichtiger als jede Funktion.
+
+Kein Zwang. Keine Streaks, keine Punkte, keine Abzeichen.
+Keine Schuld. Nichts wird rot. Nichts sagt dir, dass du etwas verpasst hast.
+Kein Lob. Erledigt ist erledigt. Kein „Gut gemacht!"
+Ein Schritt. Ein Bildschirm, eine Entscheidung. Nie eine Wand aus Optionen.
+Kein leeres Feld. Die App fragt nie „Was möchtest du tun?", ohne selbst anzufangen.
+
+Erinnerungen kommen höchstens dreimal. Danach bleibt ein Vorgang still liegen, ohne Vorwurf.
+
+Auch die Einstellungen fragen zuerst, wie ausführlich sie sein sollen: „Ich weiß, was ich tue" oder „Ich hab keinen Plan". Beide Wege führen zu denselben Möglichkeiten.
+
+
+FÜR WEN
+
+Für Menschen, denen Dinge schwerfallen, die für andere selbstverständlich sind. Du brauchst keine Diagnose – wenn dir das oben bekannt vorkommt, ist die App für dich.
+
+
+WO DEINE DATEN LIEGEN
+
+Auf deinem Gerät.
+
+Aufgaben, Nachrichten, Anrufe, Termine, deine ganze Historie – alles bleibt lokal in einer Datenbank auf dem Handy.
+
+Zum Server geht nur dein Konto, damit du dich bei einem Gerätewechsel wieder anmelden kannst, die Reset-Mail bei vergessenem Passwort und der Text für die KI – letzteres nur, wenn du KI eingeschaltet hast.
+
+Damit beim Neuinstallieren nichts verloren geht, legt die App eine Sicherungsdatei auf dem Gerät ab. Sie landet dort, wo Android seine eigene Sicherung einsammelt – also in deinem Google-Konto, nicht bei uns. Das lässt sich in den Einstellungen abschalten, und du kannst die Datei stattdessen selbst irgendwohin legen.
+
+KI ist freiwillig. Beim ersten Start wirst du gefragt, und die Frage hat zwei gleichwertige Antworten. Ohne KI funktioniert die App vollständig – sie formuliert dann nur nicht selbst. Wer mag, verbindet ein eigenes KI-Konto oder trägt seinen eigenen Server ein.
+
+
+HINWEIS
+
+Neurohelp ist ein Werkzeug zur Alltagsorganisation. Es ist kein Medizinprodukt, stellt keine Diagnose, gibt keine medizinischen Ratschläge und ersetzt keine Therapie oder Behandlung.

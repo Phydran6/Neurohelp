@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/config/app_version.dart';
 import '../../../core/di/app_services.dart';
 import '../../../core/logging/app_logger.dart';
+import '../../../shared/widgets/support_contact.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import '../../onboarding/domain/intro_slides.dart';
 import '../../onboarding/presentation/intro_slide_view.dart';
@@ -171,6 +172,14 @@ class _HelpPageState extends State<HelpPage> {
                   ),
                 ],
               ),
+            const SizedBox(height: 32),
+            // Der Ausweg, wenn der Katalog nichts hergibt und die KI auch
+            // nicht. Steht bewusst direkt unter den Fragen und nicht ganz
+            // unten bei den Links: Wer hier ankommt, hat schon gesucht.
+            const SupportContact(
+              title: 'Deine Frage steht nicht dabei?',
+              subject: 'Neurohelp – Frage oder Problem',
+            ),
             const SizedBox(height: 32),
             Text('Über die App', style: theme.textTheme.titleMedium),
             const SizedBox(height: 12),

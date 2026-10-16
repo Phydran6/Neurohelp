@@ -69,6 +69,10 @@ void main() {
       lock: InMemoryAppLock(biometricAvailable: true),
     );
     await services.settings.setLockMethod(LockMethod.biometric);
+
+    // Die Einstellungen fragen beim Oeffnen erst, wie ausfuehrlich sie sein
+    // sollen. Hier geht es um den Expertenweg.
+    await services.settings.setSettingsMode(SettingsMode.expert);
   });
 
   tearDown(() => database.close());

@@ -23,4 +23,19 @@ abstract interface class SettingsRepository {
   /// Merkt sich, dass der Hinweis auf die Zwei-Faktor-Anmeldung zu sehen war.
   /// Er kommt danach nicht wieder.
   Future<AppSettings> setMfaHintShown({required bool shown});
+
+  /// Hell, dunkel oder wie das Gerät.
+  Future<AppSettings> setThemeChoice(AppThemeChoice choice);
+
+  /// Merkt sich, welcher Weg durch die Einstellungen gewählt wurde.
+  Future<AppSettings> setSettingsMode(SettingsMode mode);
+
+  /// Schaltet die Sicherung am Standardplatz an oder aus.
+  Future<AppSettings> setAutoBackup({required bool enabled});
+
+  /// Hält fest, wann zuletzt gesichert wurde.
+  Future<AppSettings> setLastBackupAt(DateTime moment);
+
+  /// Merkt sich, dass beim Start nach einer alten Sicherung gefragt wurde.
+  Future<AppSettings> setRestoreOffered({required bool offered});
 }

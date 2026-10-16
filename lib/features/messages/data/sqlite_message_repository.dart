@@ -49,6 +49,20 @@ class SqliteMessageRepository {
     return draft;
   }
 
+  /// Die Nachricht zu einem Historien-Vorgang.
+  ///
+  /// Der Weg zurück in einen Ablauf, den man in der Historie wiedergefunden
+  /// hat: Dort ist nur der Vorgang bekannt, nicht der Entwurf daran.
+  Future<MessageDraft?> byEntryId(String entryId) async {
+    final rows = await _db.query(
+      DbSchema.tableMessages,
+      where: 'entry_id = ?',
+      whereArgs: [entryId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : MessageDraft.fromRow(rows.first);
+  }
+
   Future<MessageDraft?> byId(String id) async {
     final rows = await _db.query(
       DbSchema.tableMessages,

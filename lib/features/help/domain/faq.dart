@@ -127,12 +127,129 @@ abstract final class FaqCatalog {
       id: 'schon-ein-konto',
       question: 'Ich habe die App neu installiert und schon ein Konto.',
       answer:
-          'Beim ersten Bildschirm gibt es „Ich habe schon ein Konto". Melde '
-          'dich mit E-Mail und Passwort an und richte danach die App-Sperre '
-          'neu ein. Deine alten Vorgänge waren auf dem alten Gerät und '
-          'kommen nicht mit – das ist Absicht, sie lagen nie auf einem '
-          'Server.',
+          'Beim allerersten Start fragt die App: „Warst du schon mal hier?" '
+          'Sag ja, dann holt sie deine alten Sachen zurück – entweder von '
+          'selbst oder aus einer Sicherungsdatei, die du heraussuchst. '
+          'Danach meldest du dich mit E-Mail und Passwort an und richtest '
+          'die App-Sperre neu ein.',
       keywords: ['anmelden', 'login', 'konto', 'neu', 'gerätewechsel'],
+    ),
+    FaqEntry(
+      id: 'sicherung-was-ist-das',
+      question: 'Was ist die Sicherung und muss ich mich darum kümmern?',
+      answer:
+          'Nein. Die App legt von selbst eine Sicherung an einem Platz ab, '
+          'den dein Telefon in seine eigene Sicherung mitnimmt – nach iCloud '
+          'oder zu Google. Installierst du die App neu oder ziehst auf ein '
+          'neues Gerät um, fragt sie beim ersten Start, ob sie alles '
+          'zurückholen soll.\n\n'
+          'Das Ganze ist abschaltbar, und du kannst die Sicherung auch '
+          'selbst als Datei irgendwohin legen. Beides steht in den '
+          'Einstellungen unter „Sicherung".',
+      keywords: ['backup', 'sicherung', 'umzug', 'neues handy', 'sichern'],
+    ),
+    FaqEntry(
+      id: 'sicherung-was-drin',
+      question: 'Was steht in der Sicherungsdatei – und was nicht?',
+      answer:
+          'Drin: deine Historie, alle Vorgänge (Anrufe, Termine, '
+          'Nachrichten, Aufgaben) und deine Einstellungen.\n\n'
+          'Nicht drin: deine PIN, deine Wiederherstellungs-Codes und deine '
+          'KI-Zugänge. Die liegen im Schlüsselbund des Geräts. Eine Datei, '
+          'die den Zugang zum Gerät gleich mitliefert, wäre das Gegenteil '
+          'von Sicherheit. Die App-Sperre richtest du nach dem Einspielen '
+          'deshalb neu ein.\n\n'
+          'Die Datei ist gepackt, aber nicht verschlüsselt. Leg sie dorthin, '
+          'wo du auch Kontoauszüge hinlegen würdest.',
+      keywords: ['backup', 'sicherung', 'datei', 'pin', 'inhalt'],
+    ),
+    FaqEntry(
+      id: 'sicherung-alte-version',
+      question: 'Funktioniert eine alte Sicherung in einer neuen App?',
+      answer:
+          'Ja, und umgekehrt auch. In der Datei steht, welche Angaben es zum '
+          'Zeitpunkt der Sicherung gab. Beim Einspielen nimmt die App alles, '
+          'was sie kennt, lässt weg, was sie nicht kennt, und füllt Fehlendes '
+          'mit ihren Vorgaben. Wenn dabei etwas nicht übernommen werden '
+          'konnte, sagt sie es hinterher.',
+      keywords: ['backup', 'sicherung', 'version', 'alt', 'update'],
+    ),
+    FaqEntry(
+      id: 'sicherung-cloud',
+      question: 'Kann ich die Sicherung in meine Cloud legen?',
+      answer:
+          'Ja. In den Einstellungen unter „Sicherung" gibt es „Datei '
+          'erzeugen". Danach geht das Teilen-Blatt deines Telefons auf, und '
+          'dort stehen alle Dienste, die du installiert hast – iCloud Drive, '
+          'Google Drive, Dropbox, oder eine Mail an dich selbst. Die App '
+          'selbst kennt keinen dieser Dienste und schickt nichts von allein '
+          'irgendwohin. Du entscheidest.',
+      keywords: ['cloud', 'icloud', 'google drive', 'dropbox', 'sicherung'],
+    ),
+    FaqEntry(
+      id: 'einstellungen-zwei-wege',
+      question: 'Warum fragen die Einstellungen, ob ich weiß, was ich tue?',
+      answer:
+          'Weil dieselbe Liste für zwei sehr verschiedene Leute gedacht ist. '
+          'Wer mit API-Schlüsseln und Dateipfaden umgehen kann, soll sie '
+          'bekommen. Wer nicht, soll nicht daran vorbeimüssen.\n\n'
+          'Beide Wege können dasselbe. Der Unterschied ist nur, wie viel '
+          'dabei erklärt wird. Umschalten kannst du jederzeit – oben rechts '
+          'in den Einstellungen.',
+      keywords: ['einstellungen', 'experte', 'einfach', 'modus'],
+    ),
+    FaqEntry(
+      id: 'eigener-ki-server',
+      question: 'Kann ich meine eigene KI benutzen – OpenWebUI, Ollama?',
+      answer:
+          'Ja. In den Einstellungen unter „Ich weiß, was ich tue" gibt es '
+          '„Eigenen KI-Server eintragen". Du gibst Adresse, Modell und – '
+          'falls nötig – einen Schlüssel an; die App probiert es einmal aus, '
+          'bevor sie es speichert.\n\n'
+          'Unterstützt wird alles, was die OpenAI-Schnittstelle spricht '
+          '(OpenWebUI, Ollama, LM Studio, OpenAI selbst) sowie Anthropic. '
+          'Die Anfragen gehen dann direkt von deinem Gerät dorthin.\n\n'
+          'Wichtig: Ein ChatGPT-Plus- oder Claude-Abo ist nicht dasselbe wie '
+          'ein Schlüssel für die Schnittstelle. Die werden getrennt '
+          'abgerechnet.',
+      keywords: [
+        'ollama',
+        'openwebui',
+        'openai',
+        'anthropic',
+        'claude',
+        'chatgpt',
+        'eigener server',
+      ],
+    ),
+    FaqEntry(
+      id: 'hell-dunkel',
+      question: 'Kann ich die App dauerhaft dunkel stellen?',
+      answer:
+          'Ja, in den Einstellungen unter „Darstellung" bzw. „Hell oder '
+          'dunkel?". Standard ist, was dein Gerät gerade macht; du kannst '
+          'aber fest hell oder fest dunkel wählen, ohne dafür das ganze '
+          'Gerät umzustellen.',
+      keywords: ['dunkel', 'dark mode', 'hell', 'theme', 'darstellung'],
+    ),
+    FaqEntry(
+      id: 'weitermachen',
+      question: 'Wie mache ich an etwas weiter, das ich angefangen habe?',
+      answer:
+          'In der Historie. Neben jedem offenen Vorgang steht ein '
+          'Abspiel-Pfeil – der bringt dich direkt dorthin zurück, wo du '
+          'aufgehört hast, nicht nur ins Protokoll.\n\n'
+          'Dasselbe gilt am Anfang jedes Ablaufs: Findet die App beim '
+          'Nachschauen etwas Offenes, steht dort „Daran weitermachen". '
+          'Antippen des Eintrags legt stattdessen etwas Neues mit demselben '
+          'Thema an – beides geht, du entscheidest.',
+      keywords: [
+        'weitermachen',
+        'fortsetzen',
+        'historie',
+        'angefangen',
+        'offen',
+      ],
     ),
     FaqEntry(
       id: 'zwei-faktor',
@@ -192,8 +309,22 @@ abstract final class FaqCatalog {
           'danach dieses Gerät leer: Vorgänge, Historie, Einstellungen, PIN. '
           'Danach bist du abgemeldet und die App fängt wieder von vorn an. '
           'Was schon aus der App heraus ist – eine übergebene Mail, ein '
-          'Termin im Kalender – bleibt, wo es ist.',
+          'Termin im Kalender oder eine Sicherungsdatei, die du selbst '
+          'woanders abgelegt hast – bleibt, wo es ist.',
       keywords: ['löschen', 'deinstallieren', 'konto'],
+    ),
+    FaqEntry(
+      id: 'nichts-geht',
+      question: 'Es geht gar nichts mehr. Was kann ich tun?',
+      answer:
+          'Schreib mir. Im Hilfe-Bereich steht unter den häufigen Fragen '
+          '„Deine Frage steht nicht dabei?" – dort gibt es zwei Wege: eine '
+          'Mail direkt an mich oder ein Ticket auf GitHub. Die Mail ist '
+          'schon vorausgefüllt, inklusive deiner Version; du musst nur noch '
+          'hinschreiben, was passiert ist.\n\n'
+          'Beides landet bei derselben Person. Nimm den Weg, der dir '
+          'leichter fällt.',
+      keywords: ['hilfe', 'kaputt', 'fehler', 'melden', 'mail', 'kontakt'],
     ),
   ];
 

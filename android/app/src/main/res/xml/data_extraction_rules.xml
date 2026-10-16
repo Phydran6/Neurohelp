@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Dasselbe fuer Android 12 und neuer. Dort trennt das System zwei Faelle,
+    und beide muessen einzeln beschrieben werden:
+
+      cloud-backup    - die Sicherung nach Google Drive.
+      device-transfer - die direkte Uebertragung auf ein neues Geraet beim
+                        Einrichten, ohne Umweg ueber die Cloud.
+
+    In beiden Faellen dieselbe Erlaubnisliste wie in backup_rules.xml: nur
+    die Sicherungsdatei, die die App selbst angelegt hat. Siehe dort fuer
+    die Begruendung.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="file" path="Sicherungen/" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="file" path="Sicherungen/" />
+    </device-transfer>
+</data-extraction-rules>

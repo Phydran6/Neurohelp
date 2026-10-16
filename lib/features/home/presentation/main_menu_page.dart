@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../../core/companion/tone_texts.dart';
@@ -107,7 +109,7 @@ class _MenuTile extends StatelessWidget {
       child: InkWell(
         key: Key('menu_${entry.id}'),
         borderRadius: BorderRadius.circular(16),
-        onTap: () => _open(context),
+        onTap: () => unawaited(_open(context)),
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
           child: Row(
@@ -124,7 +126,7 @@ class _MenuTile extends StatelessWidget {
     );
   }
 
-  void _open(BuildContext context) {
+  Future<void> _open(BuildContext context) async {
     final page = switch (entry.id) {
       'task' => const TaskStartPage(),
       'message' => const MessageStartPage(),
@@ -135,6 +137,15 @@ class _MenuTile extends StatelessWidget {
       _ => throw StateError('Kein Bildschirm für ${entry.id}.'),
     };
 
-    Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => page));
+    final services = AppScope.of(context);
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => page));
+
+    // Zurück aus einem Ablauf ist der richtige Moment für die Sicherung:
+    // Hier ist etwas entstanden, und der User macht gerade nichts. Läuft
+    // still im Hintergrund und meldet sich nie – er hat nicht darum
+    // gebeten, also darf es ihn auch nicht aufhalten (Konzept, Abschnitt 14a).
+    unawaited(services.backUpQuietly());
   }
 }

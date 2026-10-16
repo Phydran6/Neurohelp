@@ -7,6 +7,62 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Added
+
+- **Deine Sachen überleben jetzt eine Neuinstallation.** Die App legt von
+  selbst eine Sicherung an, und beim allerersten Start nach einer
+  Neuinstallation fragt sie: „Warst du schon mal hier?" Sagst du ja, ist alles
+  wieder da – Historie, Vorgänge, Einstellungen. Du musst dich dafür um nichts
+  kümmern, und abschalten kannst du es in den Einstellungen
+- **Zwei Wege zur Sicherung, wie überall in der App.** Wer mag, lässt sich
+  eine Datei erzeugen und legt sie selbst ab: in der Cloud, als Mail an sich
+  selbst, auf einem Stick. Wer damit nichts zu tun haben will, lässt die App
+  machen – sie legt die Datei dort ab, wo dein Telefon sie in seine eigene
+  Sicherung mitnimmt
+- **Eine Sicherung aus jeder Version lässt sich in jede Version einspielen.**
+  Eine alte Datei in einer neuen App funktioniert, und umgekehrt auch. Was
+  dabei nicht übernommen werden konnte, sagt die App hinterher – statt still
+  die Hälfte zu verlieren
+- **Die Einstellungen fragen zuerst, wie ausführlich sie sein sollen.** „Ich
+  weiß, was ich tue" oder „Ich hab keinen Plan". Beide Wege führen zu
+  denselben Möglichkeiten; der Unterschied ist nur, wie viel erklärt wird. Die
+  Wahl bleibt stehen und lässt sich oben rechts jederzeit zurücknehmen
+- **Hell oder dunkel lässt sich fest einstellen.** Bisher richtete sich die
+  App immer nach dem Gerät. Wer dauerhaft dunkel braucht, muss dafür jetzt
+  nicht mehr das ganze Telefon umstellen
+- **Du kannst deinen eigenen KI-Server eintragen.** OpenWebUI, Ollama, LM
+  Studio – oder einen Schlüssel von OpenAI bzw. Anthropic. Die App probiert
+  den Zugang einmal aus, bevor sie ihn speichert, und sagt bei einem Problem,
+  wo du nachsehen musst. Zu finden unter „Ich weiß, was ich tue"
+- **Passwort ändern geht endlich aus der App heraus.** Bisher ging das nur
+  über „Passwort vergessen" beim Anmelden – wer angemeldet war, kam gar nicht
+  daran. Jetzt steht es in den Einstellungen unter „Konto", ohne Mail und ohne
+  Code
+- **„Schreib mir direkt" im Hilfe-Bereich.** Wenn eine Frage nicht dabeisteht
+  oder etwas klemmt: eine Mail an mich, schon vorausgefüllt samt
+  Versionsnummer – oder ein Ticket auf GitHub, wenn dir das lieber ist
+- **Neun neue Antworten im Hilfe-Bereich** zu Sicherung, Wiederherstellung,
+  eigenem KI-Server, Darstellung und den zwei Einstellungs-Wegen
+
+### Fixed
+
+- **Aus der Historie kommst du jetzt direkt in den Vorgang zurück.** Bisher
+  sah man dort nur das Protokoll und konnte den Zustand ändern – wer seine
+  angefangene Aufgabe wiederfand, musste den Weg dorthin selbst noch einmal
+  suchen. Neben jedem offenen Vorgang steht jetzt ein Pfeil, der genau dorthin
+  führt, wo du aufgehört hast
+- **Dasselbe am Anfang jedes Ablaufs.** Findet die App beim Nachschauen etwas
+  Offenes, steht dort „Daran weitermachen". Vorher gab es nur „Titel
+  übernehmen" – das legte einen zweiten Vorgang an, und weitergearbeitet hat
+  man garantiert nicht dort, wo man aufgehört hatte
+- **Eine pausierte Aufgabe ohne Schritte behauptete „alles erledigt".** Wer
+  eine Aufgabe angelegt und beim Zerlegen abgebrochen hatte, landete beim
+  Wiederaufnehmen im Fokus-Modus, der nichts zu zeigen hatte. Jetzt geht es
+  dort weiter, wo es aufgehört hat: beim Zerlegen
+- **Die Datenschutzerklärung behauptete „es gibt keine Sicherung in der
+  Cloud".** Mit der neuen Sicherung stimmt das so nicht mehr – nachgezogen,
+  samt dem Hinweis, wohin die Datei tatsächlich geht und wie man es abschaltet
+
 ## [0.1.0-alpha.10] - 2026-08-21
 
 ### Added

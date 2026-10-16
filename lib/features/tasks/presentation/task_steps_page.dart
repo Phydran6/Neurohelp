@@ -9,6 +9,7 @@ import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/history_check.dart';
 import '../../../shared/widgets/recall_entry.dart';
+import '../../history/presentation/resume_entry.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import 'task_focus_page.dart';
 
@@ -19,7 +20,18 @@ import 'task_focus_page.dart';
 /// Reibung, die blockiert. Deshalb: ein Feld, Eingabetaste, nächster Punkt.
 /// Kein Dialog, kein Speichern-Knopf pro Schritt.
 class TaskStepsPage extends StatefulWidget {
-  const TaskStepsPage({super.key});
+  const TaskStepsPage({super.key, this.entryId, this.initialTitle});
+
+  /// Eine Aufgabe, die es schon gibt.
+  ///
+  /// Der Weg aus der Historie zurück in eine Aufgabe, die beim Anlegen
+  /// abgebrochen wurde: Sie steht in der Historie, hat aber keine Schritte –
+  /// im Fokus-Modus gäbe es also nichts zu zeigen. Statt sie als leere Hülle
+  /// stehen zu lassen, wird hier weiterzerlegt.
+  final String? entryId;
+
+  /// Titel, der schon feststeht. Kommt zusammen mit [entryId].
+  final String? initialTitle;
 
   @override
   State<TaskStepsPage> createState() => _TaskStepsPageState();
@@ -35,7 +47,12 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
 
   /// Der Einstieg ist überall derselbe: erst die Frage, dann das Feld
   /// (Konzept, Abschnitt 10, Schritt 2 – gilt für alle Features).
-  RecallMode _mode = RecallMode.asking;
+  ///
+  /// Ausnahme: An einer bestehenden Aufgabe gibt es nichts zu erinnern – sie
+  /// ist ja schon gefunden. Dann steht sofort das Feld da.
+  late RecallMode _mode = widget.entryId == null
+      ? RecallMode.asking
+      : RecallMode.typing;
   List<HistoryEntry> _found = const [];
   HistoryCheckState _check = HistoryCheckState.running;
 
@@ -61,12 +78,41 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     });
   }
 
+  /// Am gefundenen Vorgang weiterarbeiten, statt einen zweiten anzulegen.
+  ///
+  /// **Das war die Lücke.** Der Historie-Check hat gefunden, was offen war,
+  /// und der einzige Weg weiter hieß: Titel übernehmen, neuer Vorgang. Wer
+  /// seine angefangene Sache wiedererkannte, bekam eine Kopie davon und
+  /// arbeitete garantiert nicht dort weiter, wo er aufgehört hatte.
+  Future<void> _resumeFromHistory(HistoryEntry entry) async {
+    final blocked = await ResumeEntry.open(context, entry);
+    if (!mounted) return;
+    if (blocked == null) return;
+
+    // Geht es doch nicht weiter, bleibt der alte Weg: als Vorlage nehmen.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ResumeEntry.describe(blocked)),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   /// Ein Fund wird zum Titel der neuen Aufgabe – der alte Vorgang bleibt.
   void _takeFromHistory(HistoryEntry entry) {
     setState(() {
       _mode = RecallMode.typing;
       _titleController.text = entry.title;
     });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    final title = widget.initialTitle;
+    // Der Platzhalter aus einem abgebrochenen Ablauf ist kein Titel – er
+    // gehört nicht ins Feld, sonst steht er gleich wieder als Thema da.
+    if (title != null && title != kUnknownTopic) _titleController.text = title;
   }
 
   @override
@@ -110,10 +156,19 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     if (!_canStart || _saving) return;
     setState(() => _saving = true);
 
-    final tasks = AppScope.of(context).tasks;
+    final services = AppScope.of(context);
+    final tasks = services.tasks;
     final typed = _titleController.text.trim();
     final title = typed.isEmpty ? kUnknownTopic : typed;
-    final entryId = await tasks.createTask(title);
+
+    // Eine bestehende Aufgabe wird weiterzerlegt, keine zweite angelegt.
+    // Sonst stünden nach dem Weitermachen aus der Historie zwei gleich
+    // heißende Vorgänge nebeneinander.
+    final existing = widget.entryId;
+    final entryId = existing ?? await tasks.createTask(title);
+    if (existing != null && typed.isNotEmpty && typed != widget.initialTitle) {
+      await services.history.rename(existing, title);
+    }
     await tasks.addSteps(entryId, titles: _steps);
 
     if (!mounted) return;
@@ -129,7 +184,11 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Neue Aufgabe')),
+      appBar: AppBar(
+        title: Text(
+          widget.entryId == null ? 'Neue Aufgabe' : 'Aufgabe weiter zerlegen',
+        ),
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 8, 24, 24),
@@ -211,6 +270,8 @@ class _TaskStepsPageState extends State<TaskStepsPage> {
                               hits: _found,
                               nudges: RecallNudges.task,
                               onPick: _takeFromHistory,
+                              onResume: _resumeFromHistory,
+                              resumeLabel: 'Daran weitermachen',
                             ),
                             const SizedBox(height: 16),
                           ],

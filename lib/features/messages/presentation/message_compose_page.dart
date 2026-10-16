@@ -10,6 +10,7 @@ import '../../../shared/widgets/ai_suggestions.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/history_check.dart';
 import '../../../shared/widgets/recall_entry.dart';
+import '../../history/presentation/resume_entry.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/message_draft.dart';
 import '../domain/message_flow.dart';
@@ -76,6 +77,26 @@ class _MessageComposePageState extends State<MessageComposePage> {
           ? HistoryCheckState.empty
           : HistoryCheckState.found;
     });
+  }
+
+  /// Am gefundenen Vorgang weiterarbeiten, statt einen zweiten anzulegen.
+  ///
+  /// **Das war die Lücke.** Der Historie-Check hat gefunden, was offen war,
+  /// und der einzige Weg weiter hieß: Titel übernehmen, neuer Vorgang. Wer
+  /// seine angefangene Sache wiedererkannte, bekam eine Kopie davon und
+  /// arbeitete garantiert nicht dort weiter, wo er aufgehört hatte.
+  Future<void> _resumeFromHistory(HistoryEntry entry) async {
+    final blocked = await ResumeEntry.open(context, entry);
+    if (!mounted) return;
+    if (blocked == null) return;
+
+    // Geht es doch nicht weiter, bleibt der alte Weg: als Vorlage nehmen.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ResumeEntry.describe(blocked)),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   /// Ein Fund aus der Historie wird zum Thema der neuen Nachricht.
@@ -344,6 +365,8 @@ class _MessageComposePageState extends State<MessageComposePage> {
                           hits: _found,
                           nudges: RecallNudges.message,
                           onPick: _takeFromHistory,
+                          onResume: _resumeFromHistory,
+                          resumeLabel: 'Daran weitermachen',
                         ),
                         const SizedBox(height: 16),
                         Text(

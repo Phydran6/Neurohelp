@@ -7,6 +7,7 @@ import '../../../core/history/domain/history_entry.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/history_check.dart';
 import '../../../shared/widgets/recall_entry.dart';
+import '../../history/presentation/resume_entry.dart';
 import '../../../shared/widgets/text_context_menu.dart';
 import '../domain/appointment.dart';
 import 'appointment_book_page.dart';
@@ -121,6 +122,26 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
     });
   }
 
+  /// Am gefundenen Vorgang weiterarbeiten, statt einen zweiten anzulegen.
+  ///
+  /// **Das war die Lücke.** Der Historie-Check hat gefunden, was offen war,
+  /// und der einzige Weg weiter hieß: Titel übernehmen, neuer Vorgang. Wer
+  /// seine angefangene Sache wiedererkannte, bekam eine Kopie davon und
+  /// arbeitete garantiert nicht dort weiter, wo er aufgehört hatte.
+  Future<void> _resumeFromHistory(HistoryEntry entry) async {
+    final blocked = await ResumeEntry.open(context, entry);
+    if (!mounted) return;
+    if (blocked == null) return;
+
+    // Geht es doch nicht weiter, bleibt der alte Weg: als Vorlage nehmen.
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(ResumeEntry.describe(blocked)),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
   /// Ein Fund wird zum Thema des neuen Termins – der alte Vorgang bleibt.
   void _takeFromHistory(HistoryEntry entry) {
     setState(() {
@@ -225,6 +246,8 @@ class _AppointmentStartPageState extends State<AppointmentStartPage> {
                               hits: _found,
                               nudges: RecallNudges.appointment,
                               onPick: _takeFromHistory,
+                              onResume: _resumeFromHistory,
+                              resumeLabel: 'Daran weitermachen',
                             ),
                           ),
                         ),

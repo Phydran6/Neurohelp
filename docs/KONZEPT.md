@@ -315,6 +315,35 @@ FIDO2 / WebAuthn.
 
 ---
 
+## 14a. Sicherung ✅ NEU
+
+### Das Problem
+Lokal-first heißt für den User sonst: **irgendwann ist alles weg.** Ein Update, eine Neuinstallation, ein neues Telefon – und die Historie, auf der die ganze App aufbaut, ist leer. Genau die Menschen, für die diese App gebaut ist, verlieren damit am meisten.
+
+### Grundsatz
+**Die Sicherung ist eine Datei, und sie gehört dem User.** Kein eigener Cloud-Speicher, keine neue Stelle, an der fremde Daten liegen. Das Konzept in Abschnitt 14 gilt weiter.
+
+### Zwei Wege, wie überall
+| | **Ich weiß, was ich tue** | **Ich hab keinen Plan** |
+|---|---|---|
+| Sichern | Datei erzeugen, selbst ablegen | läuft von selbst mit |
+| Zurückholen | Datei selbst heraussuchen | App schaut am Standardplatz nach |
+
+Der geführte Weg ist der, bei dem der User **keine Entscheidung treffen muss** – und deshalb der, bei dem eine Sicherung tatsächlich existiert, wenn sie gebraucht wird.
+
+### Versionstoleranz ist die eigentliche Anforderung
+Eine Sicherung aus **jeder** Version muss sich in **jede** Version einspielen lassen. Deshalb steht in der Datei kein Objekt „Termin", sondern Tabelle, Spalte, Wert. Unbekannte Spalten fallen weg, fehlende bekommen Standardwerte. Was nicht übernommen wurde, wird **gesagt** – nicht verschwiegen.
+
+### Was nicht hineingehört
+PIN, Wiederherstellungs-Codes, KI-Zugänge. Sie liegen im Schlüsselbund. Eine Sicherungsdatei, die den Zugang zum Gerät mitliefert, ist das Gegenteil von Sicherheit.
+
+### Cloud – ohne eine Zeile Backend
+Das Teilen-Blatt des Systems enthält iCloud Drive, Google Drive, Dropbox und alles andere, was installiert ist. Die App kennt keinen dieser Dienste und braucht es auch nicht. Der Standardplatz wiederum wird von der **Gerätesicherung** mitgenommen – Googles bzw. Apples, nicht unserer.
+
+> Einzelheiten und Begründungen: [BACKUP.md](BACKUP.md).
+
+---
+
 ## 15. Info- & Hilfe-Bereich
 
 1. **Über die App** – Name, Herkunft, Entwickler, Version, Lizenzen
@@ -380,13 +409,36 @@ Der User soll KI nutzen können, **ohne** dass Kosten bei dir entstehen und **oh
 | In-App-Abo (IAP) | Verlangt Auszahlungs- und Steuerkonfiguration → faktisch Gewerbeanmeldung. **Bewusst abgelehnt.** Store-Provision liegt bei 15 %. |
 | Nur BYOK (Schlüssel selbst eintragen) | Bricht das DAU-Prinzip. Genau der Admin-Kram, an dem die Zielgruppe scheitert. |
 
-### Festgelegtes Drei-Stufen-Modell
+### Festgelegtes Stufenmodell
+
+Von unten nach oben: Je weiter oben, desto mehr hat der User selbst
+eingerichtet – und desto eher soll genau das benutzt werden.
 
 | Stufe | Wer zahlt | Aufwand für den User | Rolle |
 |---|---|---|---|
 | **1. Eigene gehostete KI** | niemand | keiner – läuft sofort | **Standard** |
+| **1a. Fertiger Zugang der App** ✅ NEU | der Betreiber, mit Limit | keiner | **für „kein Plan und kein Budget"** |
 | **2. OpenRouter-Login (OAuth/PKCE)** | der User selbst (kostenlose Modelle vorhanden) | ein Tap, wie „mit Konto anmelden" | **Angebot für bessere Qualität** |
-| **3. Eigener API-Schlüssel (BYOK)** | der User | Schlüssel eintragen | **versteckt in Einstellungen** |
+| **3. Eigener Server oder API-Schlüssel** ✅ ERWEITERT | der User | Adresse, Modell, Schlüssel eintragen | **Expertenweg in den Einstellungen** |
+
+**Zu 1a:** Ein mitgelieferter OpenRouter-Schlüssel, gesetzt beim Bauen über
+`--dart-define=OPENROUTER_SHARED_KEY`. Er steht **nie** im Repository. Ehrlich
+bleiben muss man trotzdem: Ein ausgelieferter Schlüssel lässt sich aus jeder
+App herausholen – deshalb gehört ein Ausgabenlimit darauf, und deshalb steht
+in der Oberfläche, dass die Anfragen über ein gemeinsames Konto laufen. Fehlt
+der Schlüssel im Build, fällt genau diese Stufe weg; alle anderen laufen weiter.
+
+**Zu 3:** Nicht mehr nur ein OpenRouter-Schlüssel, sondern jeder
+OpenAI-kompatible Server (OpenWebUI, Ollama, LM Studio, OpenAI selbst) sowie
+Anthropic. Der Grund: Wer schon eine eigene KI betreibt, soll sie benutzen
+dürfen, statt sich einen zweiten Zugang zuzulegen. Vor dem Speichern wird
+**einmal wirklich gefragt** – ein Zugang, der erst mitten in einem Ablauf als
+falsch auffällt, ist schlimmer als gar keiner.
+
+> **Keine Stufe ist ein Login mit einem ChatGPT- oder Claude-Abo.** Das gibt es
+> technisch nicht und wird es nicht geben (siehe „Verworfene Wege"). Wer ein
+> solches Abo hat, braucht zusätzlich einen Schlüssel für die Schnittstelle –
+> die App sagt das an der Stelle, an der man es sonst falsch verstehen würde.
 
 ### Warum OpenRouter
 - Offizieller OAuth-Login: die App tauscht einen Code gegen einen **nutzereigenen Schlüssel**. Der User sieht nie einen Schlüssel, kopiert nichts.

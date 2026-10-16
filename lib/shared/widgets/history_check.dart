@@ -69,12 +69,25 @@ class HistoryEntryTile extends StatelessWidget {
     required this.entry,
     required this.onTap,
     this.subtitle,
+    this.onResume,
+    this.resumeLabel = 'Daran weitermachen',
     super.key,
   });
 
   final HistoryEntry entry;
   final String? subtitle;
   final VoidCallback onTap;
+
+  /// Zurück in den Ablauf, aus dem dieser Vorgang stammt.
+  ///
+  /// **Der Unterschied, der gefehlt hat:** Antippen hieß bisher überall „nimm
+  /// den Titel als Vorlage für etwas Neues". Wer seinen angefangenen Vorgang
+  /// wiederfand, legte damit einen zweiten daneben – und arbeitete garantiert
+  /// nicht dort weiter, wo er aufgehört hatte. Ist dieser Rückruf gesetzt,
+  /// steht daneben der Weg zurück in den alten Vorgang.
+  final VoidCallback? onResume;
+
+  final String resumeLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -101,6 +114,26 @@ class HistoryEntryTile extends StatelessWidget {
                       Text(
                         subtitle!,
                         style: theme.textTheme.bodyMedium?.copyWith(
+                          color: theme.colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                    if (onResume != null) ...[
+                      const SizedBox(height: 10),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: FilledButton.tonalIcon(
+                          key: Key('recall_resume_${entry.id}'),
+                          onPressed: onResume,
+                          icon: const Icon(Icons.play_arrow, size: 18),
+                          label: Text(resumeLabel),
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        'Antippen legt stattdessen etwas Neues mit diesem '
+                        'Thema an.',
+                        style: theme.textTheme.bodySmall?.copyWith(
                           color: theme.colorScheme.onSurfaceVariant,
                         ),
                       ),

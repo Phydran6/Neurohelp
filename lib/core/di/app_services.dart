@@ -6,21 +6,28 @@ import '../../features/appointments/data/sqlite_appointment_repository.dart';
 import '../../features/help/domain/help_service.dart';
 import '../../features/messages/data/sqlite_message_repository.dart';
 import '../../features/messages/domain/message_sender.dart';
+import '../files/file_opener.dart';
 import '../files/file_saver.dart';
 import '../../features/tasks/data/sqlite_task_repository.dart';
 import '../../features/tasks/domain/task_repository.dart';
 import '../account/account_repository.dart';
 import '../account/data/unconfigured_account_repository.dart';
 import '../ai/ai_client.dart';
+import '../ai/custom/custom_endpoint_account.dart';
+import '../ai/custom/custom_endpoint_store.dart';
 import '../ai/openrouter/openrouter_account.dart';
 import '../ai/openrouter/openrouter_api.dart';
 import '../ai/openrouter/openrouter_key_store.dart';
+import '../backup/backup_codec.dart';
+import '../backup/backup_service.dart';
+import '../backup/backup_vault.dart';
 import '../db/app_database.dart';
 import '../db/schema.dart';
 import '../history/data/sqlite_history_repository.dart';
 import '../security/app_lock.dart';
 import '../security/data/device_app_lock.dart';
 import '../history/domain/history_repository.dart';
+import '../logging/app_logger.dart';
 import '../settings/data/sqlite_settings_repository.dart';
 import '../settings/settings_controller.dart';
 
@@ -45,6 +52,10 @@ class AppServices {
     required this.account,
     required this.lock,
     required this.files,
+    required this.fileOpener,
+    required this.backup,
+    required this.vault,
+    required this.customAi,
   });
 
   /// Baut die Dienste über einer geöffneten Datenbank auf.
@@ -59,7 +70,10 @@ class AppServices {
     AccountRepository? account,
     AppLock? lock,
     FileSaver files = const NoFileSaver(),
+    FileOpener? fileOpener,
     OpenRouterAccount? openRouter,
+    CustomEndpointAccount? customAi,
+    BackupVault? vault,
   }) {
     final history = SqliteHistoryRepository(database.raw, clock: clock);
     final aiClient = ai ?? const DisabledAiClient();
@@ -104,6 +118,14 @@ class AppServices {
       account: account ?? const UnconfiguredAccountRepository(),
       lock: lock ?? InMemoryAppLock(),
       files: files,
+      fileOpener: fileOpener ?? FixedFileOpener(),
+      // Die Sicherung arbeitet auf derselben Datenbank wie alles andere.
+      // Ein eigener Zugang waere eine zweite Wahrheit ueber denselben Daten.
+      backup: BackupService(database.raw, clock: clock),
+      vault: vault ?? InMemoryBackupVault(clock: clock),
+      customAi:
+          customAi ??
+          CustomEndpointAccount(store: InMemoryCustomEndpointStore()),
     );
   }
 
@@ -142,6 +164,21 @@ class AppServices {
   /// ICS-Export eines Termins. In Tests bewusst wirkungslos.
   final FileSaver files;
 
+  /// Holt eine Datei vom Gerät herein – die Sicherung, die eingespielt
+  /// werden soll. In Tests bewusst wirkungslos.
+  final FileOpener fileOpener;
+
+  /// Sicherung schreiben und einspielen (Konzept, Abschnitt 14a).
+  final BackupService backup;
+
+  /// Der Standardplatz für die Sicherung – für alle, die mit Dateien nichts
+  /// zu tun haben wollen.
+  final BackupVault vault;
+
+  /// Der selbst eingetragene KI-Zugang (OpenWebUI, OpenAI, Anthropic …).
+  /// Wie [openRouter]: Die Abläufe fragen ihn nie, sie kennen nur [ai].
+  final CustomEndpointAccount customAi;
+
   /// Räumt alles weg, was auf diesem Gerät liegt.
   ///
   /// Gehört zum Löschen des Kontos: Erst räumt das Backend auf, dann das
@@ -168,14 +205,52 @@ class AppServices {
     // OpenRouter bleibt davon unberührt; das können wir nicht anfassen und
     // sollen es auch nicht.
     await openRouter.disconnect();
+    await customAi.disconnect();
+
+    // Auch die Sicherung am Standardplatz. Sonst stünde nach "dieses Gerät
+    // ist leergeräumt" die vollständige Historie weiter im Dateisystem.
+    await vault.clear();
 
     // Neu lesen heißt: Standardwerte, und jede horchende Seite erfährt davon.
     await settings.load();
   }
 
+  /// Legt eine Sicherung am Standardplatz ab und merkt sich, wann.
+  ///
+  /// Der Weg für alle, die von Dateien nichts wissen wollen: Es entsteht eine
+  /// Datei, sie liegt an einem Ort, den die Gerätesicherung mitnimmt, und der
+  /// User musste dafür nichts entscheiden.
+  Future<StoredBackup> backUpToVault() async {
+    final document = await backup.create();
+    final stored = await vault.write(BackupCodec.encode(document));
+    await settings.setLastBackupAt(stored.savedAt);
+    return stored;
+  }
+
+  /// Sichert still im Hintergrund, wenn der User das nicht abgeschaltet hat.
+  ///
+  /// Läuft beim Verlassen eines Ablaufs mit. Ein Fehler darf dabei **nie**
+  /// sichtbar werden: Der User hat nicht um diese Sicherung gebeten, also
+  /// darf sie ihn auch nicht mit einer Meldung aufhalten.
+  Future<void> backUpQuietly() async {
+    if (!settings.current.autoBackup) return;
+
+    try {
+      await backUpToVault();
+    } on Exception catch (error, stackTrace) {
+      AppLogger.error(
+        'Sicherung im Hintergrund fehlgeschlagen',
+        scope: 'backup',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
   Future<void> dispose() {
     settings.dispose();
     openRouter.dispose();
+    customAi.dispose();
     return database.close();
   }
 }

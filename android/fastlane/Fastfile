@@ -2,6 +2,21 @@ default_platform(:android)
 
 AAB_PATH = "../build/app/outputs/bundle/release/app-release.aab"
 
+# Die Store-Texte liegen unter fastlane/metadata/android/ und sind
+# eingecheckt - wie bei iOS. So ist nachvollziehbar, was im Store steht, und
+# eine Aenderung geht durch Review wie Code.
+#
+# Hochgeladen werden sie aber nur dort, wo es gewollt ist: Ein Lauf in den
+# Track "internal" soll den oeffentlichen Eintrag nicht anfassen.
+def metadata_off
+  {
+    skip_upload_metadata: true,
+    skip_upload_images: true,
+    skip_upload_screenshots: true,
+    skip_upload_changelogs: true,
+  }
+end
+
 platform :android do
   desc "AAB in den Play-Track 'internal' hochladen"
   lane :internal do
@@ -9,9 +24,7 @@ platform :android do
       track: "internal",
       aab: AAB_PATH,
       release_status: "draft",
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
+      **metadata_off,
     )
   end
 
@@ -21,21 +34,47 @@ platform :android do
       track: "internal",
       track_promote_to: "beta",
       skip_upload_aab: true,
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
+      **metadata_off,
     )
   end
 
   desc "Von 'beta' in die Produktion hochstufen"
-  lane :promote_production do
+  #
+  # Der letzte Schritt vor der Oeffentlichkeit. `rollout` ist Absicht: Google
+  # liefert die Version zunaechst nur an einen Teil der Geraete aus. Faellt
+  # etwas auf, laesst sich das in der Console anhalten, bevor es alle trifft.
+  # Den Anteil hochzudrehen ist ein Klick - ein Rueckruf ist es nicht.
+  lane :promote_production do |options|
+    rollout = (options[:rollout] || "0.2").to_s
+
     upload_to_play_store(
       track: "beta",
       track_promote_to: "production",
+      rollout: rollout,
       skip_upload_aab: true,
-      skip_upload_metadata: true,
-      skip_upload_images: true,
-      skip_upload_screenshots: true,
+      **metadata_off,
     )
+  end
+
+  desc "Nur die Store-Texte und Bilder aktualisieren (ohne Build)"
+  #
+  # Das Gegenstueck zu `metadata_only` auf der iOS-Seite. Laeuft gegen den
+  # vorhandenen Eintrag und laedt kein Paket hoch.
+  lane :metadata_only do
+    upload_to_play_store(
+      skip_upload_aab: true,
+      skip_upload_apk: true,
+      skip_upload_changelogs: true,
+    )
+  end
+
+  desc "Pruefen, ob der Play-Zugang funktioniert"
+  #
+  # Vor dem ersten echten Lauf: Ein falsch hinterlegter Service-Account faellt
+  # sonst erst nach 20 Minuten Bauzeit auf, und die Meldung spricht dann von
+  # einem fehlenden Paket statt von fehlenden Rechten.
+  lane :check_access do
+    validate_play_store_json_key
+    UI.success("Play-Zugang steht.")
   end
 end

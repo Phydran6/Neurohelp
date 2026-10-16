@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:neurohelp/core/ai/ai_client.dart';
 import 'package:neurohelp/core/db/app_database.dart';
+import 'package:neurohelp/core/settings/app_settings.dart';
 import 'package:neurohelp/core/di/app_services.dart';
 import 'package:neurohelp/features/help/presentation/help_page.dart';
 import 'package:neurohelp/features/settings/presentation/settings_page.dart';
@@ -19,6 +20,11 @@ void main() {
   setUp(() async {
     database = await AppDatabase.open(path: inMemoryDatabasePath);
     services = AppServices.from(database);
+
+    // Die Einstellungen fragen beim Öffnen erst, wie ausführlich sie sein
+    // sollen. Hier geht es um den Expertenweg; die Vorschaltung selbst hat
+    // ihren eigenen Test.
+    await services.settings.setSettingsMode(SettingsMode.expert);
   });
 
   tearDown(() => database.close());
@@ -39,6 +45,13 @@ void main() {
   }
 
   Future<void> pump(WidgetTester tester, Widget page) async {
+    // Hoher Bildschirm: Die Einstellungen sind eine ListView, und was nicht
+    // sichtbar ist, wird auch nicht gebaut. Auf der Standardgröße fände
+    // `find.byKey` den KI-Schalter nicht, obwohl er da ist.
+    tester.view.physicalSize = const Size(1200, 3600);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+
     await tester.pumpWidget(
       AppScope(
         services: services,

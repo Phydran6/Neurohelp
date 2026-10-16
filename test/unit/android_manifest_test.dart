@@ -49,5 +49,73 @@ void main() {
       expect(content, isNot(contains('ACCESS_FINE_LOCATION')));
       expect(content, isNot(contains('READ_EXTERNAL_STORAGE')));
     });
+
+    test('nimmt die Sicherung in die Gerätesicherung mit', () {
+      final content = manifest.readAsStringSync();
+
+      // Ohne diese drei Zeilen überlebt keine Sicherung eine
+      // Neuinstallation – und der Einstieg beim ersten Start findet dann
+      // nie etwas. Das fällt in keinem Emulator-Lauf auf.
+      expect(content, contains('android:allowBackup="true"'));
+      expect(
+        content,
+        contains('android:fullBackupContent="@xml/backup_rules"'),
+      );
+      expect(
+        content,
+        contains('android:dataExtractionRules="@xml/data_extraction_rules"'),
+        reason: 'Ab Android 12 gelten die alten Regeln nicht mehr.',
+      );
+    });
+  });
+
+  group('Sicherungsregeln', () {
+    final rules = File('android/app/src/main/res/xml/backup_rules.xml');
+    final extraction = File(
+      'android/app/src/main/res/xml/data_extraction_rules.xml',
+    );
+
+    test('nehmen nur die Sicherungsdatei mit, nichts sonst', () {
+      // Erlaubnisliste statt Sperrliste: Ohne diese Dateien würde Android
+      // die gesamte App nach Google sichern, inklusive der Datenbank. Das
+      // wäre eine Cloud-Speicherung, um die niemand gebeten hat
+      // (Konzept, Abschnitt 14).
+      for (final file in [rules, extraction]) {
+        // Ohne die Kommentare: Dort steht die Begründung, warum Datenbank
+        // und Einstellungen draußen bleiben – und genau diese Wörter würde
+        // die Prüfung sonst finden.
+        final content = file.readAsStringSync().replaceAll(
+          RegExp(r'<!--.*?-->', dotAll: true),
+          '',
+        );
+
+        expect(
+          content,
+          contains('<include domain="file" path="Sicherungen/" />'),
+          reason: 'Muss zu DeviceBackupVault.folderName passen.',
+        );
+        expect(
+          content,
+          isNot(contains('database')),
+          reason:
+              'Die Datenbank steckt bereits in der Sicherungsdatei, und '
+              'zwar in einer Form, die eine andere Schemaversion übersteht.',
+        );
+        expect(
+          content,
+          isNot(contains('sharedpref')),
+          reason: 'Dort liegen PIN und Wiederherstellungs-Codes.',
+        );
+      }
+    });
+
+    test('decken Cloud-Sicherung und Gerätewechsel getrennt ab', () {
+      final content = extraction.readAsStringSync();
+
+      // Android 12 trennt beides, und was nicht dasteht, wird nicht
+      // mitgenommen.
+      expect(content, contains('<cloud-backup>'));
+      expect(content, contains('<device-transfer>'));
+    });
   });
 }

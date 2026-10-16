@@ -127,6 +127,18 @@ abstract interface class AccountRepository {
     required String newPassword,
   });
 
+  /// Ändert das Passwort der **laufenden** Sitzung – ohne Code, ohne Mail.
+  ///
+  /// Der Unterschied zu [resetPassword]: Dort beweist der Code aus der Mail,
+  /// dass das Postfach dem Anrufer gehört. Wer schon angemeldet ist, hat das
+  /// längst bewiesen; ihn trotzdem durch eine Mail zu schicken wäre eine
+  /// Hürde ohne Gewinn.
+  ///
+  /// Das fehlte bis hierher komplett: Das Passwort ließ sich **nur** über
+  /// „vergessen" im Einstieg ändern – wer angemeldet war, kam gar nicht
+  /// daran.
+  Future<Account> changePassword(String newPassword);
+
   /// Beginnt die Einrichtung der Zwei-Faktor-Anmeldung (TOTP).
   Future<MfaEnrollment> startMfaEnrollment();
 

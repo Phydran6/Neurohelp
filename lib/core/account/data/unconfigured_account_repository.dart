@@ -63,6 +63,10 @@ class UnconfiguredAccountRepository implements AccountRepository {
   }) async => throw _unavailable;
 
   @override
+  Future<Account> changePassword(String newPassword) async =>
+      throw _unavailable;
+
+  @override
   Future<MfaEnrollment> startMfaEnrollment() async => throw _unavailable;
 
   @override
@@ -210,6 +214,25 @@ class LocalAccountRepository implements AccountRepository {
       username: email.split('@').first,
       email: email.trim(),
     );
+  }
+
+  @override
+  Future<Account> changePassword(String newPassword) async {
+    if (newPassword.length < 8) {
+      throw const AccountException(
+        AccountFailure.invalidInput,
+        'Das Passwort braucht mindestens 8 Zeichen.',
+      );
+    }
+
+    final account = _account;
+    if (account == null) {
+      throw const AccountException(
+        AccountFailure.invalidCredentials,
+        'Dafür musst du angemeldet sein.',
+      );
+    }
+    return account;
   }
 
   @override

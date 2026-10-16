@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Was Android in seine automatische Sicherung nach Google mitnimmt
+    (Geraete bis Android 11).
+
+    Grundsatz aus dem Konzept, Abschnitt 14: Nutzerdaten bleiben auf dem
+    Geraet. Deshalb steht hier eine Erlaubnisliste und keine Sperrliste -
+    ohne diese Datei wuerde Android die gesamte App sichern, inklusive der
+    SQLite-Datenbank und der Einstellungen, und das waere eine
+    Cloud-Speicherung, um die niemand gebeten hat.
+
+    Mitgenommen wird genau eine Datei: die Sicherung, die die App selbst
+    angelegt hat und die der User in den Einstellungen abschalten kann. Sie
+    ist damit auch die einzige Stelle, an der ein "Ja" des Users haengt.
+
+    Bewusst NICHT dabei:
+      - databases/  - die Datenbank selbst. Sie steckt bereits in der
+        Sicherungsdatei, und zwar in einer Form, die eine andere
+        Schemaversion uebersteht.
+      - shared_prefs/ und der Schluesselbund - dort liegen PIN,
+        Wiederherstellungs-Codes und KI-Zugaenge. Die gehoeren auf das
+        Geraet und nirgendwo sonst hin.
+-->
+<full-backup-content>
+    <include domain="file" path="Sicherungen/" />
+</full-backup-content>

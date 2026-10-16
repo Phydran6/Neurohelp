@@ -7,10 +7,27 @@
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!--
+        Die automatische Sicherung von Android (Konzept, Abschnitt 14a).
+
+        Sie ist der Grund, warum die App nach einer Neuinstallation ueberhaupt
+        etwas zurueckholen kann, ohne dass der User sich um eine Datei
+        kuemmern musste: Android legt die erlaubten Dateien in seiner eigenen
+        Sicherung ab und stellt sie beim naechsten Einrichten wieder her.
+
+        `allowBackup` steht hier ausdruecklich, obwohl es der Vorgabewert ist -
+        eine Cloud-Speicherung soll man im Manifest sehen, nicht erraten
+        muessen. WAS gesichert wird, steht in den beiden XML-Dateien, und das
+        ist ausschliesslich die Sicherungsdatei der App. Datenbank,
+        Einstellungen und Schluesselbund bleiben draussen.
+    -->
     <application
         android:label="Neurohelp"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_rules"
+        android:dataExtractionRules="@xml/data_extraction_rules">
         <activity
             android:name=".MainActivity"
             android:exported="true"

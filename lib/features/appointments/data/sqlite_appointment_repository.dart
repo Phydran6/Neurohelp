@@ -44,6 +44,20 @@ class SqliteAppointmentRepository {
     return appointment;
   }
 
+  /// Der Termin zu einem Historien-Vorgang.
+  ///
+  /// Der Weg zurück in einen Ablauf, den man in der Historie wiedergefunden
+  /// hat: Dort ist nur der Vorgang bekannt, nicht der Termin daran.
+  Future<Appointment?> byEntryId(String entryId) async {
+    final rows = await _db.query(
+      DbSchema.tableAppointments,
+      where: 'entry_id = ?',
+      whereArgs: [entryId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : Appointment.fromRow(rows.first);
+  }
+
   Future<Appointment?> byId(String id) async {
     final rows = await _db.query(
       DbSchema.tableAppointments,

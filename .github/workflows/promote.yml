@@ -1,0 +1,131 @@
+name: In den Store hochstufen
+
+# Der letzte Schritt, und bewusst der einzige, den ein Mensch startet.
+#
+# `deploy.yml` schickt jeden Release automatisch an die Tester-Kanäle –
+# Play-Track „internal" und TestFlight. Von dort weiter in die
+# Öffentlichkeit passiert **nie** von selbst: Ein versehentlich getaggter
+# Commit soll nicht im Store landen.
+#
+# Reihenfolge bei Google: internal → beta (closed testing) → production.
+# Die Zwischenstufe ist bei neuen Entwicklerkonten Pflicht, siehe
+# docs/RELEASE-CHECKLISTE.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Zielplattform"
+        required: true
+        default: android
+        type: choice
+        options: [android, ios]
+      step:
+        description: "Android: welcher Schritt"
+        required: true
+        default: beta
+        type: choice
+        options: [beta, production, metadata]
+      rollout:
+        description: "Android-Produktion: Anteil der Geräte (0.2 = 20 %)"
+        required: false
+        default: "0.2"
+      version:
+        description: "iOS: Version ohne v-Präfix, z.B. 0.1.0"
+        required: false
+      build_number:
+        description: "iOS: Build-Nummer des Laufs, der hochgeladen wurde"
+        required: false
+
+jobs:
+  android:
+    name: Google Play
+    runs-on: ubuntu-latest
+    if: inputs.target == 'android'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Play-Secrets vorhanden?
+        env:
+          PLAY_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [ -z "$PLAY_JSON" ]; then
+            echo "::error::PLAY_SERVICE_ACCOUNT_JSON fehlt – siehe docs/RELEASE-CHECKLISTE.md."
+            exit 1
+          fi
+          echo "$PLAY_JSON" > android/play-service-account.json
+
+      - name: Hochstufen
+        run: |
+          cd android
+          gem install fastlane --no-document
+
+          case "${{ inputs.step }}" in
+            beta)       fastlane promote_beta ;;
+            production) fastlane promote_production rollout:"${{ inputs.rollout }}" ;;
+            metadata)   fastlane metadata_only ;;
+          esac
+
+  ios:
+    name: App Store
+    runs-on: macos-latest
+    if: inputs.target == 'ios'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Angaben vollständig?
+        run: |
+          if [ -z "${{ inputs.version }}" ] || [ -z "${{ inputs.build_number }}" ]; then
+            echo "::error::Für iOS werden version und build_number gebraucht."
+            exit 1
+          fi
+          # Ohne diese Secrets kommt der Prüfer nicht in die App, und Apple
+          # lehnt mit Abstand am häufigsten genau deswegen ab.
+          for name in REVIEW_EMAIL REVIEW_DEMO_USER REVIEW_DEMO_PASSWORD; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Secret $name fehlt – ohne Testkonto lehnt Apple ab."
+              exit 1
+            fi
+          done
+        env:
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          REVIEW_DEMO_USER: ${{ secrets.REVIEW_DEMO_USER }}
+          REVIEW_DEMO_PASSWORD: ${{ secrets.REVIEW_DEMO_PASSWORD }}
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - run: flutter pub get
+      - run: bash scripts/ensure_platforms.sh
+      - run: flutter pub get
+
+      - name: Zugriff auf das match-Repository
+        env:
+          MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+        run: |
+          bash scripts/check_apple_secrets.sh
+          bash scripts/check_match_repo.sh
+          echo "GIT_TERMINAL_PROMPT=0" >> "$GITHUB_ENV"
+
+      - name: Bauen und zur Prüfung einreichen
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          REVIEW_FIRST_NAME: ${{ secrets.REVIEW_FIRST_NAME }}
+          REVIEW_LAST_NAME: ${{ secrets.REVIEW_LAST_NAME }}
+          REVIEW_PHONE: ${{ secrets.REVIEW_PHONE }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          REVIEW_DEMO_USER: ${{ secrets.REVIEW_DEMO_USER }}
+          REVIEW_DEMO_PASSWORD: ${{ secrets.REVIEW_DEMO_PASSWORD }}
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
+        run: |
+          gem install fastlane --no-document
+          bash scripts/run_fastlane.sh release_store \
+            version:"${{ inputs.version }}" \
+            build_number:"${{ inputs.build_number }}"

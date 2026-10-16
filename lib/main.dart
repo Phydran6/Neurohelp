@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -5,15 +7,21 @@ import 'app/app.dart';
 import 'core/account/data/supabase_account_repository.dart';
 import 'core/account/data/unconfigured_account_repository.dart';
 import 'core/ai/ai_client.dart';
+import 'core/ai/custom/custom_endpoint_account.dart';
+import 'core/ai/custom/custom_endpoint_store.dart';
+import 'core/ai/data/custom_endpoint_ai_client.dart';
 import 'core/ai/data/layered_ai_client.dart';
 import 'core/ai/data/openrouter_ai_client.dart';
 import 'core/ai/data/supabase_ai_client.dart';
 import 'core/ai/openrouter/openrouter_account.dart';
 import 'core/ai/openrouter/openrouter_api.dart';
+import 'core/ai/openrouter/openrouter_key.dart';
 import 'core/ai/openrouter/openrouter_key_store.dart';
+import 'core/backup/backup_vault.dart';
 import 'core/config/app_config.dart';
 import 'core/db/app_database.dart';
 import 'core/di/app_services.dart';
+import 'core/files/file_opener.dart';
 import 'core/files/file_saver.dart';
 import 'core/logging/app_logger.dart';
 import 'core/security/data/device_app_lock.dart';
@@ -39,21 +47,32 @@ Future<void> main() async {
   );
   await openRouter.load();
 
+  // Der selbst eingetragene Zugang – OpenWebUI im Heimnetz, ein Konto bei
+  // OpenAI oder Anthropic. Auch der wird vor dem ersten Bild gelesen.
+  final customAi = CustomEndpointAccount(
+    store: const SecureCustomEndpointStore(),
+  );
+  await customAi.load();
+
   final services = AppServices.from(
     database,
     sender: const UrlLauncherMessageSender(),
     dialer: const UrlLauncherCallLauncher(),
     lock: const DeviceAppLock(),
     files: const ShareFileSaver(),
+    fileOpener: const SystemFileOpener(),
+    vault: const DeviceBackupVault(),
     account: client == null
         ? const UnconfiguredAccountRepository()
         : SupabaseAccountRepository(client),
     openRouter: openRouter,
+    customAi: customAi,
     // Der Schalter kommt gleich aus den Einstellungen. Bis dahin gilt: aus.
     ai: _buildAi(
       backend: client,
       openRouter: openRouter,
       openRouterApi: openRouterApi,
+      customAi: customAi,
     ),
   );
 
@@ -66,9 +85,18 @@ Future<void> main() async {
 
 /// Stellt die KI-Schicht mit ihren Stufen zusammen (Konzept, Abschnitt 17a).
 ///
-/// Reihenfolge: erst der eigene Zugang des Users, dann die eigene gehostete
-/// KI. Fällt oben etwas aus, geht es stillschweigend eine Stufe tiefer.
-/// Bleibt nichts übrig, geht jeder Ablauf seinen lokalen Weg.
+/// Vier Wege zur KI, in dieser Reihenfolge:
+///
+///  1. Der **selbst eingetragene** Server – OpenWebUI, Ollama, OpenAI,
+///     Anthropic. Wer sich die Mühe gemacht hat, will ihn auch benutzen.
+///  2. Der **eigene OpenRouter-Zugang**, per Login verbunden.
+///  3. Der **fertige Zugang**, den wir bezahlen – für alle, die weder zahlen
+///     noch etwas einrichten wollen. Fehlt, wenn kein Schlüssel im Build
+///     steckt.
+///  4. Die **eigene gehostete KI** über Supabase.
+///
+/// Fällt oben etwas aus, geht es stillschweigend eine Stufe tiefer. Bleibt
+/// nichts übrig, geht jeder Ablauf seinen lokalen Weg.
 ///
 /// Der Schalter steht überall zunächst auf „aus" – er kommt gleich aus den
 /// Einstellungen.
@@ -76,13 +104,46 @@ AiClient _buildAi({
   required SupabaseClient? backend,
   required OpenRouterAccount openRouter,
   required OpenRouterApi openRouterApi,
+  required CustomEndpointAccount customAi,
 }) {
   final stages = <AiClient>[
+    CustomEndpointAiClient(account: customAi, enabled: false),
     OpenRouterAiClient(account: openRouter, api: openRouterApi, enabled: false),
+    if (AppConfig.instance.hasSharedAiKey)
+      OpenRouterAiClient(
+        account: _sharedAccount(openRouterApi),
+        api: openRouterApi,
+        enabled: false,
+      ),
     if (backend != null) SupabaseAiClient(backend, enabled: false),
   ];
 
   return LayeredAiClient(stages);
+}
+
+/// Der gemeinsame Zugang als ganz normales Konto.
+///
+/// Umweg über [OpenRouterAccount], statt einen zweiten Client zu schreiben:
+/// Damit gelten für den fertigen Zugang dieselbe Modellauswahl und dieselbe
+/// Ausweichlogik wie für einen eigenen. Der Unterschied ist allein, wer
+/// bezahlt.
+///
+/// Dieses Konto taucht in den Einstellungen bewusst **nicht** auf – es ist
+/// nichts, was der User verbinden oder trennen könnte.
+OpenRouterAccount _sharedAccount(OpenRouterApi api) {
+  final key = OpenRouterKey(
+    value: AppConfig.instance.openRouterSharedKey,
+    origin: OpenRouterKeyOrigin.manual,
+  );
+
+  final account = OpenRouterAccount(
+    store: InMemoryOpenRouterKeyStore(key),
+    api: api,
+  );
+  // Nicht abwarten: Die Stufe ist erst nutzbar, wenn der Schalter an ist, und
+  // bis dahin ist der Schlüssel längst gelesen.
+  unawaited(account.load());
+  return account;
 }
 
 /// Baut die Verbindung zum Backend auf, oder liefert `null`.

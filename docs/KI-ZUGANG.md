@@ -197,3 +197,76 @@ Will ein User mehr Qualität, lädt er bei OpenRouter selbst auf – komplett am
 - [ ] Prüfen, welche der kostenlosen Modelle für die einzelnen Aufgaben wirklich taugen.
       Kleine Modelle reichen für Formulierungen, fürs Ableiten von Ziel und Ansprechpartner
       eher nicht. Bisher entscheidet nur die grobe Rangfolge oben
+
+---
+
+## Nachtrag: zwei weitere Stufen
+
+Das ursprüngliche Drei-Stufen-Modell ist gewachsen. Die Reihenfolge, in der
+[LayeredAiClient](../lib/core/ai/data/layered_ai_client.dart) die Stufen
+durchgeht, steht in [main.dart](../lib/main.dart):
+
+```
+1. Eigener Server        CustomEndpointAiClient   [wenn eingetragen]
+2. Eigener OpenRouter    OpenRouterAiClient       [wenn verbunden]
+3. Fertiger Zugang       OpenRouterAiClient       [wenn Schlüssel im Build]
+4. Eigene gehostete KI   SupabaseAiClient         [Standard]
+5. nichts                → der lokale Weg des Ablaufs
+```
+
+Je weiter oben, desto mehr hat der User selbst eingerichtet – und desto eher
+soll genau das benutzt werden. Fällt eine Stufe aus, geht es still eine tiefer.
+
+### Stufe 1: eigener Server
+
+`--dart-define` gibt es dafür nicht; der User trägt alles selbst ein, unter
+**Einstellungen → Ich weiß, was ich tue → Eigenen KI-Server eintragen**.
+
+| | |
+|:--|:--|
+| Schnittstellen | OpenAI-kompatibel (OpenWebUI, Ollama, LM Studio, vLLM, OpenAI) und Anthropic |
+| Angaben | Adresse, Modellname, Schlüssel (optional) |
+| Prüfung | vor dem Speichern eine echte Anfrage. Ein Zugang, der erst mitten in einem Ablauf auffällt, ist schlimmer als gar keiner |
+| Ablage | Schlüsselbund des Geräts, nie das Backend |
+| Weg der Anfrage | direkt vom Gerät zum eingetragenen Server |
+
+Die Fehlermeldungen unterscheiden **wohin der User schauen muss**:
+nicht erreichbar → Netzwerk, abgelehnt → Anbieter, 404 → Adresse,
+unbekanntes Modell → Modellliste. „Geht nicht" schickt niemanden irgendwohin.
+
+**Der Modellname darf hier fest stehen** – anders als bei OpenRouter. Dort
+verbietet das Konzept die feste Verdrahtung, weil die kostenlosen Modelle
+rotieren. Auf einem eigenen Server weiß nur der Betreiber, was installiert
+ist; raten wäre schlechter als fragen.
+
+### Stufe 3: fertiger Zugang
+
+Für alle, die weder zahlen noch etwas einrichten wollen. Technisch ein ganz
+normales [OpenRouterAccount](../lib/core/ai/openrouter/openrouter_account.dart)
+mit einem festen Schlüssel – dadurch gelten dieselbe Modellauswahl und
+dieselbe Ausweichlogik wie für einen eigenen Zugang. Der Unterschied ist
+allein, wer bezahlt.
+
+In den Einstellungen taucht dieses Konto **nicht** auf: Es ist nichts, was der
+User verbinden oder trennen könnte.
+
+```bash
+flutter build appbundle --release \
+  --dart-define=OPENROUTER_SHARED_KEY=sk-or-...
+```
+
+**Der Schlüssel kommt nie ins Repository.** Die CI reicht ihn aus dem
+GitHub-Secret `OPENROUTER_SHARED_KEY` durch; ohne ihn fehlt genau diese Stufe.
+
+Und die ehrliche Einschränkung: Ein ausgelieferter Schlüssel lässt sich aus
+jeder App herausholen. Ein Ausgabenlimit bei OpenRouter ist deshalb keine
+Vorsichtsmaßnahme, sondern Voraussetzung.
+
+### Was es weiterhin nicht gibt
+
+Einen Login mit einem **ChatGPT-Plus- oder Claude-Abo**. Chat-Abos sind
+technisch kein Schnittstellenzugang, und kein Anbieter erlaubt Fremd-Apps,
+auf Rechnung eines Nutzer-Abos zu arbeiten. Wer ein solches Abo hat, braucht
+zusätzlich einen Schlüssel von `platform.openai.com` bzw.
+`console.anthropic.com` – die App sagt das an genau der Stelle, an der man es
+sonst falsch verstehen würde.

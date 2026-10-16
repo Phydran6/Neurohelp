@@ -1,0 +1,7 @@
+Sicherung und Wiederherstellung: Die App sichert von selbst, und nach einer Neuinstallation fragt sie beim ersten Start, ob sie alles zurückholen soll.
+
+Die Einstellungen fragen jetzt zuerst, wie ausführlich sie sein sollen – beide Wege können dasselbe.
+
+Aus der Historie kommst du direkt in den Vorgang zurück, statt nur sein Protokoll zu sehen.
+
+Hell oder dunkel lässt sich fest einstellen, und bei der KI kannst du einen eigenen Server eintragen.

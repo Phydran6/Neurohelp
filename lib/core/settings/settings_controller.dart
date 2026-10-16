@@ -56,6 +56,26 @@ class SettingsController extends ChangeNotifier implements SettingsRepository {
   Future<AppSettings> setMfaHintShown({required bool shown}) =>
       _apply(_inner.setMfaHintShown(shown: shown));
 
+  @override
+  Future<AppSettings> setThemeChoice(AppThemeChoice choice) =>
+      _apply(_inner.setThemeChoice(choice));
+
+  @override
+  Future<AppSettings> setSettingsMode(SettingsMode mode) =>
+      _apply(_inner.setSettingsMode(mode));
+
+  @override
+  Future<AppSettings> setAutoBackup({required bool enabled}) =>
+      _apply(_inner.setAutoBackup(enabled: enabled));
+
+  @override
+  Future<AppSettings> setLastBackupAt(DateTime moment) =>
+      _apply(_inner.setLastBackupAt(moment));
+
+  @override
+  Future<AppSettings> setRestoreOffered({required bool offered}) =>
+      _apply(_inner.setRestoreOffered(offered: offered));
+
   Future<AppSettings> _apply(Future<AppSettings> action) async {
     final settings = await action;
     _loaded = true;

@@ -106,21 +106,30 @@ jobs:
 
       - run: flutter pub get
 
+      # Der gemeinsame KI-Schlüssel kommt aus einem Secret und steht nirgends
+      # im Repository. Fehlt er, fällt in der App genau eine KI-Stufe weg –
+      # die anderen laufen weiter (siehe docs/KI-ZUGANG.md).
       - name: AAB bauen
+        env:
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           flutter build appbundle --release \
             --build-name="${{ needs.prepare.outputs.version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
             --dart-define=FLAVOR=prod \
+            --dart-define=OPENROUTER_SHARED_KEY="$OPENROUTER_SHARED_KEY" \
             --dart-define=APP_VERSION="${{ needs.prepare.outputs.version }}" \
             --dart-define=APP_BUILD_NUMBER="${{ needs.prepare.outputs.build_number }}"
 
       - name: APK bauen
+        env:
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           flutter build apk --release \
             --build-name="${{ needs.prepare.outputs.version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
             --dart-define=FLAVOR=prod \
+            --dart-define=OPENROUTER_SHARED_KEY="$OPENROUTER_SHARED_KEY" \
             --dart-define=APP_VERSION="${{ needs.prepare.outputs.version }}" \
             --dart-define=APP_BUILD_NUMBER="${{ needs.prepare.outputs.build_number }}"
 
@@ -180,12 +189,15 @@ jobs:
 
       - name: Unsigniert bauen
         if: steps.signing.outputs.available == 'false'
+        env:
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           # ios_version, nicht version: Apple nimmt kein `-alpha.N`.
           flutter build ios --release --no-codesign \
             --build-name="${{ needs.prepare.outputs.ios_version }}" \
             --build-number="${{ needs.prepare.outputs.build_number }}" \
             --dart-define=FLAVOR=prod \
+            --dart-define=OPENROUTER_SHARED_KEY="$OPENROUTER_SHARED_KEY" \
             --dart-define=APP_VERSION="${{ needs.prepare.outputs.ios_version }}" \
             --dart-define=APP_BUILD_NUMBER="${{ needs.prepare.outputs.build_number }}"
 

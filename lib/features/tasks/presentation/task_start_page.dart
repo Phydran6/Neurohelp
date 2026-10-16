@@ -6,7 +6,7 @@ import '../../../core/di/app_services.dart';
 import '../../../core/history/domain/history_entry.dart';
 import '../../../shared/widgets/big_action_button.dart';
 import '../../../shared/widgets/history_check.dart';
-import 'task_focus_page.dart';
+import '../../history/presentation/resume_entry.dart';
 import 'task_steps_page.dart';
 
 /// Der Einstieg in „Aufgabe sortieren" (Konzept, Abschnitt 11, Schritt 1).
@@ -44,13 +44,26 @@ class _TaskStartPageState extends State<TaskStartPage> {
     });
   }
 
+  /// Zurück in eine liegengebliebene Aufgabe.
+  ///
+  /// Über [ResumeEntry] statt direkt in den Fokus-Modus: Eine Aufgabe, die
+  /// beim Anlegen abgebrochen wurde, hat keine Schritte. Der Fokus-Modus
+  /// hätte dann nichts zu zeigen und meldete „alles erledigt" – für eine
+  /// Aufgabe, an der nie jemand etwas getan hat. Sie gehört ans Zerlegen.
   Future<void> _openExisting(HistoryEntry entry) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => TaskFocusPage(entryId: entry.id, title: entry.title),
-      ),
-    );
-    if (mounted) unawaited(_load());
+    final blocked = await ResumeEntry.open(context, entry);
+    if (!mounted) return;
+
+    if (blocked != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(ResumeEntry.describe(blocked)),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    unawaited(_load());
   }
 
   Future<void> _startNew() async {

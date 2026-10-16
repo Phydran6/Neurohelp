@@ -199,6 +199,41 @@ class SupabaseAccountRepository implements AccountRepository {
   }
 
   @override
+  Future<Account> changePassword(String newPassword) async {
+    if (newPassword.length < 8) {
+      throw const AccountException(
+        AccountFailure.invalidInput,
+        'Das Passwort braucht mindestens 8 Zeichen.',
+      );
+    }
+
+    if (_client.auth.currentUser == null) {
+      throw const AccountException(
+        AccountFailure.invalidCredentials,
+        'Dafür musst du angemeldet sein.',
+      );
+    }
+
+    try {
+      final updated = await _client.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      final user = updated.user;
+      if (user == null) {
+        throw const AccountException(
+          AccountFailure.unknown,
+          'Das Passwort wurde nicht geändert.',
+        );
+      }
+      return _toAccount(user);
+    } on AuthException catch (error) {
+      throw _translate(error, 'auth.updateUser(password)');
+    } on Exception catch (error, stackTrace) {
+      throw _wrap(error, stackTrace, 'auth.updateUser(password)');
+    }
+  }
+
+  @override
   Future<MfaEnrollment> startMfaEnrollment() async {
     try {
       final response = await _client.auth.mfa.enroll(

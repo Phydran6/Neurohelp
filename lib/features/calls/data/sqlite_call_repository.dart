@@ -41,6 +41,20 @@ class SqliteCallRepository {
     return plan;
   }
 
+  /// Der Anruf zu einem Historien-Vorgang.
+  ///
+  /// Der Weg zurück in einen Ablauf, den man in der Historie wiedergefunden
+  /// hat: Dort ist nur der Vorgang bekannt, nicht der Anruf daran.
+  Future<CallPlan?> byEntryId(String entryId) async {
+    final rows = await _db.query(
+      DbSchema.tableCalls,
+      where: 'entry_id = ?',
+      whereArgs: [entryId],
+      limit: 1,
+    );
+    return rows.isEmpty ? null : CallPlan.fromRow(rows.first);
+  }
+
   Future<CallPlan?> byId(String id) async {
     final rows = await _db.query(
       DbSchema.tableCalls,

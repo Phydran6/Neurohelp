@@ -12,6 +12,7 @@ import 'package:neurohelp/core/ai/openrouter/openrouter_key_store.dart';
 import 'package:neurohelp/core/ai/openrouter/openrouter_login.dart';
 import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/di/app_services.dart';
+import 'package:neurohelp/core/settings/app_settings.dart';
 import 'package:neurohelp/features/settings/presentation/settings_page.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -93,6 +94,10 @@ void main() {
     );
     // Das Angebot erscheint nur, wenn KI überhaupt an ist.
     await services.settings.setAiEnabled(enabled: true);
+
+    // Die Einstellungen fragen beim Oeffnen erst, wie ausfuehrlich sie sein
+    // sollen. Der eigene Schluessel liegt im Expertenweg.
+    await services.settings.setSettingsMode(SettingsMode.expert);
   }
 
   tearDown(() => database.close());

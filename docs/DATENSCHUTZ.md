@@ -15,6 +15,11 @@ KI eingeschaltet hast** – der Text, den die KI formulieren soll. Hast du ein
 eigenes KI-Konto verbunden, geht dieser Text stattdessen direkt von deinem Gerät
 zum Anbieter, an unserem Server vorbei.
 
+Damit beim Neuinstallieren nichts verloren geht, legt die App eine
+Sicherungsdatei auf deinem Gerät ab. Sie geht **nicht an uns** – sondern dorthin,
+wo dein Telefon ohnehin sichert (Google bzw. iCloud), oder dorthin, wo du sie
+selbst hinlegst. Abschaltbar in den Einstellungen.
+
 Es gibt keine Werbung, kein Tracking, keine Analyse-Werkzeuge und keine
 Weitergabe an Dritte zu Werbezwecken.
 
@@ -41,8 +46,43 @@ privaten Speicherbereich der App:
 - deine Einstellungen, einschließlich der KI-Entscheidung
 - die PIN der App-Sperre, als Hashwert – nicht im Klartext
 
-**Deinstallieren löscht diese Daten.** Es gibt keine Sicherung in der Cloud.
-Das ist eine bewusste Entscheidung, kein fehlendes Feature.
+**Deinstallieren löscht diese Daten.** Auf unseren Servern liegt davon nichts –
+auch keine Kopie „für den Fall der Fälle".
+
+---
+
+## Die Sicherung
+
+Damit beim Neuinstallieren oder beim Gerätewechsel nicht alles verloren ist,
+legt die App eine Sicherungsdatei an. Sie enthält dieselben Daten wie oben,
+also deine Vorgänge, deine Historie und deine Einstellungen.
+
+**Nicht enthalten sind:** deine PIN, deine Wiederherstellungs-Codes und deine
+KI-Zugänge. Die liegen im Schlüsselbund des Geräts und kommen bewusst nicht
+mit – eine Datei, die den Zugang zum Gerät gleich mitliefert, wäre das
+Gegenteil von Sicherheit.
+
+Die Datei geht **nicht an uns.** Wohin sie geht, hängt davon ab, welchen Weg du
+wählst:
+
+| Weg | Wo die Datei landet |
+|:--|:--|
+| Automatisch (Voreinstellung) | in den Dokumentenordner der App auf deinem Gerät. Von dort nimmt dein Telefon sie in **seine eigene** Sicherung mit – bei Android nach Google Drive, bei iPhone nach iCloud. Das ist deine Sicherung bei deinem Anbieter, nicht unsere |
+| „Datei erzeugen" | dorthin, wo du sie im Teilen-Menü hinlegst: Dateien-App, deine Cloud, eine Mail an dich selbst, ein Stick |
+
+Die App kennt **keinen einzigen Cloud-Dienst** und lädt von sich aus nichts
+irgendwohin hoch. Im zweiten Fall übergibt sie die Datei nur an das Programm,
+das du auswählst.
+
+**Abschaltbar:** In den Einstellungen unter „Sicherung" lässt sich das
+automatische Sichern ausschalten. Dann entsteht keine Datei, und es wird auch
+nichts in die Gerätesicherung übernommen.
+
+Die Datei ist gepackt, aber **nicht verschlüsselt**. Sie enthält deine
+Historie im Klartext. Leg sie dorthin, wo du auch Kontoauszüge hinlegen
+würdest.
+
+Einzelheiten: [BACKUP.md](BACKUP.md).
 
 ---
 
@@ -149,10 +189,14 @@ Du hast Anspruch auf Auskunft, Berichtigung, Löschung, Einschränkung der
 Verarbeitung, Datenübertragbarkeit und Widerspruch (Art. 15–21 DSGVO). Eine
 Einwilligung – etwa in die KI-Nutzung – kannst du jederzeit widerrufen.
 
-**Konto löschen:** Schreib uns über die oben genannten Wege. Das Konto und die
-dazugehörige E-Mail-Adresse werden dann entfernt. Deine Inhalte müssen wir dafür
-nicht anfassen, weil wir sie nie hatten – die löschst du selbst, indem du die App
-deinstallierst.
+**Konto löschen:** In der App unter Einstellungen → Konto löschen. Das Konto
+und die dazugehörige E-Mail-Adresse werden entfernt, und direkt danach räumt
+die App dieses Gerät leer – Vorgänge, Historie, Einstellungen, PIN und die
+Sicherungsdatei auf dem Gerät.
+
+Hast du die App nicht mehr installiert, schreib uns über die oben genannten
+Wege. Der vollständige Ablauf steht in
+[KONTO-LOESCHEN.md](KONTO-LOESCHEN.md).
 
 Du kannst dich außerdem bei einer Datenschutz-Aufsichtsbehörde beschweren.
 

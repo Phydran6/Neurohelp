@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../core/history/domain/history_entry.dart';
@@ -104,13 +106,26 @@ class RecallPanel extends StatelessWidget {
     required this.onPick,
     required this.nudges,
     this.subtitleOf,
+    this.onResume,
+    this.resumeLabel = 'Daran weitermachen',
     super.key,
   });
 
   final String prefix;
   final HistoryCheckState state;
   final List<HistoryEntry> hits;
+
+  /// Den Fund als **Vorlage** nehmen: Der Titel wandert ins Feld, angelegt
+  /// wird etwas Neues.
   final void Function(HistoryEntry entry) onPick;
+
+  /// Am Fund **weiterarbeiten**: zurück in den alten Vorgang.
+  ///
+  /// Nur für offene Vorgänge angeboten – bei erledigten gibt es nichts
+  /// fortzusetzen, da bleibt die Vorlage der richtige Weg.
+  final Future<void> Function(HistoryEntry entry)? onResume;
+
+  final String resumeLabel;
 
   /// Die Rückfragen für dieses Feature. Bewusst ohne KI: Der Weg muss auch
   /// mit abgeschaltetem Schalter tragen.
@@ -129,6 +144,12 @@ class RecallPanel extends StatelessWidget {
             entry: entry,
             subtitle: subtitleOf?.call(entry) ?? entry.contact,
             onTap: () => onPick(entry),
+            // Nur bei offenen Vorgängen. Einen erledigten „fortzusetzen"
+            // gibt es nicht – der taugt höchstens als Vorlage.
+            onResume: onResume == null || !entry.isOpen
+                ? null
+                : () => unawaited(onResume!(entry)),
+            resumeLabel: resumeLabel,
           ),
           const SizedBox(height: 10),
         ],

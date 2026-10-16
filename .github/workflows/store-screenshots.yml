@@ -15,7 +15,7 @@ on:
       device:
         description: "Simulator. Muss 1320x2868 liefern (App-Store-Groesse 6,9 Zoll)."
         required: true
-        default: "iPhone 16 Pro Max"
+        default: "iPhone 17 Pro Max"
 
 jobs:
   screenshots:

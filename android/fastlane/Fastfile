@@ -2,24 +2,45 @@ default_platform(:android)
 
 AAB_PATH = "../build/app/outputs/bundle/release/app-release.aab"
 
+# Track-Namen der Play Developer API – nicht die Namen aus der Console:
+#   internal   = Interner Test
+#   alpha      = Geschlossener Test (Standard-Track der Console)
+#   beta       = OFFENER Test – fuer neue private Konten erst nach
+#                Produktionszugriff verfuegbar
+#   production = Produktion
+#
+# Ziel-Track und Status kommen aus der CI (Repository-Variablen
+# PLAY_TRACK / PLAY_RELEASE_STATUS, siehe deploy.yml).
+#
+# Status "completed" = sofort an die Tester ausgerollt.
+# Status "draft"     = liegt nur als Entwurf in der Console. Pflicht, solange
+#                      die App noch "Entwurf" ist (vor dem allerersten
+#                      Rollout) – sonst lehnt die API mit "Only releases with
+#                      status draft may be created on draft app" ab.
+
 platform :android do
-  desc "AAB in den Play-Track 'internal' hochladen"
-  lane :internal do
+  desc "AAB in den Play-Track hochladen (Standard: internal, completed)"
+  lane :upload do
     upload_to_play_store(
-      track: "internal",
+      track: ENV.fetch("PLAY_TRACK", "internal"),
       aab: AAB_PATH,
-      release_status: "draft",
+      release_status: ENV.fetch("PLAY_RELEASE_STATUS", "completed"),
       skip_upload_metadata: true,
       skip_upload_images: true,
       skip_upload_screenshots: true,
     )
   end
 
-  desc "Von 'internal' nach 'beta' (closed testing) hochstufen"
-  lane :promote_beta do
+  # Alter Name, damit bestehende Aufrufe weiter funktionieren.
+  lane :internal do
+    upload
+  end
+
+  desc "Von 'internal' in den geschlossenen Test (alpha) hochstufen"
+  lane :promote_closed do
     upload_to_play_store(
       track: "internal",
-      track_promote_to: "beta",
+      track_promote_to: "alpha",
       skip_upload_aab: true,
       skip_upload_metadata: true,
       skip_upload_images: true,
@@ -27,10 +48,10 @@ platform :android do
     )
   end
 
-  desc "Von 'beta' in die Produktion hochstufen"
+  desc "Vom geschlossenen Test (alpha) in die Produktion hochstufen"
   lane :promote_production do
     upload_to_play_store(
-      track: "beta",
+      track: "alpha",
       track_promote_to: "production",
       skip_upload_aab: true,
       skip_upload_metadata: true,

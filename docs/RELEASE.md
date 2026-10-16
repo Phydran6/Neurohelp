@@ -198,11 +198,17 @@ Prerelease.
 
 ## Store-Promotion
 
-Von `internal` weiter in die geschlossene Beta bzw. Produktion:
+Von `internal` weiter in den geschlossenen Test bzw. Produktion:
 
 ```bash
-cd android && fastlane promote_beta
+cd android && fastlane promote_closed
 ```
+
+Achtung API-Namen: `alpha` = geschlossener Test, `beta` = **offener** Test.
+Den offenen Test gibt es für neue private Konten erst nach dem Produktionszugriff.
+
+Soll jedes Release direkt im geschlossenen Test landen, die Repository-Variable
+`PLAY_TRACK=alpha` setzen (Standard: `internal`).
 
 ```bash
 cd android && fastlane promote_production

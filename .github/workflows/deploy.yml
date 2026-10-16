@@ -104,7 +104,10 @@ jobs:
             --dart-define=APP_VERSION="$version" \
             --dart-define=APP_BUILD_NUMBER="${{ github.run_number }}"
           cd android
-          gem install fastlane --no-document
+          # Auf dem Ubuntu-Runner gehoert das Gem-Verzeichnis root – ohne sudo
+          # bricht die Installation mit Gem::FilePermissionError ab. (Der
+          # macOS-Runner fuer TestFlight braucht das nicht.)
+          sudo gem install fastlane --no-document
           fastlane upload
         env:
           # Repository-Variablen (Settings → Secrets and variables → Actions

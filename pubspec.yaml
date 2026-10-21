@@ -42,7 +42,7 @@ dependencies:
   # entscheiden, wohin – Dateien, Passwort-Manager, Cloud. Ein eigener
   # Speicherort wäre auf Android app-privat und damit unauffindbar.
   share_plus: ^12.0.2
-  sqflite: ^2.3.0
+  sqflite: ^2.4.4
   supabase_flutter: ^2.17.2
   url_launcher: ^6.3.0
   uuid: ^4.0.0

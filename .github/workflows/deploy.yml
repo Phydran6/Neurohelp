@@ -97,6 +97,12 @@ jobs:
         if: steps.gate.outputs.ok == 'true'
         env:
           OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
+          # Repository-Variablen (Settings → Secrets and variables → Actions
+          # → Variables). Ohne Angabe: internal + completed.
+          #   PLAY_TRACK: internal | alpha (geschlossener Test)
+          #   PLAY_RELEASE_STATUS: completed | draft
+          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'internal' }}
+          PLAY_RELEASE_STATUS: ${{ vars.PLAY_RELEASE_STATUS || 'completed' }}
         run: |
           flutter pub get
           version=$(grep -m1 '^version:' pubspec.yaml | sed 's/^version: *//' | cut -d'+' -f1)
@@ -112,13 +118,6 @@ jobs:
           # macOS-Runner fuer TestFlight braucht das nicht.)
           sudo gem install fastlane --no-document
           fastlane upload
-        env:
-          # Repository-Variablen (Settings → Secrets and variables → Actions
-          # → Variables). Ohne Angabe: internal + completed.
-          #   PLAY_TRACK: internal | alpha (geschlossener Test)
-          #   PLAY_RELEASE_STATUS: completed | draft
-          PLAY_TRACK: ${{ vars.PLAY_TRACK || 'internal' }}
-          PLAY_RELEASE_STATUS: ${{ vars.PLAY_RELEASE_STATUS || 'completed' }}
 
   ios:
     name: TestFlight

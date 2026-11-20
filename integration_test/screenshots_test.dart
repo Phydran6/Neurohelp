@@ -23,6 +23,7 @@ import 'package:neurohelp/app/app.dart';
 import 'package:neurohelp/core/config/app_config.dart';
 import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/di/app_services.dart';
+import 'package:neurohelp/core/settings/app_settings.dart';
 import 'package:sqflite/sqflite.dart';
 
 void main() {
@@ -182,6 +183,9 @@ void main() {
   });
 
   testWidgets('6 – Einstellungen: KI ist freiwillig', (tester) async {
+    // Ohne gespeicherte Wahl fragen die Einstellungen erst, wie ausführlich
+    // sie sein sollen – der KI-Schalter käme dann nie in den Blick.
+    await services.settings.setSettingsMode(SettingsMode.expert);
     await startApp(tester);
 
     await tester.tap(find.byKey(const Key('start_settings')));

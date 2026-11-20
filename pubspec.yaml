@@ -62,7 +62,7 @@ dev_dependencies:
   image: ^4.10.1
   integration_test:
     sdk: flutter
-  sqflite_common_ffi: ^2.4.3
+  sqflite_common_ffi: ^2.4.7
 
 flutter:
   uses-material-design: true

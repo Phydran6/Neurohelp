@@ -8,6 +8,12 @@ updates:
     open-pull-requests-limit: 5
     commit-message:
       prefix: "chore(deps)"
+    ignore:
+      # Ab 10 ein reines Swift Package - bricht den CocoaPods-Build von iOS.
+      # Erst anheben, wenn das iOS-Projekt auf Swift Package Manager umgestellt
+      # ist (mit einem Mac zum Nachpruefen).
+      - dependency-name: flutter_secure_storage
+        versions: [">=10.0.0"]
 
   - package-ecosystem: github-actions
     directory: "/"

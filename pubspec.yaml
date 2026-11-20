@@ -21,7 +21,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   # Nur fuer "Sicherung einspielen": Der User waehlt seine Datei selbst aus.
   # Ohne das koennte die App eine Sicherung schreiben, aber nie wieder lesen.
-  file_picker: ^10.3.10
+  file_picker: ^11.0.3
   flutter:
     sdk: flutter
   # Die Texte, die Flutter selbst mitbringt – Datums- und Zeitwähler,

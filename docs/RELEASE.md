@@ -44,7 +44,7 @@ tatsächlich passiert.
 Format `<major>.<minor>.<patch>`, die Build-Nummer hängt die CI an. Regeln
 siehe [Versionierung](#versionierung).
 
-**Ab 0.2.0 ohne `-alpha.N`.** Bis 0.1.0-alpha.14 trug jede Version diesen
+**Ab 0.2.0 ohne `-alpha.N`.** Bis 0.1.0-alpha.13 trug jede Version diesen
 Zusatz. Apple nimmt ihn nicht an, deshalb hieß auf TestFlight jede Alpha nur
 „0.1.0“, unterscheidbar nur an der Build-Nummer. Ohne Zusatz steht auf iOS und
 Android dieselbe Version.

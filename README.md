@@ -17,7 +17,7 @@ die für andere selbstverständlich sind.
      Checkliste dazu: docs/STORE.md -->
 
 [![Download](https://img.shields.io/badge/Android-APK_herunterladen-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://github.com/Phydran6/Neurohelp/releases/download/v0.2.0/Neurohelp-0.2.0-android.apk)
-[![Version](https://img.shields.io/badge/Version-0.2.0-FF9800?style=for-the-badge)](https://github.com/Phydran6/Neurohelp/releases)
+[![Version](https://img.shields.io/badge/Alpha-0.1.0-FF9800?style=for-the-badge)](https://github.com/Phydran6/Neurohelp/releases)
 
 <!--
 [![Play Store](https://img.shields.io/badge/Google_Play-Neurohelp_laden-3DDC84?style=for-the-badge&logo=googleplay&logoColor=white)](https://play.google.com/store/apps/details?id=will.neurohelp.help)

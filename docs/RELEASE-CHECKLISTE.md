@@ -218,11 +218,17 @@ Eine Größe genügt (1320 × 2868), Apple rechnet herunter.
 ```
 Actions → In den Store hochstufen
   target: ios
-  version: 0.1.0
-  build_number: <Lauf-Nummer des Builds, der in TestFlight liegt>
+  version:      leer lassen (kommt aus der pubspec.yaml, ohne -alpha.N)
+  build_number: leer lassen (Apple wird nach der nächsten freien gefragt)
 ```
 
-Der Lauf baut, lädt hoch und reicht zur Prüfung ein. Veröffentlicht wird
+Ein TestFlight-Build ist dafür **nicht** nötig. Der Lauf baut selbst, lädt
+hoch und reicht zur Prüfung ein. Der Build erscheint in App Store Connect
+trotzdem unter „TestFlight" – dort listet Apple jeden Upload, verteilt wird er
+aber an niemanden.
+
+Eine Build-Nummer von Hand nur, wenn sie sicher frei und höher als alle
+bisherigen ist; sonst lehnt Apple den Upload ab. Veröffentlicht wird
 **nicht** automatisch (`automatic_release false` im Deliverfile) – der letzte
 Knopf bleibt bei einem Menschen.
 

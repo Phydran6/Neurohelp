@@ -62,6 +62,57 @@ def use_manual_signing
   )
 end
 
+# Signatur holen und das IPA bauen. Gemeinsam fuer alle Lanes, damit ein
+# Build fuer TestFlight und einer fuer den Store garantiert gleich entstehen.
+#
+# Der gemeinsame KI-Schluessel steht bewusst als `$OPENROUTER_SHARED_KEY` im
+# Befehl, nicht als Ruby-Wert: fastlane schreibt jeden `sh`-Befehl ins
+# Protokoll, und so steht dort nur der Variablenname - die Shell setzt den
+# Wert ein. Fehlt das Secret, ist er leer, und in der App faellt genau eine
+# KI-Stufe weg (siehe docs/KI-ZUGANG.md).
+def build_signed_ipa(version:, build_number:, api_key:)
+  match(
+    type: "appstore",
+    readonly: true,
+    api_key: api_key,
+    git_url: ENV["MATCH_GIT_URL"],
+  )
+
+  use_manual_signing
+
+  # Die Version muss hier stehen. Ohne sie nimmt der Build den Wert aus der
+  # pubspec.yaml, und `0.1.0-alpha.4` ist fuer Apple ungueltig (ITMS-90060).
+  sh(
+    "cd .. && cd .. && flutter build ipa --release " \
+    "--build-name=#{version} " \
+    "--build-number=#{build_number} " \
+    "--dart-define=FLAVOR=prod " \
+    "--dart-define=OPENROUTER_SHARED_KEY=\"$OPENROUTER_SHARED_KEY\" " \
+    "--dart-define=APP_VERSION=#{version} " \
+    "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
+    "--export-options-plist=ios/ExportOptions.plist",
+  )
+end
+
+# Naechste freie Build-Nummer bei Apple.
+#
+# Fuer den Store-Weg passt kein CI-Zaehler: "In den Store hochstufen" zaehlt
+# fuer sich, und seine Nummer liegt meist unter denen, die Deploy schon an
+# Apple geschickt hat. Weil alle Alphas fuer iOS dieselbe Version 0.1.0
+# tragen, waere sie doppelt oder zu niedrig - Apple lehnt beides ab. Also
+# fragen wir Apple nach der hoechsten vergebenen Nummer.
+#
+# Ohne `version:`, also ueber alle Versionen hinweg: So ist die Nummer in
+# jedem Fall hoeher als alles, was schon dort liegt.
+def next_build_number(api_key)
+  latest = latest_testflight_build_number(
+    api_key: api_key,
+    app_identifier: APP_IDENTIFIER,
+    initial_build_number: 0,
+  )
+  latest.to_i + 1
+end
+
 platform :ios do
   before_all do
     # Pflicht auf einem CI-Rechner. `match` legt das Zertifikat in einen
@@ -93,55 +144,20 @@ platform :ios do
 
   desc "Signiertes Release-IPA bauen"
   lane :build_release do |options|
-    version = checked_version(options)
-    build_number = checked_build_number(options)
-    api_key = app_store_api_key
-
-    match(
-      type: "appstore",
-      readonly: true,
-      api_key: api_key,
-      git_url: ENV["MATCH_GIT_URL"],
-    )
-
-    use_manual_signing
-
-    sh(
-      "cd .. && cd .. && flutter build ipa --release " \
-      "--build-name=#{version} " \
-      "--build-number=#{build_number} " \
-      "--dart-define=FLAVOR=prod " \
-      "--dart-define=APP_VERSION=#{version} " \
-      "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
-      "--export-options-plist=ios/ExportOptions.plist",
+    build_signed_ipa(
+      version: checked_version(options),
+      build_number: checked_build_number(options),
+      api_key: app_store_api_key,
     )
   end
 
   desc "Build bauen und an TestFlight schicken"
   lane :beta do |options|
-    version = checked_version(options)
-    build_number = checked_build_number(options)
     api_key = app_store_api_key
-
-    match(
-      type: "appstore",
-      readonly: true,
+    build_signed_ipa(
+      version: checked_version(options),
+      build_number: checked_build_number(options),
       api_key: api_key,
-      git_url: ENV["MATCH_GIT_URL"],
-    )
-
-    use_manual_signing
-
-    # Die Version muss hier stehen. Ohne sie nimmt der Build den Wert aus der
-    # pubspec.yaml, und `0.1.0-alpha.4` ist fuer Apple ungueltig (ITMS-90060).
-    sh(
-      "cd .. && cd .. && flutter build ipa --release " \
-      "--build-name=#{version} " \
-      "--build-number=#{build_number} " \
-      "--dart-define=FLAVOR=prod " \
-      "--dart-define=APP_VERSION=#{version} " \
-      "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
-      "--export-options-plist=ios/ExportOptions.plist",
     )
 
     upload_to_testflight(
@@ -162,30 +178,25 @@ platform :ios do
     )
   end
 
+  # Direkt in den Store, ohne Umweg ueber TestFlight. Gebaut wird hier neu.
+  # Der Build taucht in App Store Connect trotzdem unter "TestFlight" auf -
+  # dort listet Apple jeden hochgeladenen Build; verteilt wird er an niemanden.
   desc "Build hochladen und zur Prüfung einreichen"
   lane :release_store do |options|
     version = checked_version(options)
-    build_number = checked_build_number(options)
     api_key = app_store_api_key
 
-    match(
-      type: "appstore",
-      readonly: true,
-      api_key: api_key,
-      git_url: ENV["MATCH_GIT_URL"],
-    )
+    # Leer gelassen ist der Normalfall. Eine Nummer von Hand nur, wenn sicher
+    # ist, dass sie bei Apple noch frei und hoeher als alle bisherigen ist.
+    build_number =
+      if options[:build_number].to_s.empty?
+        next_build_number(api_key)
+      else
+        options[:build_number].to_s
+      end
+    UI.message("iOS #{version} (#{build_number}) geht in den Store.")
 
-    use_manual_signing
-
-    sh(
-      "cd .. && cd .. && flutter build ipa --release " \
-      "--build-name=#{version} " \
-      "--build-number=#{build_number} " \
-      "--dart-define=FLAVOR=prod " \
-      "--dart-define=APP_VERSION=#{version} " \
-      "--dart-define=APP_BUILD_NUMBER=#{build_number} " \
-      "--export-options-plist=ios/ExportOptions.plist",
-    )
+    build_signed_ipa(version: version, build_number: build_number, api_key: api_key)
 
     deliver(
       api_key: api_key,

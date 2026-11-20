@@ -79,6 +79,7 @@ jobs:
             --driver=test_driver/screenshot_driver.dart \
             --target=integration_test/screenshots_test.dart \
             --dart-define=FLAVOR=dev \
+            --dart-define=STORE_SCREENSHOTS=true \
             -d "${{ steps.sim.outputs.udid }}"
 
       - name: Groesse pruefen

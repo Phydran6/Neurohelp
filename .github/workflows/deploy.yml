@@ -84,12 +84,15 @@ jobs:
 
       - name: Bauen & hochladen
         if: steps.gate.outputs.ok == 'true'
+        env:
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           flutter pub get
           version=$(grep -m1 '^version:' pubspec.yaml | sed 's/^version: *//' | cut -d'+' -f1)
           flutter build appbundle --release \
             --build-number="${{ github.run_number }}" \
             --dart-define=FLAVOR=prod \
+            --dart-define=OPENROUTER_SHARED_KEY="$OPENROUTER_SHARED_KEY" \
             --dart-define=APP_VERSION="$version" \
             --dart-define=APP_BUILD_NUMBER="${{ github.run_number }}"
           cd android
@@ -146,6 +149,7 @@ jobs:
           APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           flutter pub get
           bash scripts/ensure_platforms.sh

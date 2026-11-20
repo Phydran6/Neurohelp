@@ -234,6 +234,7 @@ jobs:
           APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
+          OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           gem install fastlane --no-document
           bash scripts/run_fastlane.sh build_release \

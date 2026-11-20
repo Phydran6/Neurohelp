@@ -31,10 +31,10 @@ on:
         required: false
         default: "0.2"
       version:
-        description: "iOS: Version ohne v-Präfix, z.B. 0.1.0"
+        description: "iOS: Version, z.B. 0.1.0. Leer = aus der pubspec.yaml"
         required: false
       build_number:
-        description: "iOS: Build-Nummer des Laufs, der hochgeladen wurde"
+        description: "iOS: Build-Nummer. Leer lassen – Apple wird nach der nächsten freien gefragt"
         required: false
 
 jobs:
@@ -73,12 +73,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Der iOS-Weg geht direkt in den Store, ein TestFlight-Build ist nicht
+      # nötig: Die Lane baut selbst und holt sich die Build-Nummer bei Apple.
       - name: Angaben vollständig?
+        id: v
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
+          REVIEW_DEMO_USER: ${{ secrets.REVIEW_DEMO_USER }}
+          REVIEW_DEMO_PASSWORD: ${{ secrets.REVIEW_DEMO_PASSWORD }}
         run: |
-          if [ -z "${{ inputs.version }}" ] || [ -z "${{ inputs.build_number }}" ]; then
-            echo "::error::Für iOS werden version und build_number gebraucht."
-            exit 1
+          version="$INPUT_VERSION"
+          if [ -z "$version" ]; then
+            version=$(grep -m1 '^version:' pubspec.yaml | sed 's/^version: *//' | cut -d'+' -f1)
+            # Wie in release.yml: Apple nimmt kein `-alpha.N`.
+            version="${version%%-*}"
+            echo "Version aus der pubspec.yaml: $version"
           fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          # Ohne Bilder lässt App Store Connect nicht einreichen. Sie können
+          # aber auch von Hand dort liegen – deshalb nur eine Warnung.
+          if ! ls ios/fastlane/screenshots/de-DE/*.png >/dev/null 2>&1; then
+            echo "::warning::Keine Bildschirmfotos unter ios/fastlane/screenshots/de-DE/. Liegen sie nicht schon in App Store Connect, scheitert das Einreichen."
+          fi
+
           # Ohne diese Secrets kommt der Prüfer nicht in die App, und Apple
           # lehnt mit Abstand am häufigsten genau deswegen ab.
           for name in REVIEW_EMAIL REVIEW_DEMO_USER REVIEW_DEMO_PASSWORD; do
@@ -87,10 +106,6 @@ jobs:
               exit 1
             fi
           done
-        env:
-          REVIEW_EMAIL: ${{ secrets.REVIEW_EMAIL }}
-          REVIEW_DEMO_USER: ${{ secrets.REVIEW_DEMO_USER }}
-          REVIEW_DEMO_PASSWORD: ${{ secrets.REVIEW_DEMO_PASSWORD }}
 
       - uses: subosito/flutter-action@v2
         with:
@@ -126,6 +141,8 @@ jobs:
           OPENROUTER_SHARED_KEY: ${{ secrets.OPENROUTER_SHARED_KEY }}
         run: |
           gem install fastlane --no-document
-          bash scripts/run_fastlane.sh release_store \
-            version:"${{ inputs.version }}" \
-            build_number:"${{ inputs.build_number }}"
+          args=(version:"${{ steps.v.outputs.version }}")
+          if [ -n "${{ inputs.build_number }}" ]; then
+            args+=(build_number:"${{ inputs.build_number }}")
+          fi
+          bash scripts/run_fastlane.sh release_store "${args[@]}"

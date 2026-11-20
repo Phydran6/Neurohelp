@@ -22,7 +22,6 @@ supabase/
 ├─ templates/                 Mail-Vorlagen, deutsch, Code statt Link
 │  ├─ confirmation.html        Registrierung bestätigen
 │  ├─ recovery.html            Passwort zurücksetzen
-│  ├─ magic_link.html          Anmeldung ohne Passwort (derzeit ungenutzt)
 │  └─ email_change.html        Adresswechsel bestätigen
 ├─ migrations/                Schema, append-only
 │  └─ 20260808120000_init.sql  Profile, Wiederherstellungs-Codes, RLS
@@ -104,8 +103,28 @@ klappt, muss die Site-URL auf `will.neurohelp.help://login-callback` stehen
 die App bekommt keine Sitzung.
 
 Unter **Authentication → Emails → SMTP Settings** einen eigenen Absender
-eintragen (Sender-Adresse, Host, Port 465, Benutzer, Passwort). Erst danach
-sind die Vorlagen editierbar.
+eintragen. Erst danach sind die Vorlagen editierbar. So läuft es aktuell
+(Strato):
+
+| Feld | Wert |
+|---|---|
+| Enable custom SMTP | an |
+| Sender email address | `neurohelp@phytech.de` |
+| Sender name | `Neurohelp` |
+| Host | `smtp.strato.de` |
+| Port | `587` |
+| Username | `neurohelp@phytech.de` – **die volle Adresse**, nicht der Host |
+| Password | Passwort dieses Postfachs |
+
+Die Falle, in die wir getreten sind: Steht unter *Username* der Host
+(`smtp.strato.de`), speichert das Dashboard das ohne Murren – aber keine Mail
+geht raus, und die App meldet beim Zurücksetzen nur einen allgemeinen Fehler.
+Ob der Versand klemmt, steht unter **Logs → Auth Logs**.
+
+**Prüfen, ob alles steht:** In der App „Passwort vergessen" antippen und die
+eigene Adresse eintragen. Kommt eine deutsche Mail mit Code, passen SMTP und
+Vorlage. Kommt eine englische Mail mit Link, fehlt die Vorlage. Kommt nichts,
+klemmt der SMTP-Zugang.
 
 ### Mail-Vorlagen
 

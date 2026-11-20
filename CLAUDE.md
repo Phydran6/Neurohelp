@@ -25,6 +25,21 @@ richtig gut, bevor das nächste kommt.
 dart format . && flutter analyze --fatal-infos --fatal-warnings && flutter test
 ```
 
+## Pull Requests
+
+Claude legt Pull Requests selbst an und mergt sie, statt dem User einen Link
+zu geben:
+
+```bash
+gh pr create --base main --fill
+gh pr merge --merge --delete-branch --auto
+```
+
+- Ziel ist immer `main` (`develop` gibt es nicht mehr)
+- `--auto` wartet, bis das CI grün ist, und mergt erst dann
+- Ist das CI rot: Fehler beheben, nicht am CI vorbei mergen
+- `gh` liegt unter `%LOCALAPPDATA%\Microsoft\WinGet\Links\gh.exe`
+
 ## Konventionen
 
 - Conventional Commits (`feat:`, `fix:`, `docs:`, `chore:` …)

@@ -77,7 +77,7 @@ class SupabaseAccountRepository implements AccountRepository {
       final response = await _client.auth.verifyOTP(
         type: OtpType.signup,
         email: email.trim(),
-        token: code.trim(),
+        token: EmailCode.normalize(code),
       );
 
       final user = response.user;
@@ -186,7 +186,7 @@ class SupabaseAccountRepository implements AccountRepository {
       final verified = await _client.auth.verifyOTP(
         type: OtpType.recovery,
         email: email.trim(),
-        token: code.trim(),
+        token: EmailCode.normalize(code),
       );
       if (verified.user == null) {
         throw const AccountException(
@@ -411,10 +411,12 @@ class SupabaseAccountRepository implements AccountRepository {
   }
 
   static void _checkCode(String code) {
-    if (code.trim().length < 6) {
+    final length = EmailCode.normalize(code).length;
+    if (length < EmailCode.minLength || length > EmailCode.maxLength) {
       throw const AccountException(
         AccountFailure.invalidInput,
-        'Der Code hat sechs Zeichen.',
+        'Der Code ist zu kurz oder zu lang. Trag alle Ziffern aus der Mail '
+        'ein.',
       );
     }
   }

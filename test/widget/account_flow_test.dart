@@ -215,6 +215,21 @@ void main() {
     await pumpUntil(tester, find.byKey(const Key('onb_reset_by_link')));
   }
 
+  /// **Anlass:** Das gehostete Supabase-Projekt verschickt achtstellige
+  /// Codes, das Feld nahm aber nur sechs Ziffern an. Der Rest fiel beim
+  /// Tippen weg, und der Code passte nie.
+  testWidgets('ein achtstelliger Code passt vollständig ins Feld', (
+    tester,
+  ) async {
+    await requestReset(tester);
+
+    await tester.enterText(find.byKey(const Key('onb_code')), '12345678');
+    await tester.pump();
+
+    final field = tester.widget<TextField>(find.byKey(const Key('onb_code')));
+    expect(field.controller!.text, '12345678');
+  });
+
   /// **Anlass:** Ohne eigenen SMTP steht in der Reset-Mail nur ein Link. Wer
   /// ihn antippte, war damit angemeldet – und die App verlangte trotzdem
   /// einen Code, den es nicht gab. Zurücksetzen ging so gar nicht.

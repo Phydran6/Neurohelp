@@ -11,8 +11,14 @@ Für die Beschreibung der App selbst: [← zurück zur Startseite](../README.md)
 |---|---|
 | [KONZEPT.md](KONZEPT.md) | **Das führende Dokument.** Bei Widersprüchen gewinnt es |
 | [ARCHITEKTUR.md](ARCHITEKTUR.md) | Schichten, Datenfluss, Entscheidungen |
-| [BACKEND.md](BACKEND.md) | Supabase: Schema, Migrationen, KI-Proxy |
-| [RELEASE.md](RELEASE.md) | Branches, Versionen, Veröffentlichen |
+| [BACKEND.md](BACKEND.md) | Supabase: Einrichtung, Mailversand, KI-Proxy |
+| [KI-ZUGANG.md](KI-ZUGANG.md) | Die KI-Stufen: eigener Server, eigenes Konto, fertiger Zugang |
+| [BACKUP.md](BACKUP.md) | Sicherung und Wiederherstellung |
+| [RELEASE.md](RELEASE.md) | Branches, Versionen, Veröffentlichen, GitHub-Secrets |
+| [STORE.md](STORE.md) | App Store und Play Store: die einmalige Einrichtung |
+| [RELEASE-CHECKLISTE.md](RELEASE-CHECKLISTE.md) | Was bis zum öffentlichen Store-Eintrag fehlt |
+| [DATENSCHUTZ.md](DATENSCHUTZ.md) | Die Erklärung, auf die die Stores verlinken |
+| [KONTO-LOESCHEN.md](KONTO-LOESCHEN.md) | Die Seite, die Google für die Löschung verlangt |
 
 ---
 
@@ -81,11 +87,17 @@ gebraucht, wenn die Plattform-Ordner neu entstehen müssen.
 | [scripts/](../scripts/) | Bootstrap und Hilfsskripte |
 | [tool/](../tool/) | Entwicklerwerkzeuge, z.B. die Icon-Aufbereitung |
 | [docs/](.) | Diese Dokumentation |
-| [.github/](../.github/UEBERSICHT.md) | Workflows, Vorlagen, Beitragsleitfaden |
+| [.github/](../.github/) | Workflows, Vorlagen, Beitragsleitfaden |
 | `android/`, `ios/` | Native Schalen, handgepflegt nur `fastlane/` und die Signatur |
 
-Jeder Bereich hat eine eigene `README.md` und ein eigenes `CHANGELOG.md`.
-Verbindlich fürs Release ist die große [CHANGELOG.md](../CHANGELOG.md).
+Es gibt genau eine [CHANGELOG.md](../CHANGELOG.md), im Wurzelordner.
+
+| Skript | Wozu |
+|---|---|
+| `scripts/bootstrap.sh`, `.ps1` | Erstaufsetzen, einmalig |
+| `scripts/ensure_platforms.sh` | Legt `android/`, `ios/` an, falls sie fehlen (CI) |
+| `scripts/extract_changelog.sh` | Release-Notizen aus der CHANGELOG (`release.yml`) |
+| `scripts/check_*.sh`, `run_fastlane.sh` | Apple-Secrets prüfen, fastlane starten (CI) |
 
 ### Innerhalb von `lib/`
 
@@ -98,8 +110,16 @@ lib/
 └─ shared/        Feature-übergreifende Widgets
 ```
 
-Details in [ARCHITEKTUR.md](ARCHITEKTUR.md), Regeln in
-[lib/README.md](../lib/README.md).
+Details in [ARCHITEKTUR.md](ARCHITEKTUR.md). Regeln für den Code:
+
+- **`domain/` kennt kein Flutter.** Reine Logik, direkt testbar
+- **`presentation/` greift nie direkt auf die Datenbank zu** – immer über ein
+  Repository aus `data/`
+- **Features kennen sich nicht gegenseitig.** Gemeinsames wandert nach `core/`
+  oder `shared/`
+- **Jede Schreiboperation landet in der Historie**
+- Neuer Dienst → in [app_services.dart](../lib/core/di/app_services.dart)
+  eintragen
 
 ---
 
@@ -195,12 +215,8 @@ Original ersetzen – die zwei Zwischenstufen entstehen automatisch neu.
 
 ## Branches
 
-| Branch | Zweck |
-|---|---|
-| `main` | Produktiv. Nur von hier wird getaggt und veröffentlicht |
-| `develop` | Entwicklung und Tests |
-
-Mehr braucht es nicht. Beide durchlaufen dieselbe CI.
+Nur `main`. Gearbeitet wird auf kurzen Branches, die per Pull Request nach
+`main` gehen, sobald die CI grün ist. Getaggt wird nur auf `main`.
 
 ---
 
@@ -208,7 +224,7 @@ Mehr braucht es nicht. Beide durchlaufen dieselbe CI.
 
 | Workflow | Auslöser | Ergebnis |
 |---|---|---|
-| [`ci.yml`](../.github/workflows/ci.yml) | Push / PR auf `main` oder `develop` | Format, Analyse, Tests, Debug-Builds |
+| [`ci.yml`](../.github/workflows/ci.yml) | Push / PR auf `main` | Format, Analyse, Tests, Debug-Builds |
 | [`release.yml`](../.github/workflows/release.yml) | Tag `v*.*.*` | APK, AAB, IPA + GitHub-Release |
 | [`deploy.yml`](../.github/workflows/deploy.yml) | nach Release / manuell | Play Store (internal), TestFlight |
 

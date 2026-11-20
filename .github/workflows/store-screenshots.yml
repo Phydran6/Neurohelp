@@ -31,6 +31,13 @@ jobs:
           flutter-version: "3.44.9"
           cache: true
 
+      # Flutter 3.44 bindet die Plugins über Swift Package Manager ein, das
+      # Projekt hängt aber noch an CocoaPods. Im Simulator-Build bricht das mit
+      # "The sandbox is not in sync with the Podfile.lock" ab. Für die Bilder
+      # reicht der alte Weg über CocoaPods – damit lief der Ablauf zuletzt grün.
+      - name: Plugins über CocoaPods einbinden
+        run: flutter config --no-enable-swift-package-manager
+
       - run: flutter pub get
 
       - name: Simulator starten

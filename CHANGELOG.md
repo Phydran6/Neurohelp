@@ -7,6 +7,8 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+## [0.1.0-alpha.14] - 2026-11-20
+
 ### Added
 
 - **Deine Sachen überleben jetzt eine Neuinstallation.** Die App legt von
@@ -635,7 +637,8 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.13...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.14...HEAD
+[0.1.0-alpha.14]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.14
 [0.1.0-alpha.13]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.13
 [0.1.0-alpha.12]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.12
 [0.1.0-alpha.11]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.11

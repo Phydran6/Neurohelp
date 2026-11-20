@@ -7,17 +7,7 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
-### Changed
-
-- **Die Version heißt ab jetzt schlicht `0.2.0`, ohne „-alpha“.** Auf iPhone
-  und Android steht damit dieselbe Nummer. Bisher hieß auf TestFlight jede
-  Alpha nur „0.1.0“.
-
-### Fixed
-
-- TestFlight-Uploads scheitern nicht mehr an einer zu niedrigen Build-Nummer.
-
-## [0.1.0-alpha.14] - 2026-11-20
+## [0.2.0] - 2026-11-20
 
 ### Added
 
@@ -56,6 +46,12 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Neun neue Antworten im Hilfe-Bereich** zu Sicherung, Wiederherstellung,
   eigenem KI-Server, Darstellung und den zwei Einstellungs-Wegen
 
+### Changed
+
+- **Die Version heißt ab jetzt schlicht `0.2.0`, ohne „-alpha“.** Auf iPhone
+  und Android steht damit dieselbe Nummer. Bisher hieß auf TestFlight jede
+  Alpha nur „0.1.0“.
+
 ### Fixed
 
 - **Abmelden meldet jetzt wirklich ab.** Bisher verschwand in den
@@ -87,6 +83,10 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 - **Die Datenschutzerklärung behauptete „es gibt keine Sicherung in der
   Cloud".** Mit der neuen Sicherung stimmt das so nicht mehr – nachgezogen,
   samt dem Hinweis, wohin die Datei tatsächlich geht und wie man es abschaltet
+- TestFlight-Uploads scheitern nicht mehr an einer zu niedrigen Build-Nummer.
+- **Android und iOS bauen wieder.** Nach mehreren Paket-Updates brachen beide
+  App-Builds ab. 0.1.0-alpha.14 ist deshalb nie erschienen; alles, was dafür
+  gedacht war, steht hier unter 0.2.0
 
 ## [0.1.0-alpha.13] - 2026-10-16
 
@@ -647,8 +647,8 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.14...HEAD
-[0.1.0-alpha.14]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.14
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.2.0
 [0.1.0-alpha.13]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.13
 [0.1.0-alpha.12]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.12
 [0.1.0-alpha.11]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.11

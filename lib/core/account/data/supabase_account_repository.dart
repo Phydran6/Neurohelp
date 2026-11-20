@@ -26,6 +26,11 @@ class SupabaseAccountRepository implements AccountRepository {
   }
 
   @override
+  Stream<bool> get signedInChanges => _client.auth.onAuthStateChange
+      .map((state) => state.session != null)
+      .distinct();
+
+  @override
   Future<SignUpResult> signUp({
     required String username,
     required String password,
@@ -124,12 +129,22 @@ class SupabaseAccountRepository implements AccountRepository {
     }
   }
 
+  /// Meldet auf diesem Gerät ab – immer.
+  ///
+  /// Supabase wirft die Sitzung auf dem Gerät weg, **bevor** es dem Server
+  /// Bescheid sagt. Scheitert danach nur noch die Nachricht an den Server
+  /// (kein Netz, Störung), ist der User trotzdem abgemeldet. Früher kam
+  /// dann eine Fehlermeldung, und die Einstellungen zeigten weiter das Konto
+  /// an, obwohl keine Sitzung mehr dahinterstand.
   @override
   Future<void> signOut() async {
     try {
       await _client.auth.signOut();
-    } on AuthException catch (error) {
-      throw _translate(error, 'auth.signOut');
+    } on Exception catch (error) {
+      AppLogger.info(
+        'Abmelden beim Server nicht bestätigt, lokal abgemeldet: $error',
+        scope: 'account',
+      );
     }
   }
 

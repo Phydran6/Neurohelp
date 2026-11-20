@@ -45,10 +45,21 @@ enum AccountMode {
 /// Danach fünf Schritte, einer pro Bildschirm. KI-Toggle und App-Sperre sind
 /// **Pflichtentscheidungen** – nur die Zusatzsicherheit ist überspringbar,
 /// und die sagt beim Überspringen einmal ruhig Bescheid.
+///
+/// Mit [signInOnly] zeigt die Seite nur den Konto-Bildschirm, gleich beim
+/// Anmelden: für alle, die sich abgemeldet haben. Ihr Onboarding ist längst
+/// fertig, und nichts davon wird hier noch einmal gefragt oder überschrieben.
 class OnboardingPage extends StatefulWidget {
-  const OnboardingPage({required this.onDone, super.key});
+  const OnboardingPage({
+    required this.onDone,
+    this.signInOnly = false,
+    super.key,
+  });
 
   final VoidCallback onDone;
+
+  /// Nur wieder anmelden, statt das ganze Onboarding zu durchlaufen.
+  final bool signInOnly;
 
   @override
   State<OnboardingPage> createState() => _OnboardingPageState();
@@ -71,9 +82,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
   bool _busy = false;
   bool _biometricAvailable = false;
 
+  /// Ob der Reset über den Link aus der Mail läuft statt über den Code.
+  /// Dann steht schon eine Sitzung, und es fehlt nur noch das Passwort.
+  bool _resetByLink = false;
+
   @override
   void initState() {
     super.initState();
+    if (widget.signInOnly) {
+      _flow = const OnboardingFlow(step: OnboardingStep.account);
+      _mode = AccountMode.signIn;
+    }
     // Die Knöpfe sind gesperrt, solange zu wenig dasteht. Ohne diese Listener
     // merken sie die Eingabe nicht.
     for (final controller in [_pin, _code, _email, _password, _newPassword]) {
@@ -125,6 +144,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       _error = null;
       _technical = null;
       _info = null;
+      _resetByLink = false;
       _code.clear();
     });
   }
@@ -163,6 +183,17 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   // ------------------------------------------------------------------- Konto
 
+  /// Das Konto steht. Im Onboarding geht es weiter zur KI-Frage, beim
+  /// Wieder-Anmelden ist hier Schluss.
+  void _accountDone() {
+    if (widget.signInOnly) {
+      widget.onDone();
+      return;
+    }
+    setState(() => _flow = _flow.withAccountCreated());
+    _advance();
+  }
+
   Future<void> _createAccount() => _guard(() async {
     final result = await AppScope.of(context).account.signUp(
       username: _username.text,
@@ -181,8 +212,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       return;
     }
 
-    setState(() => _flow = _flow.withAccountCreated());
-    _advance();
+    _accountDone();
   });
 
   Future<void> _confirmSignUp() => _guard(() async {
@@ -191,8 +221,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     ).account.confirmSignUp(email: _email.text, code: _code.text);
     if (!mounted) return;
 
-    setState(() => _flow = _flow.withAccountCreated());
-    _advance();
+    _accountDone();
   });
 
   Future<void> _resendCode() => _guard(() async {
@@ -224,8 +253,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       return;
     }
 
-    setState(() => _flow = _flow.withAccountCreated());
-    _advance();
+    _accountDone();
   });
 
   Future<void> _signIn() => _guard(() async {
@@ -234,8 +262,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
     ).account.signIn(email: _email.text, password: _password.text);
     if (!mounted) return;
 
-    setState(() => _flow = _flow.withAccountCreated());
-    _advance();
+    _accountDone();
   });
 
   Future<void> _sendReset() => _guard(() async {
@@ -257,8 +284,45 @@ class _OnboardingPageState extends State<OnboardingPage> {
     );
     if (!mounted) return;
 
-    setState(() => _flow = _flow.withAccountCreated());
-    _advance();
+    _accountDone();
+  });
+
+  /// Rückweg, wenn in der Reset-Mail **kein** Code steht.
+  ///
+  /// Derselbe Grund wie bei [_checkConfirmedByLink]: Ohne eigenen SMTP
+  /// verschickt Supabase seine Standard-Mail mit Link statt Code. Bisher gab
+  /// es dafür beim Zurücksetzen keinen Ausweg – der User tippte den Link an,
+  /// war damit sogar angemeldet, und die App verlangte trotzdem einen Code,
+  /// den es nicht gab.
+  ///
+  /// Der Link legt die Sitzung an. Mit ihr lässt sich das Passwort direkt
+  /// setzen, ohne Code – genau wie in den Einstellungen.
+  Future<void> _checkResetByLink() => _guard(() async {
+    final account = await AppScope.of(context).account.currentAccount();
+    if (!mounted) return;
+
+    if (account == null) {
+      setState(
+        () => _error =
+            'Noch nichts angekommen. Tipp den Link in der Mail an und komm '
+            'dann hierher zurück – oder trag den Code ein, falls einer '
+            'drinsteht.',
+      );
+      return;
+    }
+
+    setState(() {
+      _resetByLink = true;
+      _code.clear();
+      _info = 'Der Link hat geklappt. Jetzt nur noch das neue Passwort.';
+    });
+  });
+
+  Future<void> _resetPasswordByLink() => _guard(() async {
+    await AppScope.of(context).account.changePassword(_newPassword.text);
+    if (!mounted) return;
+
+    _accountDone();
   });
 
   // ------------------------------------------------------------------ Sperre
@@ -492,10 +556,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
       AccountMode.forgotPassword => email,
       AccountMode.resetPassword => Column(
         children: [
-          email,
-          const SizedBox(height: 16),
-          code,
-          const SizedBox(height: 16),
+          if (!_resetByLink) ...[
+            email,
+            const SizedBox(height: 16),
+            code,
+            const SizedBox(height: 16),
+          ],
           TextField(
             key: const Key('onb_new_password'),
             controller: _newPassword,
@@ -682,6 +748,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
           ),
         ],
       ),
+      AccountMode.resetPassword when _resetByLink => BigActionButton(
+        key: const Key('onb_reset'),
+        label: 'Neues Passwort setzen',
+        onPressed: _busy || _newPassword.text.length < 8
+            ? null
+            : _resetPasswordByLink,
+      ),
       AccountMode.resetPassword => Column(
         children: [
           BigActionButton(
@@ -696,6 +769,11 @@ class _OnboardingPageState extends State<OnboardingPage> {
             key: const Key('onb_send_reset'),
             onPressed: _busy ? null : _sendReset,
             child: const Text('Code nochmal schicken'),
+          ),
+          TextButton(
+            key: const Key('onb_reset_by_link'),
+            onPressed: _busy ? null : _checkResetByLink,
+            child: const Text('Kein Code drin? Ich hab den Link angetippt'),
           ),
         ],
       ),
@@ -731,6 +809,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
             'eine Stunde.\n\n'
             'Steht in der Mail nur ein Link und kein Code? Dann tipp den '
             'Link an und komm hierher zurück.',
+      AccountMode.signIn when widget.signInOnly =>
+        'Du bist abgemeldet. Melde dich wieder an, dann geht es weiter. '
+            'Deine Vorgänge und deine Historie liegen noch auf diesem Gerät.',
       AccountMode.signIn =>
         'Melde dich mit deinen Zugangsdaten an. Deine alten Vorgänge lagen '
             'auf dem alten Gerät und kommen nicht mit – die waren nie auf '
@@ -738,8 +819,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
       AccountMode.forgotPassword =>
         'Trag deine E-Mail-Adresse ein. Du bekommst einen Code, mit dem du '
             'dir ein neues Passwort setzt.',
+      AccountMode.resetPassword when _resetByLink =>
+        'Der Link aus der Mail hat dich angemeldet. Trag jetzt dein neues '
+            'Passwort ein.',
       AccountMode.resetPassword =>
-        'Code aus der Mail, dann das neue Passwort. Fertig.',
+        'Code aus der Mail, dann das neue Passwort. Fertig.\n\n'
+            'Steht in der Mail nur ein Link und kein Code? Dann tipp den '
+            'Link an und komm hierher zurück.',
     },
     OnboardingStep.aiChoice =>
       'Mit KI formuliere ich Texte für dich und zerlege Aufgaben. Dafür '

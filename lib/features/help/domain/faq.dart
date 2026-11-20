@@ -120,8 +120,19 @@ abstract final class FaqCatalog {
           'zurück in die App finden muss. Das geht oft schief. Ein '
           'sechsstelliger Code wird abgetippt und funktioniert überall. Er '
           'gilt eine Stunde; danach lässt du dir einfach einen neuen '
-          'schicken.',
-      keywords: ['code', 'mail', 'bestätigung', 'link', 'registrierung'],
+          'schicken.\n\n'
+          'Steht in der Mail doch nur ein Link? Dann tipp ihn an und komm '
+          'in die App zurück. Unter dem Code-Feld steht „Kein Code drin? '
+          'Ich hab den Link angetippt" – das gilt beim Registrieren und '
+          'beim Zurücksetzen des Passworts.',
+      keywords: [
+        'code',
+        'mail',
+        'bestätigung',
+        'link',
+        'registrierung',
+        'zurücksetzen',
+      ],
     ),
     FaqEntry(
       id: 'schon-ein-konto',

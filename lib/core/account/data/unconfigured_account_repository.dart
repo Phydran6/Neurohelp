@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import '../account_repository.dart';
 
 /// Konto-Verwaltung, solange kein Backend eingerichtet ist.
@@ -26,6 +28,9 @@ class UnconfiguredAccountRepository implements AccountRepository {
 
   @override
   Future<Account?> currentAccount() async => null;
+
+  @override
+  Stream<bool> get signedInChanges => const Stream.empty();
 
   @override
   Future<SignUpResult> signUp({
@@ -99,14 +104,33 @@ class LocalAccountRepository implements AccountRepository {
   /// Der Code, den [confirmSignUp] und [resetPassword] akzeptieren.
   static const String testCode = '123456';
 
-  Account? _account;
+  /// Das angelegte Konto. Es bleibt beim Abmelden bestehen, damit man sich
+  /// wieder anmelden kann; weg ist es erst mit [deleteAccount].
+  Account? _registered;
+
+  /// Die laufende Sitzung.
+  Account? _session;
   String? _mfaFactorId;
+
+  final StreamController<bool> _changes = StreamController<bool>.broadcast();
+
+  Account? get _account => _session;
+
+  set _account(Account? value) {
+    final changed = (value == null) != (_session == null);
+    _session = value;
+    if (value != null) _registered = value;
+    if (changed) _changes.add(value != null);
+  }
 
   @override
   bool get isConfigured => true;
 
   @override
   Future<Account?> currentAccount() async => _account;
+
+  @override
+  Stream<bool> get signedInChanges => _changes.stream;
 
   @override
   Future<SignUpResult> signUp({
@@ -167,14 +191,14 @@ class LocalAccountRepository implements AccountRepository {
     required String email,
     required String password,
   }) async {
-    final account = _account;
+    final account = _registered;
     if (account == null || account.email != email.trim()) {
       throw const AccountException(
         AccountFailure.invalidCredentials,
         'E-Mail oder Passwort stimmt nicht.',
       );
     }
-    return account;
+    return _account = account;
   }
 
   @override
@@ -265,6 +289,7 @@ class LocalAccountRepository implements AccountRepository {
   @override
   Future<bool> deleteAccount() async {
     _account = null;
+    _registered = null;
     _mfaFactorId = null;
     return false;
   }

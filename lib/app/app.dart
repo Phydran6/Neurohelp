@@ -24,7 +24,11 @@ class NeurohelpApp extends StatelessWidget {
       listenable: settings,
       builder: (context, _) => MaterialApp(
         title: 'Neurohelp',
-        debugShowCheckedModeBanner: !AppConfig.instance.isProduction,
+        // Store-Bildschirmfotos laufen mit FLAVOR=dev, dürfen das
+        // DEBUG-Band aber nicht zeigen.
+        debugShowCheckedModeBanner:
+            !AppConfig.instance.isProduction &&
+            !const bool.fromEnvironment('STORE_SCREENSHOTS'),
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
         themeMode: switch (settings.current.themeChoice) {
@@ -56,11 +60,23 @@ class _EntryState extends State<_Entry> {
   bool _unlocked = false;
   bool _started = false;
 
+  /// Ob eine Sitzung besteht. `null`, solange das noch nicht gelesen ist.
+  bool? _signedIn;
+  StreamSubscription<bool>? _accountChanges;
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (_started) return;
     _started = true;
+
+    final account = AppScope.of(context).account;
+    if (account.isConfigured) {
+      _accountChanges = account.signedInChanges.listen((signedIn) {
+        if (mounted) setState(() => _signedIn = signedIn);
+      });
+      unawaited(_readAccount());
+    }
 
     final settings = AppScope.of(context).settings;
     if (settings.isLoaded) {
@@ -68,6 +84,17 @@ class _EntryState extends State<_Entry> {
     } else {
       unawaited(_load());
     }
+  }
+
+  Future<void> _readAccount() async {
+    final account = await AppScope.of(context).account.currentAccount();
+    if (mounted) setState(() => _signedIn = account != null);
+  }
+
+  @override
+  void dispose() {
+    unawaited(_accountChanges?.cancel());
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -100,6 +127,21 @@ class _EntryState extends State<_Entry> {
 
         if (settings.isLocked && !_unlocked) {
           return LockScreen(onUnlocked: () => setState(() => _unlocked = true));
+        }
+
+        // Das Konto ist Pflicht (Konzept, Abschnitt 13). Wer abgemeldet ist,
+        // meldet sich wieder an, statt in der App weiterzumachen, als wäre
+        // nichts gewesen. Seine Sachen auf dem Gerät bleiben dabei, wo sie
+        // sind.
+        if (AppScope.of(context).account.isConfigured) {
+          if (_signedIn == null) return const SizedBox.shrink();
+          if (_signedIn == false) {
+            return OnboardingPage(
+              key: const Key('entry_sign_in'),
+              signInOnly: true,
+              onDone: () => setState(() => _signedIn = true),
+            );
+          }
         }
 
         return const StartPage();

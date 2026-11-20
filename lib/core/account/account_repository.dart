@@ -100,6 +100,14 @@ abstract interface class AccountRepository {
   /// Das aktuell angemeldete Konto, oder `null`.
   Future<Account?> currentAccount();
 
+  /// Meldet jeden Wechsel zwischen angemeldet (`true`) und abgemeldet
+  /// (`false`).
+  ///
+  /// Darauf horcht der Einstieg der App: Wer sich abmeldet – oder dessen
+  /// Sitzung serverseitig abläuft –, landet wieder bei der Anmeldung, statt
+  /// in einer App zu stehen, die so tut, als wäre nichts gewesen.
+  Stream<bool> get signedInChanges;
+
   /// Legt ein Konto an. Alle drei Felder sind laut Konzept Pflicht.
   Future<SignUpResult> signUp({
     required String username,

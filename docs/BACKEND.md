@@ -94,8 +94,14 @@ Der eingebaute Mailversand von Supabase ist **kein Produktivweg**:
 
 Ohne eigenen SMTP verschickt Supabase also seine englische Standard-Mail mit
 Link statt Code. Die App fängt das ab („Kein Code drin? Ich hab den Link
-angetippt" auf dem Bestätigungs-Bildschirm), aber das ist der Notausgang,
-nicht der gedachte Weg.
+angetippt" beim Bestätigen **und** beim Zurücksetzen des Passworts), aber das
+ist der Notausgang, nicht der gedachte Weg.
+
+Beim Zurücksetzen heißt das: Der Link legt über das App-Schema eine Sitzung
+an, danach setzt die App das Passwort mit `updateUser` – ohne Code. Damit das
+klappt, muss die Site-URL auf `will.neurohelp.help://login-callback` stehen
+(siehe oben). Steht sie auf `localhost:3000`, endet der Link im Browser und
+die App bekommt keine Sitzung.
 
 Unter **Authentication → Emails → SMTP Settings** einen eigenen Absender
 eintragen (Sender-Adresse, Host, Port 465, Benutzer, Passwort). Erst danach

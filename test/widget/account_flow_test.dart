@@ -200,6 +200,61 @@ void main() {
     await pumpUntil(tester, find.byKey(const Key('onb_ai_yes')));
   });
 
+  /// Bis zur Reset-Mail tippen, ohne Code einzutragen.
+  Future<void> requestReset(WidgetTester tester) async {
+    await pumpOnboarding(tester);
+    await tester.tap(find.byKey(const Key('onb_forgot')));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(
+      find.byKey(const Key('onb_email')),
+      'philipp@example.test',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('onb_send_reset')));
+    await pumpUntil(tester, find.byKey(const Key('onb_reset_by_link')));
+  }
+
+  /// **Anlass:** Ohne eigenen SMTP steht in der Reset-Mail nur ein Link. Wer
+  /// ihn antippte, war damit angemeldet – und die App verlangte trotzdem
+  /// einen Code, den es nicht gab. Zurücksetzen ging so gar nicht.
+  testWidgets('ohne Code in der Reset-Mail geht es über den Link weiter', (
+    tester,
+  ) async {
+    // Steht für die Sitzung, die der angetippte Link anlegt.
+    await account.signUp(
+      username: 'philipp',
+      email: 'philipp@example.test',
+      password: 'altesgeheim1',
+    );
+
+    await requestReset(tester);
+    await tester.tap(find.byKey(const Key('onb_reset_by_link')));
+    await tester.pumpAndSettle();
+
+    // Kein Code-Feld mehr – nur noch das neue Passwort.
+    expect(find.byKey(const Key('onb_code')), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const Key('onb_new_password')),
+      'nochgeheimer1',
+    );
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('onb_reset')));
+    await pumpUntil(tester, find.byKey(const Key('onb_ai_yes')));
+  });
+
+  testWidgets('ohne angetippten Link sagt der Rückweg ruhig Bescheid', (
+    tester,
+  ) async {
+    await requestReset(tester);
+    await tester.tap(find.byKey(const Key('onb_reset_by_link')));
+    await pumpUntil(tester, find.byKey(const Key('onb_error')));
+
+    // Der Code-Weg bleibt offen.
+    expect(find.byKey(const Key('onb_code')), findsOneWidget);
+  });
+
   testWidgets('eine Störung liefert Details zum Melden mit', (tester) async {
     services = AppServices.from(database, lock: InMemoryAppLock());
     await pumpOnboarding(tester);

@@ -355,15 +355,17 @@ class _ExpertSettingsPageState extends State<ExpertSettingsPage> {
     });
   }
 
+  /// Abmelden heißt: raus aus der App, zurück zur Anmeldung.
+  ///
+  /// Früher verschwand nur der Knopf, und alles lief weiter wie vorher –
+  /// das sah aus, als wäre man noch angemeldet. Jetzt geht es an den
+  /// Anfang, und dort steht die Anmeldung. Die Sachen auf dem Gerät
+  /// bleiben dabei, wo sie sind.
   Future<void> _signOut() async {
     await _run(() async {
       await AppScope.of(context).account.signOut();
       if (!mounted) return;
-      setState(() {
-        _account = null;
-        _hasMfa = false;
-        _message = 'Du bist abgemeldet. Deine Sachen bleiben auf dem Gerät.';
-      });
+      Navigator.of(context).popUntil((route) => route.isFirst);
     });
   }
 

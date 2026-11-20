@@ -46,6 +46,19 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Fixed
 
+- **Abmelden meldet jetzt wirklich ab.** Bisher verschwand in den
+  Einstellungen nur der Knopf, und die App lief weiter wie vorher – es sah
+  aus, als wäre man noch angemeldet. Jetzt geht es zurück zur Anmeldung.
+  Deine Vorgänge und deine Historie bleiben dabei auf dem Gerät, und nach dem
+  Wieder-Anmelden musst du nichts neu einstellen
+- **Die KI ohne eigenes Konto geht jetzt auch auf dem iPhone und in der
+  Testversion bei Google Play.** Bisher fehlte diesen Versionen der Zugang,
+  und die App fiel dort still auf die nächste KI-Stufe zurück
+- **„Passwort vergessen" funktioniert jetzt auch, wenn in der Mail nur ein
+  Link steht.** Bisher verlangte die App nach dem Antippen des Links trotzdem
+  einen Code, den es nicht gab – zurücksetzen ging so gar nicht. Jetzt steht
+  unter dem Code-Feld „Kein Code drin? Ich hab den Link angetippt", und danach
+  fehlt nur noch das neue Passwort
 - **Aus der Historie kommst du jetzt direkt in den Vorgang zurück.** Bisher
   sah man dort nur das Protokoll und konnte den Zustand ändern – wer seine
   angefangene Aufgabe wiederfand, musste den Weg dorthin selbst noch einmal

@@ -32,6 +32,57 @@ abstract final class EmailCode {
   static bool looksComplete(String code) => normalize(code).length >= minLength;
 }
 
+/// Was ein Benutzername sein darf – dieselbe Regel wie in der Datenbank.
+///
+/// Die Tabelle `profiles` erlaubt nur 3 bis 32 Zeichen aus `A–Z`, `a–z`,
+/// `0–9`, `_`, `.` und `-` (Migration `20260808120000_init.sql`). Die App
+/// prüfte vorher nur die Mindestlänge. Wer eine Mail-Adresse als
+/// Benutzernamen eintrug, kam bis zum Server durch und bekam von dort einen
+/// unverständlichen Backend-Fehler zurück. Jetzt sagt die App es selbst,
+/// schon beim Tippen.
+abstract final class Username {
+  static const int minLength = 3;
+  static const int maxLength = 32;
+
+  static final RegExp _allowed = RegExp(r'^[A-Za-z0-9_.-]+$');
+
+  /// Warum der Name nicht geht – oder `null`, wenn er passt.
+  ///
+  /// Mit [whileTyping] bleibt ein noch zu kurzer Name unkommentiert: Wer
+  /// gerade erst den ersten Buchstaben getippt hat, braucht keinen Hinweis.
+  static String? problem(String input, {bool whileTyping = false}) {
+    final name = input.trim();
+
+    if (name.contains('@')) {
+      return 'Der Benutzername darf keine E-Mail-Adresse sein. Die Mail '
+          'kommt ins Feld darunter – hier reicht ein Name, z.B. „philipp“.';
+    }
+    if (name.contains(RegExp(r'\s'))) {
+      return 'Im Benutzernamen gehen keine Leerzeichen. Nimm z.B. einen '
+          'Punkt oder Unterstrich: „max_mustermann“.';
+    }
+    if (name.isNotEmpty && !_allowed.hasMatch(name)) {
+      return 'Im Benutzernamen gehen nur Buchstaben ohne Umlaute, Ziffern '
+          'und _ . -';
+    }
+    if (name.length > maxLength) {
+      return 'Der Benutzername darf höchstens $maxLength Zeichen haben.';
+    }
+    if (!whileTyping && name.length < minLength) {
+      return 'Der Benutzername braucht mindestens $minLength Zeichen.';
+    }
+    return null;
+  }
+
+  /// Wirft eine [AccountException], wenn der Name nicht geht.
+  static void check(String input) {
+    final message = problem(input);
+    if (message != null) {
+      throw AccountException(AccountFailure.invalidInput, message);
+    }
+  }
+}
+
 /// Was nach einer Registrierung noch aussteht.
 class SignUpResult {
   const SignUpResult({required this.account, required this.needsConfirmation});

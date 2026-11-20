@@ -154,9 +154,20 @@ platform :ios do
   desc "Build bauen und an TestFlight schicken"
   lane :beta do |options|
     api_key = app_store_api_key
+
+    # Die Lauf-Nummer von Deploy allein reicht nicht: Bei Apple liegen schon
+    # Builds mit hoeheren Nummern (176, Deploy stand bei gut 20). Eine
+    # niedrigere Nummer lehnt Apple ab - also die groessere von beiden. Auf
+    # iOS kann die Build-Nummer dadurch von der Android-Nummer abweichen.
+    build_number = [
+      checked_build_number(options).to_i,
+      next_build_number(api_key),
+    ].max.to_s
+    UI.message("TestFlight-Build-Nummer: #{build_number}")
+
     build_signed_ipa(
       version: checked_version(options),
-      build_number: checked_build_number(options),
+      build_number: build_number,
       api_key: api_key,
     )
 

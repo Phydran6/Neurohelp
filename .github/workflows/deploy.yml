@@ -22,6 +22,10 @@ on:
 
 env:
   FLUTTER_CHANNEL: stable
+  # Fest, nicht "neueste": Mit 3.47 gilt material.dart als veraltet, und
+  # --fatal-infos macht daraus in jeder Datei einen Fehler. Gleich halten mit
+  # der lokalen Version und mit promote.yml / store-screenshots.yml.
+  FLUTTER_VERSION: "3.44.9"
 
 jobs:
   android:
@@ -67,6 +71,7 @@ jobs:
         if: steps.gate.outputs.ok == 'true'
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Plattform-Ordner sicherstellen
@@ -155,6 +160,7 @@ jobs:
         if: steps.gate.outputs.ok == 'true'
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Zugriff auf das match-Repository

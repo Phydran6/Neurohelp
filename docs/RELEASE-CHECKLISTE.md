@@ -237,7 +237,8 @@ Knopf bleibt bei einem Menschen.
 Apple lehnt unfertige Apps nach Richtlinie 2.1 ab. Solange die Version den
 Zusatz `-alpha.N` trägt, ist das ein unnötiges Risiko:
 
-- [ ] `-alpha.N` aus [pubspec.yaml](../pubspec.yaml) nehmen
+- [ ] `-alpha.N` aus [pubspec.yaml](../pubspec.yaml) nehmen – geschieht mit
+      0.2.0, siehe [RELEASE.md](RELEASE.md#versionsnummern)
 - [ ] Bekannte Fehler abarbeiten
 - [ ] In [README.md](../README.md) die Store-Knöpfe einkommentieren
       (markiert mit `STORE-KNOEPFE`) und die Alpha-Warnung entfernen

@@ -20,6 +20,10 @@ permissions:
 
 env:
   FLUTTER_CHANNEL: stable
+  # Fest, nicht "neueste": Mit 3.47 gilt material.dart als veraltet, und
+  # --fatal-infos macht daraus in jeder Datei einen Fehler. Gleich halten mit
+  # der lokalen Version und mit promote.yml / store-screenshots.yml.
+  FLUTTER_VERSION: "3.44.9"
 
 jobs:
   prepare:
@@ -76,6 +80,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - name: Plattform-Ordner sicherstellen
@@ -160,6 +165,7 @@ jobs:
       - uses: subosito/flutter-action@v2
         with:
           channel: ${{ env.FLUTTER_CHANNEL }}
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
       - run: flutter pub get

@@ -7,6 +7,16 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Die Version heißt ab jetzt schlicht `0.2.0`, ohne „-alpha“.** Auf iPhone
+  und Android steht damit dieselbe Nummer. Bisher hieß auf TestFlight jede
+  Alpha nur „0.1.0“.
+
+### Fixed
+
+- TestFlight-Uploads scheitern nicht mehr an einer zu niedrigen Build-Nummer.
+
 ## [0.1.0-alpha.14] - 2026-11-20
 
 ### Added

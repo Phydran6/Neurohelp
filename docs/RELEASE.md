@@ -41,11 +41,17 @@ tatsächlich passiert.
 
 ## Versionsnummern
 
-Format `<major>.<minor>.<patch>[-alpha.N]`, die Build-Nummer hängt die CI an.
+Format `<major>.<minor>.<patch>`, die Build-Nummer hängt die CI an. Regeln
+siehe [Versionierung](#versionierung).
 
-Der Zusatz `-alpha.N` steht in `pubspec.yaml` und ist auf dem Gerät sichtbar.
-Er bleibt, solange die App nicht wirklich für fremde Geräte taugt. GitHub
-markiert solche Releases automatisch als Vorabversion.
+**Ab 0.2.0 ohne `-alpha.N`.** Bis 0.1.0-alpha.14 trug jede Version diesen
+Zusatz. Apple nimmt ihn nicht an, deshalb hieß auf TestFlight jede Alpha nur
+„0.1.0“, unterscheidbar nur an der Build-Nummer. Ohne Zusatz steht auf iOS und
+Android dieselbe Version.
+
+Die Build-Nummer ist keine Version. Android nimmt die Lauf-Nummer von Deploy,
+iOS die größere von Lauf-Nummer und höchster Nummer bei Apple. Beide können
+deshalb voneinander abweichen.
 
 ---
 
@@ -184,12 +190,19 @@ Base64 unter Windows:
 Vor 1.0 gilt jedes Release als Vorabversion; `release.yml` markiert `0.x`-Tags automatisch als
 Prerelease.
 
+- **Nächstes Release: `0.2.0`.** Danach neue Features `0.3.0`, `0.4.0` …,
+  reine Fehlerbehebungen `0.2.1`, `0.2.2` …
+- **`1.0.0`**, sobald die App öffentlich in den Stores steht
+  ([RELEASE-CHECKLISTE.md](RELEASE-CHECKLISTE.md), Abschnitt B5)
+
 ### Release-Schritte von Hand
 
 1. `CHANGELOG.md`: `[Unreleased]` in `[X.Y.Z] - JJJJ-MM-TT` umbenennen, neuen leeren
    `[Unreleased]`-Block darüber anlegen, Vergleichs-Links unten anpassen
-2. `pubspec.yaml`: `version:` auf `X.Y.Z+1` setzen
-3. Committen, dann taggen:
+2. `pubspec.yaml`: `version:` auf `X.Y.Z+1` setzen, dieselbe Version in
+   `AppVersion.fallbackName` ([app_version.dart](../lib/core/config/app_version.dart))
+3. Download-Links in `README.md` auf die neue Version setzen
+4. Committen, dann taggen:
    ```bash
    git tag vX.Y.Z && git push origin main --tags
    ```

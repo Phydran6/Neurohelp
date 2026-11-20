@@ -6,7 +6,7 @@
 //     --target=integration_test/screenshots_test.dart -d <Gerät>
 //
 // Die Bildgröße ist die des Simulators. Für den App Store braucht es
-// 1320×2868 – das liefert das iPhone 16 Pro Max. Die Prüfung darauf steht in
+// 1320×2868 – das liefert das iPhone 17 Pro Max. Die Prüfung darauf steht in
 // .github/workflows/store-screenshots.yml, nicht hier: Ein Test soll nicht an
 // der Gerätewahl scheitern.
 //
@@ -104,6 +104,10 @@ void main() {
     await waitFor(tester, find.byKey(const Key('task_new')));
 
     await tester.tap(find.byKey(const Key('task_new')));
+
+    // Erst kommt der Historie-Check („Weißt du schon, worum es geht?").
+    await waitFor(tester, find.byKey(const Key('task_know')));
+    await tester.tap(find.byKey(const Key('task_know')));
     await waitFor(tester, find.byKey(const Key('task_title_field')));
 
     await tester.enterText(
@@ -136,6 +140,10 @@ void main() {
     await waitFor(tester, find.byKey(const Key('task_new')));
 
     await tester.tap(find.byKey(const Key('task_new')));
+
+    // Erst kommt der Historie-Check („Weißt du schon, worum es geht?").
+    await waitFor(tester, find.byKey(const Key('task_know')));
+    await tester.tap(find.byKey(const Key('task_know')));
     await waitFor(tester, find.byKey(const Key('task_title_field')));
 
     await tester.enterText(

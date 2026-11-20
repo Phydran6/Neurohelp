@@ -116,7 +116,7 @@ class BackupRunner {
 
     try {
       final bytes = await _services.vault.read(stored.path);
-      return _restore(BackupCodec.decode(bytes), mode: mode);
+      return await _restore(BackupCodec.decode(bytes), mode: mode);
     } on BackupFormatException catch (error) {
       return BackupOutcome.failed(error.reason, technical: error.technical);
     } on Exception catch (error, stackTrace) {
@@ -136,7 +136,7 @@ class BackupRunner {
     if (picked == null) return null;
 
     try {
-      return _restore(BackupCodec.decode(picked.bytes), mode: mode);
+      return await _restore(BackupCodec.decode(picked.bytes), mode: mode);
     } on BackupFormatException catch (error) {
       return BackupOutcome.failed(error.reason, technical: error.technical);
     } on Exception catch (error, stackTrace) {

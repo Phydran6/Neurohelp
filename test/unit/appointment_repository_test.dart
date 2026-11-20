@@ -177,6 +177,98 @@ void main() {
     });
   });
 
+  group('Nachbessern', () {
+    test('ein gebuchter Termin lässt sich noch ändern', () async {
+      final a = await gebucht();
+
+      final geaendert = await appointments.updateBooking(
+        a.id,
+        startsAt: termin,
+        location: 'Hauptstraße 5',
+        checklist: const ['Versichertenkarte', 'Alte Brille', 'Überweisung'],
+      );
+
+      expect(geaendert.checklist, contains('Überweisung'));
+      // Er bleibt gebucht: Nachtragen ist kein neuer Termin.
+      expect(geaendert.isBooked, isTrue);
+      expect(geaendert.bookedAt, a.bookedAt);
+    });
+
+    test('der Ort lässt sich auch wieder leeren', () async {
+      final a = await gebucht();
+      expect(a.location, 'Hauptstraße 5');
+
+      final geaendert = await appointments.updateBooking(
+        a.id,
+        startsAt: termin,
+      );
+
+      expect(geaendert.location, isNull);
+    });
+
+    test('verschiebt sich der Termin, gelten die Erinnerungen neu', () async {
+      final a = await gebucht();
+      await appointments.markPhaseNotified(a.id, FollowUpPhase.booked);
+      await appointments.markPhaseNotified(a.id, FollowUpPhase.dayBefore);
+
+      final geaendert = await appointments.updateBooking(
+        a.id,
+        startsAt: termin.add(const Duration(days: 7)),
+      );
+
+      // Die Bestätigung war für die Buchung, die bleibt. Die Erinnerung am
+      // Vortag gehörte zum alten Datum.
+      expect(geaendert.notifiedPhases, {FollowUpPhase.booked});
+    });
+
+    test(
+      'bleibt der Termin liegen, bleiben die Erinnerungen gemeldet',
+      () async {
+        final a = await gebucht();
+        await appointments.markPhaseNotified(a.id, FollowUpPhase.booked);
+
+        final geaendert = await appointments.updateBooking(
+          a.id,
+          startsAt: termin,
+          checklist: const ['Versichertenkarte'],
+        );
+
+        expect(geaendert.notifiedPhases, {FollowUpPhase.booked});
+      },
+    );
+
+    test('gebuchte Termine bleiben auffindbar', () async {
+      final a = await gebucht();
+
+      final liste = await appointments.upcoming();
+      expect(liste.map((e) => e.id), [a.id]);
+    });
+
+    test('was noch nicht gebucht ist, steht nicht bei den Terminen', () async {
+      final offen = await appointments.create('Zahnarzt');
+      await appointments.chooseRoute(offen.id, BookingRoute.phone);
+
+      expect(await appointments.upcoming(), isEmpty);
+      expect((await appointments.unbooked()).map((e) => e.id), [offen.id]);
+    });
+
+    test('vergangene Termine fallen aus der Liste', () async {
+      await gebucht();
+      // Zwei Tage nach dem Termin.
+      now = termin.add(const Duration(days: 2));
+
+      expect(await appointments.upcoming(), isEmpty);
+    });
+
+    test('ein Termin von heute Morgen zählt noch zu heute', () async {
+      await gebucht();
+      // Terminmorgen, der Termin selbst war um 10 Uhr.
+      now = DateTime(2026, 8, 20, 14);
+
+      expect(await appointments.upcoming(), hasLength(1));
+    });
+  });
+
   group('Kalender', () {
     test('erkennt eine Überschneidung', () {
       const stunde = Duration(hours: 1);

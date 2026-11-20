@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import '../core/config/app_config.dart';
 import '../core/di/app_services.dart';
@@ -10,6 +11,24 @@ import '../features/backup/presentation/restore_gate_page.dart';
 import '../features/home/presentation/start_page.dart';
 import '../features/onboarding/presentation/onboarding_page.dart';
 import '../features/security/presentation/lock_screen.dart';
+
+/// Die Sprachpakete, die Flutter selbst mitbringt.
+///
+/// Ohne sie sprechen Datums- und Zeitwähler Englisch und rechnen mit der
+/// US-Woche: Der Kalender fängt bei Sonntag an. Im Deutschen steht Montag
+/// vorn – und wer beim Termin eine Spalte danebengreift, merkt es erst am
+/// falschen Tag.
+const List<LocalizationsDelegate<dynamic>> appLocalizationsDelegates = [
+  GlobalMaterialLocalizations.delegate,
+  GlobalWidgetsLocalizations.delegate,
+  GlobalCupertinoLocalizations.delegate,
+];
+
+/// Die App ist durchgehend deutsch geschrieben. Deshalb wird auch das, was
+/// Flutter beisteuert, auf Deutsch festgelegt – und nicht der Sprache des
+/// Geräts überlassen, sonst steht ein englischer Kalender in einer deutschen
+/// App.
+const Locale appLocale = Locale('de');
 
 class NeurohelpApp extends StatelessWidget {
   const NeurohelpApp({super.key});
@@ -36,6 +55,9 @@ class NeurohelpApp extends StatelessWidget {
           AppThemeChoice.light => ThemeMode.light,
           AppThemeChoice.dark => ThemeMode.dark,
         },
+        localizationsDelegates: appLocalizationsDelegates,
+        supportedLocales: const [appLocale],
+        locale: appLocale,
         home: const _Entry(),
       ),
     );

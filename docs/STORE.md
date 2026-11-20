@@ -166,7 +166,11 @@ cd ios && fastlane release_store version:0.1.0 build_number:42
 3. Service-Account in Google Cloud anlegen, in der Play Console freischalten,
    JSON-Schlüssel herunterladen → Secret `PLAY_SERVICE_ACCOUNT_JSON`
 4. Ab dann lädt [deploy.yml](../.github/workflows/deploy.yml) automatisch in den
-   Track „internal"
+   Track aus `PLAY_TRACK` (Standard „internal“), Status aus `PLAY_RELEASE_STATUS`
+   (Standard „completed“). Vor dem allerersten Rollout ist die App ein Entwurf –
+   dann nimmt die API nur `draft` an.
+5. Private Konten (nach 13.11.2023): Produktion erst nach geschlossenem Test mit
+   **mind. 12 Testern, 14 Tage am Stück** eingetragen
 
 Play verlangt zusätzlich eine **Datensicherheits-Erklärung** – inhaltlich
 dieselben Antworten wie bei Apple oben.

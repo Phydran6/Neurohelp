@@ -75,6 +75,9 @@ void main() {
       find.byKey(const Key('task_step_field')),
       'Kartons besorgen',
     );
+    // Der Knopf richtet sich nach dem Feldinhalt – ohne Pump kennt er ihn
+    // noch nicht und ist aus.
+    await tester.pump();
     await tester.tap(find.byKey(const Key('task_step_add')));
     // Auf den Listeneintrag warten, nicht auf den Text: Der steht sonst
     // auch noch im Eingabefeld und der Test wäre grün, ohne dass etwas
@@ -85,6 +88,7 @@ void main() {
       find.byKey(const Key('task_step_field')),
       'Kündigung schreiben',
     );
+    await tester.pump();
     await tester.tap(find.byKey(const Key('task_step_add')));
     await pumpUntil(tester, find.byKey(const Key('task_step_1')));
 

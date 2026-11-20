@@ -69,34 +69,57 @@ class _TaskFocusPageState extends State<TaskFocusPage> {
               : Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    const Spacer(),
-                    Text(
-                      texts.nextStepLabel,
-                      key: const Key('focus_label'),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.labelLarge?.copyWith(
-                        color: theme.colorScheme.onSurfaceVariant,
+                    // Der Schritt steht mittig – und rollt, wenn er nicht
+                    // aufs Blatt passt. Vorher hing er zwischen zwei
+                    // `Spacer`n: Ein Schritt, wie ihn die KI schreibt („Einen
+                    // Satz notieren, mit dem du starten willst, zum
+                    // Beispiel: …"), lief bei großer Schrift unten heraus und
+                    // nahm den Erledigt-Knopf mit. Genau der eine Bildschirm,
+                    // um den es im Fokus-Modus geht.
+                    Expanded(
+                      child: LayoutBuilder(
+                        builder: (context, viewport) => SingleChildScrollView(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(
+                              minHeight: viewport.maxHeight,
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  texts.nextStepLabel,
+                                  key: const Key('focus_label'),
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.labelLarge?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  _step!.title,
+                                  key: const Key('focus_step'),
+                                  textAlign: TextAlign.center,
+                                  style: theme.textTheme.headlineSmall,
+                                ),
+                                if (_step!.note != null) ...[
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    _step!.note!,
+                                    key: const Key('focus_note'),
+                                    textAlign: TextAlign.center,
+                                    style: theme.textTheme.bodyLarge?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(height: 16),
-                    Text(
-                      _step!.title,
-                      key: const Key('focus_step'),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.headlineSmall,
-                    ),
-                    if (_step!.note != null) ...[
-                      const SizedBox(height: 16),
-                      Text(
-                        _step!.note!,
-                        key: const Key('focus_note'),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                    const Spacer(),
                     BigActionButton(
                       key: const Key('focus_complete'),
                       label: 'Erledigt',

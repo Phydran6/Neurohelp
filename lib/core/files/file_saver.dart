@@ -52,7 +52,10 @@ class ShareFileSaver implements FileSaver {
     String? subject,
     Rect? origin,
   }) async {
-    final file = await _write(fileName, (file) => file.writeAsString(content));
+    final file = await _write(
+      fileName,
+      (file) => file.writeAsString(content, flush: true),
+    );
     await _share(file, fileName, mimeType, subject, origin);
   }
 
@@ -64,7 +67,10 @@ class ShareFileSaver implements FileSaver {
     String? subject,
     Rect? origin,
   }) async {
-    final file = await _write(fileName, (file) => file.writeAsBytes(bytes));
+    final file = await _write(
+      fileName,
+      (file) => file.writeAsBytes(bytes, flush: true),
+    );
     await _share(file, fileName, mimeType, subject, origin);
   }
 
@@ -83,11 +89,15 @@ class ShareFileSaver implements FileSaver {
     String mimeType,
     String? subject,
     Rect? origin,
-  ) {
-    return Share.shareXFiles(
-      [XFile(file.path, mimeType: mimeType, name: fileName)],
-      subject: subject,
-      sharePositionOrigin: origin,
+  ) async {
+    // share_plus 13: ein Parameterobjekt statt vieler Argumente.
+    // `Share.shareXFiles` gibt es noch, ist aber abgekündigt.
+    await SharePlus.instance.share(
+      ShareParams(
+        files: [XFile(file.path, mimeType: mimeType, name: fileName)],
+        subject: subject,
+        sharePositionOrigin: origin,
+      ),
     );
   }
 }

@@ -10,15 +10,21 @@ git tag v0.1.0-alpha.2 && git push origin v0.1.0-alpha.2
 
 ## Branches
 
-Es gibt genau zwei, mehr braucht ein Projekt dieser Größe nicht:
+Einer bleibt, alles andere ist Arbeitsmaterial:
 
 | Branch | Zweck |
 |---|---|
 | `main` | Produktiv. Nur von hier wird getaggt und veröffentlicht |
-| `develop` | Entwicklung und Tests. Alles landet zuerst hier |
+| Arbeitszweige | Ein Zweig je Vorhaben, danach weg |
 
-Der Weg ist immer derselbe: auf `develop` arbeiten, per Pull Request nach
-`main`, dann taggen. Beide Branches durchlaufen dieselbe CI.
+Der Weg ist immer derselbe: einen Zweig für das Vorhaben aufmachen, per Pull
+Request nach `main`, dann taggen und den Zweig löschen. Jeder Zweig durchläuft
+dieselbe CI.
+
+Ein dauerhafter `develop` stand hier früher als Zwischenstation. Er wurde nie
+so benutzt – gearbeitet wurde von Anfang an in Zweigen je Vorhaben, und
+`develop` lief dabei still hinter `main` her. Beschrieben steht jetzt, was
+tatsächlich passiert.
 
 ---
 
@@ -192,11 +198,17 @@ Prerelease.
 
 ## Store-Promotion
 
-Von `internal` weiter in die geschlossene Beta bzw. Produktion:
+Von `internal` weiter in den geschlossenen Test bzw. Produktion:
 
 ```bash
-cd android && fastlane promote_beta
+cd android && fastlane promote_closed
 ```
+
+Achtung API-Namen: `alpha` = geschlossener Test, `beta` = **offener** Test.
+Den offenen Test gibt es für neue private Konten erst nach dem Produktionszugriff.
+
+Soll jedes Release direkt im geschlossenen Test landen, die Repository-Variable
+`PLAY_TRACK=alpha` setzen (Standard: `internal`).
 
 ```bash
 cd android && fastlane promote_production

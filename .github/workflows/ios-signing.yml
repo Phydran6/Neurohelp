@@ -17,7 +17,7 @@ jobs:
     name: Zertifikat und Profil erzeugen
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Secrets vollstaendig?
         env:

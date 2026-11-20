@@ -61,11 +61,22 @@ void main() {
           texts.historyFound,
           texts.historyEmpty,
           texts.askAi,
+          texts.aiOffer,
           texts.aiWorking,
           texts.aiResultTitle,
         ]) {
           expect(text.trim(), isNotEmpty, reason: tone.name);
         }
+      }
+    });
+
+    test('Überschrift und Knopf im KI-Block sagen nicht dasselbe', () {
+      // Gemeldet aus dem Gerätetest: „Soll ich was vorschlagen?" stand als
+      // Überschrift da und gleich darunter nochmal auf dem Knopf.
+      for (final tone in AiTone.values) {
+        final texts = ToneTexts(tone);
+
+        expect(texts.aiOffer, isNot(texts.askAi), reason: tone.name);
       }
     });
   });

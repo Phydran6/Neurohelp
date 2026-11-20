@@ -54,7 +54,7 @@ class SqliteTaskRepository implements TaskRepository {
       entryId,
       HistoryEventKind.stepAdded,
       note: title,
-      data: {'node_id': node.id, if (parentId != null) 'parent_id': parentId},
+      data: {'node_id': node.id, 'parent_id': ?parentId},
     );
 
     return node;

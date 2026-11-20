@@ -54,6 +54,13 @@ class ToneTexts {
   String get askAi =>
       _pick('Soll ich was vorschlagen?', 'Vorschlag holen', 'Vorschlag');
 
+  /// Die Überschrift über dem KI-Block, solange noch nichts geholt wurde.
+  ///
+  /// Bewusst ein anderer Satz als [askAi]: Vorher stand beides untereinander,
+  /// und der Block las sich wie ein Stotterer – dieselbe Frage als
+  /// Überschrift und gleich darunter nochmal auf dem Knopf.
+  String get aiOffer => _pick('Wenn du magst', 'KI-Vorschlag', 'KI-Vorschlag');
+
   /// Während die KI arbeitet. Kein Ladekringel – der flackert nur.
   String get aiWorking =>
       _pick('Ich denk kurz nach …', 'Einen Moment …', 'Wird erzeugt …');

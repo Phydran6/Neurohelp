@@ -90,7 +90,7 @@ class SupportContact extends StatelessWidget {
   /// zu fragen, wenn jemand gerade nicht weiterkommt, ist eine Zumutung.
   Future<void> _openMail(BuildContext context, String email) {
     final body = [
-      if (context_ != null) context_!,
+      ?context_,
       if (context_ != null) '',
       'Was ich gemacht habe:',
       '',

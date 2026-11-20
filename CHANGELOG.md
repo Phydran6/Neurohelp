@@ -76,6 +76,114 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
   Cloud".** Mit der neuen Sicherung stimmt das so nicht mehr – nachgezogen,
   samt dem Hinweis, wohin die Datei tatsächlich geht und wie man es abschaltet
 
+## [0.1.0-alpha.13] - 2026-10-16
+
+### Fixed
+
+- **Der Fokus-Modus hält auch lange Schritte.** Genau die Schritte, die die
+  KI schreibt („Einen Satz notieren, mit dem du starten willst, zum
+  Beispiel: …"), liefen bei großer Schrift unten aus dem Bild – und nahmen
+  den Erledigt-Knopf mit. Das ist der eine Bildschirm, um den es im
+  Fokus-Modus geht; er rollt jetzt
+
+### Changed
+
+- **Android-Releases gehen automatisch an Google Play.** Jedes GitHub-Release
+  landet neben TestFlight jetzt auch im Play-Test-Track. Track und Status
+  sind über die Repository-Variablen `PLAY_TRACK` und `PLAY_RELEASE_STATUS`
+  steuerbar
+- **Abhängigkeiten auf den aktuellen Stand gezogen.** `local_auth` 2 → 3,
+  `share_plus` 10 → 12, `supabase_flutter` 2.17.2, `flutter_lints` 6, dazu
+  die GitHub-Actions in der Pipeline.
+  **Ausgenommen: `flutter_secure_storage`** – die bleibt bei 9.2. Sie ist das
+  letzte Plugin, das nur CocoaPods mitbringt und keine Swift-Package-Variante.
+  Solange sie so ist, benutzt Flutter für iOS CocoaPods; ab Version 10 bringt
+  auch sie ein Swift Package mit, und dann stellt Flutter das iOS-Projekt auf
+  Swift Package Manager um – die CocoaPods-Einbindung im Xcode-Projekt passt
+  danach nicht mehr, der Build bricht ab. Version 11 verlangt zusätzlich
+  `compileSdk 37`, wofür erst das Android-Gradle-Plugin nachziehen müsste.
+  Beides ist eine eigene Runde mit einem Mac zum Nachprüfen, kein Nebenbei
+- **Biometrie schickt niemanden mehr in die Systemeinstellungen.** Wenn keine
+  Biometrie eingerichtet oder sie gesperrt ist, zeigte das System bisher
+  einen eigenen Dialog. Jetzt führt der Weg still zur PIN – so war es immer
+  gedacht
+
+
+## [0.1.0-alpha.12] - 2026-08-31
+
+### Fixed
+
+- **KI-Vorschläge lassen sich wieder übernehmen.** Beim Anlegen einer Aufgabe
+  tat ein Tipp auf „Übernehmen" scheinbar nichts. Der Schritt kam sehr wohl
+  an – nur landete er in einer Liste, die auf dem Telefon gar nicht mehr aufs
+  Blatt passte: Ab drei Vorschlägen drückte der KI-Block sie auf null Höhe.
+  Jetzt rollt die Seite als Ganzes, der übernommene Schritt wird ins Bild
+  geholt, und die Kachel sagt selbst „Übernommen"
+- **Die Vorschlagsliste lässt sich durchscrollen.** Bei sechs Vorschlägen
+  waren zwei zu sehen und der Rest unerreichbar. Die Seite hatte schlicht
+  keinen Scrollbereich
+- **„Alle übernehmen" ist ganz zu sehen.** Die Knopfreihe unter den
+  Vorschlägen lief auf Telefonbreite fast 300 Pixel aus dem Bild – in allen
+  Bereichen, nicht nur bei den Aufgaben. Sie bricht jetzt um
+- **„Was gehört dazu?" ist freiwillig.** Wer nur wusste, worum es geht, kam
+  nicht weiter: „Los geht's" blieb grau, ohne zu sagen warum. Ein Thema
+  genügt jetzt. Ohne eigene Schritte ist die Aufgabe selbst der eine Schritt,
+  statt sofort „alles erledigt" zu melden
+- **Ein getippter Eintrag geht nicht mehr verloren.** Wer den letzten Schritt
+  tippt und gleich weiterdrückt, hatte „hinzufügen" nie gedrückt – der
+  Eintrag war weg. Gilt für Aufgaben, Anrufe und Termine
+- **„Schritt hinzufügen" und „Stichpunkt hinzufügen" sind Knöpfe mit
+  Beschriftung.** Das kleine Plus im Feld war da, wurde aber nicht als
+  „hinzufügen" gelesen – bei den Terminen war das schon geändert, hier nicht
+- **Der KI-Block sagt nicht mehr zweimal dasselbe.** „Soll ich was
+  vorschlagen?" stand als Überschrift da und gleich darunter nochmal auf dem
+  Knopf
+- **Frische Vorschläge werden am Anfang gezeigt, nicht am Ende.** Bei einer
+  langen Liste stand vorher ihre Mitte da, und ihr Anfang lag oben außerhalb
+  des Bildes
+- **Große Schrift bricht keine Seite mehr.** Bei doppelter Systemschrift
+  verlor „Termin klären" über 700 Pixel nach unten und das Onboarding 152 –
+  mitsamt dem großen Knopf. Beide rollen jetzt
+
+## [0.1.0-alpha.11] - 2026-08-30
+
+### Fixed
+
+- **Ein abgebrochener Termin lässt sich wieder aufnehmen – auch der Anruf.**
+  Wer „Anrufen" gewählt und das Telefonat abgebrochen hat, landete beim
+  Weitermachen sofort im Eintragen: Die App ging davon aus, der Anruf sei
+  gelaufen, und bot ihn nicht mehr an. Jetzt führt der Weg wieder über die
+  Wahl. Der zuletzt gewählte Weg steht markiert da – du kannst ihn noch
+  einmal gehen oder einen anderen nehmen. Wer den Termin inzwischen schon
+  hat, überspringt das mit „Der Termin steht schon – eintragen"
+- **Der Kalender fängt bei Montag an.** Datums- und Uhrzeitwähler liefen auf
+  Englisch und mit der amerikanischen Woche: Sonntag zuerst, Montag daneben.
+  Genau daneben greift man dann auch. Alles, was Flutter an Texten
+  beisteuert, spricht jetzt Deutsch, und die Woche beginnt, wo sie im
+  Deutschen beginnt
+- **Der Wochentag steht beim Termin dabei.** Nach dem Wählen liest du
+  „Mo, 31.08.2026, 10:00 Uhr" statt nur des Datums. Ein Griff daneben fällt
+  damit sofort auf und nicht erst am falschen Tag
+- **„Punkt hinzufügen" ist ein Knopf mit Beschriftung.** Vorher war es ein
+  kleines Plus im Eingabefeld – es war da, aber es las sich nicht als
+  „hinzufügen", und auf kleinen Bildschirmen war es kaum zu treffen. Der
+  neue Punkt wird außerdem ins Bild geschoben, damit man sieht, dass er
+  angekommen ist
+
+### Added
+
+- **Ein Termin, der steht, bleibt erreichbar.** Bisher war er mit „Termin
+  steht" abgeschlossen und verschwand; was du danach noch wusstest –
+  Unterlagen, Überweisung, wo es genau hingeht –, konntest du nirgends mehr
+  eintragen. Jetzt stehen deine gebuchten Termine unter „Termine, die
+  stehen" und lassen sich öffnen. Uhrzeit, Ort und die Mitnehm-Liste
+  kannst du jederzeit nachtragen
+- **Auch aus der Erinnerung heraus.** Fragt die App am Vortag, was du
+  mitnehmen musst, steht daneben „Etwas nachtragen" – da fällt es einem ja
+  ein. Das ist **kein Umbuchen**: Beim Arzt ändert sich davon nichts, das
+  bleibt außen vor (Konzept, Abschnitt 9). Verschiebst du den Termin selbst
+  auf einen anderen Tag, gilt die Erinnerung am Vortag neu
+
 ## [0.1.0-alpha.10] - 2026-08-21
 
 ### Added
@@ -527,7 +635,12 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.8...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.1.0-alpha.13...HEAD
+[0.1.0-alpha.13]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.13
+[0.1.0-alpha.12]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.12
+[0.1.0-alpha.11]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.11
+[0.1.0-alpha.10]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.10
+[0.1.0-alpha.9]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.9
 [0.1.0-alpha.8]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.8
 [0.1.0-alpha.7]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.7
 [0.1.0-alpha.6]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.6

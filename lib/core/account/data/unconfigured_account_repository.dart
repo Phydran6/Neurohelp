@@ -138,12 +138,7 @@ class LocalAccountRepository implements AccountRepository {
     required String email,
     required String password,
   }) async {
-    if (username.trim().length < 3) {
-      throw const AccountException(
-        AccountFailure.invalidInput,
-        'Der Benutzername braucht mindestens 3 Zeichen.',
-      );
-    }
+    Username.check(username);
     if (!email.contains('@')) {
       throw const AccountException(
         AccountFailure.invalidInput,

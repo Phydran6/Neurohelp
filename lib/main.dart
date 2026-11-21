@@ -160,7 +160,7 @@ Future<SupabaseClient?> _connectBackend() async {
       publishableKey: config.supabaseKey,
       // Ohne das versucht Supabase, Bestätigungs- und Reset-Links über den
       // Browser zurück in die App zu holen. Neurohelp arbeitet stattdessen
-      // mit sechsstelligen Codes: Die tippt man ab, und sie funktionieren
+      // mit Codes aus der Mail: Die tippt man ab, und sie funktionieren
       // auch dann, wenn der Link im falschen Browser landet.
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.implicit,

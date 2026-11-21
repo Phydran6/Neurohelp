@@ -8,7 +8,7 @@ publish_to: "none"
 # Der Zusatz `-alpha.N` ist Absicht und bleibt so lange stehen, bis die App
 # wirklich für fremde Geräte taugt. Er landet im Namen der App-Version und ist
 # damit auf dem Gerät sichtbar.
-version: 0.1.0-alpha.14+1
+version: 0.2.1+1
 
 environment:
   # Ab 3.8 formatiert `dart format` im neuen ("tall") Stil. Die Untergrenze
@@ -17,7 +17,7 @@ environment:
   sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
-  crypto: ^3.0.0
+  crypto: ^3.0.8
   cupertino_icons: ^1.0.8
   # Nur fuer "Sicherung einspielen": Der User waehlt seine Datei selbst aus.
   # Ohne das koennte die App eine Sicherung schreiben, aber nie wieder lesen.
@@ -62,7 +62,7 @@ dev_dependencies:
   image: ^4.10.1
   integration_test:
     sdk: flutter
-  sqflite_common_ffi: ^2.4.3
+  sqflite_common_ffi: ^2.4.7
 
 flutter:
   uses-material-design: true

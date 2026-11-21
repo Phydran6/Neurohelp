@@ -17,7 +17,6 @@ Abschnitt 23 (Projektgrundsätze). Die wichtigsten in Kurzform:
 | Branch | Zweck |
 |---|---|
 | `main` | immer releasefähig |
-| `develop` | Integrationszweig |
 | `feat/<name>` | neues Feature |
 | `fix/<name>` | Fehlerbehebung |
 | `chore/<name>` | Aufräumen, Abhängigkeiten, Werkzeuge |

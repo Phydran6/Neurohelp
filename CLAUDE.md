@@ -32,13 +32,16 @@ zu geben:
 
 ```bash
 gh pr create --base main --fill
-gh pr merge --merge --delete-branch --auto
+gh pr checks <nr> --watch          # im Hintergrund, bis das CI durch ist
+gh pr merge <nr> --merge --delete-branch
 ```
 
 - Ziel ist immer `main` (`develop` gibt es nicht mehr)
-- `--auto` wartet, bis das CI grün ist, und mergt erst dann
+- Erst mergen, wenn alle Checks grün sind. `--auto` geht nicht, Auto-Merge
+  ist im Repository ausgeschaltet
 - Ist das CI rot: Fehler beheben, nicht am CI vorbei mergen
-- `gh` liegt unter `%LOCALAPPDATA%\Microsoft\WinGet\Links\gh.exe`
+- `gh` ist in der Sitzung nicht auf dem PATH. Voller Pfad:
+  `%LOCALAPPDATA%\Microsoft\WinGet\Packages\GitHub.cli_Microsoft.Winget.Source_8wekyb3d8bbwe\bin\gh.exe`
 
 ## Konventionen
 

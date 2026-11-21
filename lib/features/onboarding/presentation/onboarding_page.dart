@@ -95,7 +95,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
     // Die Knöpfe sind gesperrt, solange zu wenig dasteht. Ohne diese Listener
     // merken sie die Eingabe nicht.
-    for (final controller in [_pin, _code, _email, _password, _newPassword]) {
+    for (final controller in [
+      _pin,
+      _code,
+      _username,
+      _email,
+      _password,
+      _newPassword,
+    ]) {
       controller.addListener(_onInputChanged);
     }
   }
@@ -117,7 +124,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   void dispose() {
-    for (final controller in [_pin, _code, _email, _password, _newPassword]) {
+    for (final controller in [
+      _pin,
+      _code,
+      _username,
+      _email,
+      _password,
+      _newPassword,
+    ]) {
       controller.removeListener(_onInputChanged);
     }
     _username.dispose();
@@ -206,7 +220,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       setState(() {
         _mode = AccountMode.confirmSignUp;
         _info =
-            'Ich habe dir einen sechsstelligen Code an ${_email.text.trim()} '
+            'Ich habe dir einen Code an ${_email.text.trim()} '
             'geschickt. Trag ihn hier ein.';
       });
       return;
@@ -523,7 +537,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       key: const Key('onb_code'),
       controller: _code,
       keyboardType: TextInputType.number,
-      maxLength: 6,
+      maxLength: EmailCode.maxLength,
       decoration: const InputDecoration(
         labelText: 'Code aus der Mail',
         counterText: '',
@@ -538,7 +552,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
             contextMenuBuilder: noScanContextMenu,
             controller: _username,
             autocorrect: false,
-            decoration: const InputDecoration(labelText: 'Benutzername'),
+            decoration: InputDecoration(
+              labelText: 'Benutzername',
+              helperText: 'Ein Name, keine Mail-Adresse',
+              // Gleich beim Tippen statt erst als Fehler vom Server.
+              errorText: Username.problem(_username.text, whileTyping: true),
+              errorMaxLines: 3,
+            ),
           ),
           const SizedBox(height: 16),
           email,
@@ -675,7 +695,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   };
 
   Widget _accountActions() {
-    final canConfirm = _code.text.trim().length >= 6;
+    final canConfirm = EmailCode.looksComplete(_code.text);
 
     return switch (_mode) {
       AccountMode.signUp => Column(
@@ -683,7 +703,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
           BigActionButton(
             key: const Key('onb_create'),
             label: 'Konto anlegen',
-            onPressed: _busy ? null : _createAccount,
+            // Gesperrt, solange am Benutzernamen ein Hinweis steht – der
+            // sagt schon, was fehlt.
+            onPressed:
+                _busy ||
+                    Username.problem(_username.text, whileTyping: true) != null
+                ? null
+                : _createAccount,
           ),
           const SizedBox(height: 8),
           // Die beiden Wege für „ich war schon mal hier". Ruhig, klein,
@@ -820,7 +846,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         'Damit du dich wieder anmelden kannst, wenn du das Gerät wechselst. '
             'Deine Inhalte bleiben trotzdem auf dem Gerät.',
       AccountMode.confirmSignUp =>
-        'Ich schicke einen sechsstelligen Code statt eines Links – der '
+        'Ich schicke einen Code statt eines Links – der '
             'landet sonst im Browser und findet nicht zurück. Der Code gilt '
             'eine Stunde.\n\n'
             'Steht in der Mail nur ein Link und kein Code? Dann tipp den '

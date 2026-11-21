@@ -27,7 +27,7 @@ enabled = true
 # Wichtig: Die Standard-Site-URL eines neuen Supabase-Projekts ist
 # http://localhost:3000. Steht sie so, zeigt jeder Bestätigungs-Link dorthin
 # und endet im Browser mit "otp_expired" – genau der Fehler aus der Alpha.
-# Neurohelp arbeitet mit sechsstelligen Codes; die Site-URL zeigt trotzdem
+# Neurohelp arbeitet mit Codes aus der Mail; die Site-URL zeigt trotzdem
 # auf die App, damit ein versehentlich angeklickter Link nicht ins Leere
 # läuft.
 #
@@ -43,6 +43,11 @@ enable_signup = true
 enable_signup = true
 enable_confirmations = true
 double_confirm_changes = true
+# Gleich halten mit dem gehosteten Projekt (Authentication → Providers →
+# Email → „Email OTP Length"). Dort sind es 8 Stellen. Die App nimmt 6 bis
+# 10 an, siehe EmailCode in lib/core/account/account_repository.dart.
+otp_length = 8
+otp_expiry = 3600
 
 # Die Vorlagen sind deutsch und stellen den Code voran, nicht den Link.
 # Ein Link muss aus der Mail-App über den Browser zurück in die App finden –

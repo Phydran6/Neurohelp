@@ -130,7 +130,7 @@ klemmt der SMTP-Zugang.
 
 Unter **Authentication → Emails → Templates** die Vorlagen aus
 [supabase/templates/](../supabase/templates/) einfügen. Sie sind deutsch und
-stellen **den sechsstelligen Code voran**, nicht den Link.
+stellen **den Code voran**, nicht den Link.
 
 Das ist Absicht: Ein Link muss aus der Mail-App über den Browser zurück in die
 App finden. Das scheitert regelmäßig – falscher Browser, Link-Vorschau des

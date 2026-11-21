@@ -77,7 +77,7 @@ class SupabaseAccountRepository implements AccountRepository {
       final response = await _client.auth.verifyOTP(
         type: OtpType.signup,
         email: email.trim(),
-        token: code.trim(),
+        token: EmailCode.normalize(code),
       );
 
       final user = response.user;
@@ -186,7 +186,7 @@ class SupabaseAccountRepository implements AccountRepository {
       final verified = await _client.auth.verifyOTP(
         type: OtpType.recovery,
         email: email.trim(),
-        token: code.trim(),
+        token: EmailCode.normalize(code),
       );
       if (verified.user == null) {
         throw const AccountException(
@@ -390,12 +390,7 @@ class SupabaseAccountRepository implements AccountRepository {
     required String email,
     required String password,
   }) {
-    if (username.trim().length < 3) {
-      throw const AccountException(
-        AccountFailure.invalidInput,
-        'Der Benutzername braucht mindestens 3 Zeichen.',
-      );
-    }
+    Username.check(username);
     if (!email.contains('@')) {
       throw const AccountException(
         AccountFailure.invalidInput,
@@ -411,10 +406,12 @@ class SupabaseAccountRepository implements AccountRepository {
   }
 
   static void _checkCode(String code) {
-    if (code.trim().length < 6) {
+    final length = EmailCode.normalize(code).length;
+    if (length < EmailCode.minLength || length > EmailCode.maxLength) {
       throw const AccountException(
         AccountFailure.invalidInput,
-        'Der Code hat sechs Zeichen.',
+        'Der Code ist zu kurz oder zu lang. Trag alle Ziffern aus der Mail '
+        'ein.',
       );
     }
   }
@@ -433,6 +430,18 @@ class SupabaseAccountRepository implements AccountRepository {
         AccountFailure.alreadyTaken,
         'Mit dieser E-Mail gibt es schon ein Konto. Melde dich damit an '
         'oder setz das Passwort zurück.',
+        technical,
+      );
+    }
+
+    // Der Datenbank-Trigger konnte das Profil nicht anlegen. Das Format prüft
+    // die App vorher selbst – übrig bleibt praktisch nur ein Benutzername,
+    // den es (in anderer Groß-/Kleinschreibung) schon gibt. Bewusst nicht
+    // `alreadyTaken`: Das schickt zur Anmeldung, und die hilft hier nicht.
+    if (message.contains('database error saving new user')) {
+      return AccountException(
+        AccountFailure.invalidInput,
+        'Diesen Benutzernamen gibt es schon. Nimm bitte einen anderen.',
         technical,
       );
     }

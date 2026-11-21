@@ -7,6 +7,24 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Eine Mail-Adresse als Benutzername lehnt die App jetzt selbst ab.**
+  Vorher ging sie bis zum Server durch und kam als Backend-Fehler zurück.
+  Das Feld sagt es schon beim Tippen, ebenso bei Leerzeichen, Umlauten oder
+  zu langen Namen. Ein schon vergebener Benutzername bekommt eine ruhige
+  Meldung statt des technischen Fehlers.
+
+## [0.2.1] - 2026-11-21
+
+### Fixed
+
+- **Der Code aus der Mail passt jetzt ganz ins Feld.** Supabase verschickt
+  achtstellige Codes, das Feld nahm aber nur sechs Ziffern an. Passwort
+  zurücksetzen und Registrierung bestätigen ging dadurch nicht. Jetzt nimmt
+  die App Codes mit 6 bis 10 Stellen an; Leerzeichen beim Einfügen stören
+  nicht mehr.
+
 ## [0.2.0] - 2026-11-20
 
 ### Added
@@ -647,7 +665,8 @@ Phase 1 der Bau-Reihenfolge: Projekt-Setup Flutter + GitHub Actions
 - Issue- und Pull-Request-Vorlagen, Dependabot für pub, GitHub Actions und Gradle
 - MIT-Lizenz
 
-[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/Phydran6/Neurohelp/compare/v0.2.1...HEAD
+[0.2.1]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.2.1
 [0.2.0]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.2.0
 [0.1.0-alpha.13]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.13
 [0.1.0-alpha.12]: https://github.com/Phydran6/Neurohelp/releases/tag/v0.1.0-alpha.12

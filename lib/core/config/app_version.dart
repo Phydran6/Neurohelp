@@ -14,7 +14,7 @@
 ///     hält sie mit `pubspec.yaml` zusammen, damit sie nicht davonlaufen.
 abstract final class AppVersion {
   /// Muss zur `version:` in pubspec.yaml passen (Teil vor dem `+`).
-  static const String fallbackName = '0.2.0';
+  static const String fallbackName = '0.2.1';
 
   /// Muss zur `version:` in pubspec.yaml passen (Teil nach dem `+`).
   static const String fallbackBuild = '1';

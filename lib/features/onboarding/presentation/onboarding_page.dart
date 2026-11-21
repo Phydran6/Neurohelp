@@ -206,7 +206,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       setState(() {
         _mode = AccountMode.confirmSignUp;
         _info =
-            'Ich habe dir einen sechsstelligen Code an ${_email.text.trim()} '
+            'Ich habe dir einen Code an ${_email.text.trim()} '
             'geschickt. Trag ihn hier ein.';
       });
       return;
@@ -523,7 +523,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       key: const Key('onb_code'),
       controller: _code,
       keyboardType: TextInputType.number,
-      maxLength: 6,
+      maxLength: EmailCode.maxLength,
       decoration: const InputDecoration(
         labelText: 'Code aus der Mail',
         counterText: '',
@@ -675,7 +675,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   };
 
   Widget _accountActions() {
-    final canConfirm = _code.text.trim().length >= 6;
+    final canConfirm = EmailCode.looksComplete(_code.text);
 
     return switch (_mode) {
       AccountMode.signUp => Column(
@@ -820,7 +820,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
         'Damit du dich wieder anmelden kannst, wenn du das Gerät wechselst. '
             'Deine Inhalte bleiben trotzdem auf dem Gerät.',
       AccountMode.confirmSignUp =>
-        'Ich schicke einen sechsstelligen Code statt eines Links – der '
+        'Ich schicke einen Code statt eines Links – der '
             'landet sonst im Browser und findet nicht zurück. Der Code gilt '
             'eine Stunde.\n\n'
             'Steht in der Mail nur ein Link und kein Code? Dann tipp den '

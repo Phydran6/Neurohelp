@@ -107,7 +107,7 @@ abstract final class FaqCatalog {
       question: 'Ich habe meine PIN vergessen. Was jetzt?',
       answer:
           'Melde dich mit deinem Konto neu an. Beim ersten Bildschirm gibt es '
-          '„Passwort vergessen": Du bekommst einen sechsstelligen Code per '
+          '„Passwort vergessen": Du bekommst einen Code per '
           'Mail, setzt damit ein neues Passwort und kannst danach eine neue '
           'PIN vergeben.',
       keywords: ['pin', 'vergessen', 'passwort', 'wiederherstellung'],
@@ -118,7 +118,7 @@ abstract final class FaqCatalog {
       answer:
           'Weil ein Link in der Mail erst im Browser landet und von dort '
           'zurück in die App finden muss. Das geht oft schief. Ein '
-          'sechsstelliger Code wird abgetippt und funktioniert überall. Er '
+          'Code wird abgetippt und funktioniert überall. Er '
           'gilt eine Stunde; danach lässt du dir einfach einen neuen '
           'schicken.\n\n'
           'Steht in der Mail doch nur ein Link? Dann tipp ihn an und komm '

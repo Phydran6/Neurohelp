@@ -14,6 +14,24 @@ class Account {
   final String email;
 }
 
+/// Wie lang ein Code aus einer Mail von Supabase sein kann.
+///
+/// Die Länge stellt das gehostete Projekt ein (Authentication → Providers →
+/// Email → „Email OTP Length"), erlaubt sind 6 bis 10 Stellen. Das gehostete
+/// Projekt verschickt 8 – die App hatte 6 fest eingebaut, und der Code ließ
+/// sich nicht vollständig eintippen. Deshalb nimmt die App jede erlaubte
+/// Länge an, statt eine bestimmte vorauszusetzen.
+abstract final class EmailCode {
+  static const int minLength = 6;
+  static const int maxLength = 10;
+
+  /// Entfernt Leerzeichen, die beim Kopieren aus der Mail mitkommen.
+  static String normalize(String code) => code.replaceAll(RegExp(r'\s'), '');
+
+  /// Ob der Code lang genug ist, um ihn abzuschicken.
+  static bool looksComplete(String code) => normalize(code).length >= minLength;
+}
+
 /// Was nach einer Registrierung noch aussteht.
 class SignUpResult {
   const SignUpResult({required this.account, required this.needsConfirmation});
@@ -25,7 +43,7 @@ class SignUpResult {
   /// Bewusst ein Code und kein Link: Ein Link in der Mail landet im Browser
   /// und muss von dort zurück in die App finden. Das ging in der Alpha
   /// regelmäßig schief („Email link is invalid or has expired"). Ein
-  /// sechsstelliger Code wird abgetippt und funktioniert überall.
+  /// Code wird abgetippt und funktioniert überall.
   final bool needsConfirmation;
 }
 

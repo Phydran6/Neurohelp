@@ -27,7 +27,7 @@ void main() {
     test('kennt den Rückweg aus einer Bestätigungs-Mail', () {
       final content = manifest.readAsStringSync();
 
-      // Die App arbeitet mit sechsstelligen Codes, weil Links aus Mail-Apps
+      // Die App arbeitet mit Codes aus der Mail, weil Links aus Mail-Apps
       // im falschen Browser landen. Der Link steht trotzdem in jeder Mail –
       // ohne dieses Schema passiert beim Antippen gar nichts.
       expect(

@@ -119,7 +119,13 @@ jobs:
       - run: flutter pub get
 
       - name: Zugriff auf das match-Repository
+        # check_apple_secrets.sh prüft alle sechs Werte. Bekommt es nur zwei,
+        # meldet es die übrigen als fehlend, obwohl sie gesetzt sind.
         env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_API_ISSUER_ID: ${{ secrets.APPSTORE_API_ISSUER_ID }}
+          APPSTORE_API_PRIVATE_KEY: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           MATCH_GIT_TOKEN: ${{ secrets.MATCH_GIT_TOKEN }}
           MATCH_GIT_URL: ${{ secrets.MATCH_GIT_URL }}
         run: |

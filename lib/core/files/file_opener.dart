@@ -34,7 +34,7 @@ class SystemFileOpener implements FileOpener {
   @override
   Future<PickedFile?> pick({List<String> extensions = const []}) async {
     try {
-      final result = await FilePicker.pickFiles(
+      final result = await FilePicker.platform.pickFiles(
         // Ohne das liefert die Auswahl auf Android nur einen Pfad, den die
         // App nicht lesen darf – die Datei liegt bei einem anderen Programm.
         withData: true,

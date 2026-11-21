@@ -13,6 +13,15 @@
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>NSFaceIDUsageDescription</key>
 	<string>Damit du Neurohelp mit deinem Gesicht entsperren kannst.</string>
+	<!-- Neurohelp fragt weder Fotos noch Kamera noch Standort ab. Apple verlangt
+	     die Texte trotzdem, weil Bibliotheken (u. a. file_picker) Code dafuer
+	     enthalten. Ohne sie verwirft App Store Connect den Build (ITMS-90683). -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Neurohelp greift nicht auf deine Fotos zu. Nur wenn du selbst eine Sicherungsdatei auswählst, öffnet sich die Auswahl des Systems.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Neurohelp benutzt die Kamera nicht.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Neurohelp fragt deinen Standort nicht ab.</string>
 	<!-- Rueckweg aus einer Bestaetigungs- oder Reset-Mail. Die App arbeitet
 	     mit sechsstelligen Codes; der Link in der Mail ist die Zugabe und
 	     braucht dieses Schema, sonst passiert beim Antippen nichts. Der Wert

@@ -127,6 +127,9 @@ jobs:
   ios:
     name: TestFlight
     runs-on: macos-latest
+    # Bauen und Hochladen dauern rund 10 Minuten. Alles darueber ist ein
+    # Haenger, kein langsamer Lauf.
+    timeout-minutes: 75
     if: >-
       github.event_name == 'workflow_dispatch' &&
       (inputs.target == 'both' || inputs.target == 'ios') ||

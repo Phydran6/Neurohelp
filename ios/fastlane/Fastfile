@@ -176,6 +176,12 @@ platform :ios do
       ipa: "../build/ios/ipa/neurohelp.ipa",
       skip_waiting_for_build_processing: true,
       changelog: "Siehe CHANGELOG.md im Repository.",
+      # Mit `changelog` wartet fastlane, bis Apple den Build in der Liste
+      # zeigt. Verwirft Apple ihn bei der Verarbeitung, kommt er nie - und
+      # der Lauf hing bis zum 6-Stunden-Limit von GitHub (0.2.0, Build 22).
+      # Nach 30 Minuten lieber abbrechen: Dann liegt der Grund in der Mail
+      # von Apple oder unter App Store Connect -> TestFlight.
+      wait_processing_timeout_duration: 1800,
     )
   end
 

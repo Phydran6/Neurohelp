@@ -6,6 +6,7 @@ import 'package:neurohelp/core/db/app_database.dart';
 import 'package:neurohelp/core/di/app_services.dart';
 import 'package:neurohelp/core/security/data/device_app_lock.dart';
 import 'package:neurohelp/features/onboarding/presentation/onboarding_page.dart';
+import 'package:neurohelp/shared/widgets/big_action_button.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 /// Die Wege für „ich war schon mal hier".
@@ -80,6 +81,37 @@ void main() {
     expect(find.byKey(const Key('onb_create')), findsOneWidget);
     expect(find.byKey(const Key('onb_have_account')), findsOneWidget);
     expect(find.byKey(const Key('onb_forgot')), findsOneWidget);
+  });
+
+  /// **Anlass:** Eine Mail im Benutzernamen kam erst als Backend-Fehler
+  /// zurück. Jetzt sagt das Feld es selbst, und der Knopf bleibt zu.
+  testWidgets('eine Mail als Benutzername lehnt die App selbst ab', (
+    tester,
+  ) async {
+    await pumpOnboarding(tester);
+
+    await tester.enterText(
+      find.byKey(const Key('onb_username')),
+      'philipp@example.test',
+    );
+    await tester.pump();
+
+    expect(find.textContaining('keine E-Mail-Adresse sein'), findsOneWidget);
+    final create = tester.widget<BigActionButton>(
+      find.byKey(const Key('onb_create')),
+    );
+    expect(create.onPressed, isNull);
+
+    // Korrigiert – Hinweis weg, Knopf wieder frei.
+    await tester.enterText(find.byKey(const Key('onb_username')), 'philipp');
+    await tester.pump();
+    expect(find.textContaining('keine E-Mail-Adresse sein'), findsNothing);
+    expect(
+      tester
+          .widget<BigActionButton>(find.byKey(const Key('onb_create')))
+          .onPressed,
+      isNotNull,
+    );
   });
 
   testWidgets('nach der Registrierung kommt der Code aus der Mail', (

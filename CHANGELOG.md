@@ -7,6 +7,14 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ## [Unreleased]
 
+### Fixed
+
+- **Eine Mail-Adresse als Benutzername lehnt die App jetzt selbst ab.**
+  Vorher ging sie bis zum Server durch und kam als Backend-Fehler zurück.
+  Das Feld sagt es schon beim Tippen, ebenso bei Leerzeichen, Umlauten oder
+  zu langen Namen. Ein schon vergebener Benutzername bekommt eine ruhige
+  Meldung statt des technischen Fehlers.
+
 ## [0.2.1] - 2026-11-21
 
 ### Fixed

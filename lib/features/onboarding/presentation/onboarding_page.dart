@@ -95,7 +95,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
     }
     // Die Knöpfe sind gesperrt, solange zu wenig dasteht. Ohne diese Listener
     // merken sie die Eingabe nicht.
-    for (final controller in [_pin, _code, _email, _password, _newPassword]) {
+    for (final controller in [
+      _pin,
+      _code,
+      _username,
+      _email,
+      _password,
+      _newPassword,
+    ]) {
       controller.addListener(_onInputChanged);
     }
   }
@@ -117,7 +124,14 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   void dispose() {
-    for (final controller in [_pin, _code, _email, _password, _newPassword]) {
+    for (final controller in [
+      _pin,
+      _code,
+      _username,
+      _email,
+      _password,
+      _newPassword,
+    ]) {
       controller.removeListener(_onInputChanged);
     }
     _username.dispose();
@@ -538,7 +552,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
             contextMenuBuilder: noScanContextMenu,
             controller: _username,
             autocorrect: false,
-            decoration: const InputDecoration(labelText: 'Benutzername'),
+            decoration: InputDecoration(
+              labelText: 'Benutzername',
+              helperText: 'Ein Name, keine Mail-Adresse',
+              // Gleich beim Tippen statt erst als Fehler vom Server.
+              errorText: Username.problem(_username.text, whileTyping: true),
+              errorMaxLines: 3,
+            ),
           ),
           const SizedBox(height: 16),
           email,
@@ -683,7 +703,13 @@ class _OnboardingPageState extends State<OnboardingPage> {
           BigActionButton(
             key: const Key('onb_create'),
             label: 'Konto anlegen',
-            onPressed: _busy ? null : _createAccount,
+            // Gesperrt, solange am Benutzernamen ein Hinweis steht – der
+            // sagt schon, was fehlt.
+            onPressed:
+                _busy ||
+                    Username.problem(_username.text, whileTyping: true) != null
+                ? null
+                : _createAccount,
           ),
           const SizedBox(height: 8),
           // Die beiden Wege für „ich war schon mal hier". Ruhig, klein,

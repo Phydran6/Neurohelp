@@ -60,10 +60,6 @@ content_path = "./supabase/templates/confirmation.html"
 subject = "Neues Passwort für Neurohelp"
 content_path = "./supabase/templates/recovery.html"
 
-[auth.email.template.magic_link]
-subject = "Dein Anmelde-Code für Neurohelp"
-content_path = "./supabase/templates/magic_link.html"
-
 [auth.email.template.email_change]
 subject = "Neue E-Mail-Adresse für Neurohelp bestätigen"
 content_path = "./supabase/templates/email_change.html"

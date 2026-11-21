@@ -53,12 +53,18 @@ jobs:
           #   iPhone 16 Pro Max (A1B2C3D4-...) (Shutdown)
           # Das " (" hinter dem Namen ist wichtig, sonst passt "iPhone 16 Pro"
           # auch auf "iPhone 16 Pro Max".
+          #
+          # Die UDID wird per Muster gezogen, nicht als erste Klammer: iPads
+          # tragen selbst Klammern im Namen ("iPad Pro 13-inch (M5)"), dann
+          # waere die erste Klammer "M5".
           udid=$(xcrun simctl list devices available \
-            | awk -v want="$DEVICE (" -F'[()]' 'index($0, want) { print $2; exit }')
+            | grep -F "    $DEVICE (" \
+            | grep -oE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}' \
+            | head -1 || true)
 
           if [ -z "$udid" ]; then
             echo "::error::Simulator \"$DEVICE\" gibt es auf diesem Runner nicht. Verfuegbar:"
-            xcrun simctl list devices available | grep -E "iPhone" || true
+            xcrun simctl list devices available | grep -E "iPhone|iPad" || true
             exit 1
           fi
 

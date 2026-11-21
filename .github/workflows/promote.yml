@@ -70,6 +70,12 @@ jobs:
     name: App Store
     runs-on: macos-latest
     if: inputs.target == 'ios'
+    # Lehnt Apple einen Build bei der Verarbeitung ab (z.B. ITMS-90683),
+    # erscheint er nie in der Build-Liste - und deliver wartet ohne Ende,
+    # bis GitHub nach sechs Stunden abbricht. Bauen und Einreichen dauert
+    # sonst etwa 30 Minuten; nach 90 ist sicher etwas faul. Die Ursache
+    # steht dann in der Mail von Apple.
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
 

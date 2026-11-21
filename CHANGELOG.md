@@ -9,6 +9,11 @@ dieses Projekt folgt [Semantic Versioning](https://semver.org/lang/de/).
 
 ### Fixed
 
+- **Die iPhone-Version kommt wieder bei TestFlight an.** Apple hat die Builds
+  seit 0.2.0 abgelehnt, weil drei Pflicht-Erklärungen fehlten: Fotos, Kamera
+  und Standort. Neurohelp benutzt nichts davon. Eine Bibliothek für die
+  Dateiauswahl bringt aber Code dafür mit, und dann verlangt Apple die Texte
+  trotzdem
 - **Eine Mail-Adresse als Benutzername lehnt die App jetzt selbst ab.**
   Vorher ging sie bis zum Server durch und kam als Backend-Fehler zurück.
   Das Feld sagt es schon beim Tippen, ebenso bei Leerzeichen, Umlauten oder
